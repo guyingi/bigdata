@@ -1,0 +1,81 @@
+package yasen.bigdata.milk.conf;
+/**
+ * @Title: ESConstants.java
+ * @Package yasen.bigdata.milk.conf
+ * @Description: 该类包含与ES相关的一些常量
+ * @author weiguangwu
+ * @date  2018/4/23 14:13
+ * @version V1.0
+ */
+
+public class ESConstants {
+
+    /*********************ES中存储的字段***************************/
+    public static String MediaStorageSOPClassUID_ES	  = "MediaStorageSOPClassUID";
+    public static String MediaStorageSOPInstUID_ES       = "MediaStorageSOPInstUID";
+    public static String TransferSyntaxUID_ES            = "TransferSyntaxUID";
+    public static String ImplementationClassUID_ES       = "ImplementationClassUID";
+    public static String ImplementationVersionName_ES	  = "ImplementationVersionName";
+    public static String SourceApplicationEntityTitle_ES = "SourceApplicationEntityTit";
+    public static String SpecificCharacterSet_ES         = "SpecificCharacterSet";
+    public static String ImageType_ES                    = "ImageType";
+    public static String InstanceCreationDate_ES         = "InstanceCreationDate";
+    public static String InstanceCreationTime_ES         = "InstanceCreationTime";
+    public static String InstanceCreatorUID_ES           = "InstanceCreatorUID";
+    public static String SOPClassUID_ES                  = "SOPClassUID";
+    //    public static String SOPInstanceUID               = "SOPInstanceUID"; //一个序列为单位，不需要单张图片标识号
+    public static String StudyDate_ES = "StudyDate";
+    public static String SeriesDate_ES = "SeriesDate";
+    public static String AcquisitionDate_ES              = "AcquisitionDate";
+    public static String ImageDate_ES                    = "ImageDate";
+    public static String StudyTime_ES                    = "StudyTime";
+    public static String SeriesTime_ES                   = "SeriesTime";
+    public static String AcquisitionTime_ES              = "AcquisitionTime";
+    public static String ImageTime_ES                    = "ImageTime";
+    public static String AccessionNumber_ES              = "AccessionNumber";
+    public static String Modality_ES                     = "Modality";
+    public static String Manufacturer_ES                 = "Manufacturer";
+    public static String InstitutionName_ES = "InstitutionName";
+    public static String ReferringPhysiciansName_ES     = "ReferringPhysiciansName";
+    public static String TimezoneOffsetFromUTC_ES        = "TimezoneOffsetFromUTC";
+    public static String StationName_ES                  = "StationName";
+    public static String StudyDescription_ES             = "StudyDescription";
+    public static String SeriesDescription_ES = "SeriesDescription";
+    public static String ManufacturersModelName_ES       = "ManufacturersModelName";
+    public static String ReferencedSOPClassUID_ES        = "ReferencedSOPClassUID";
+    public static String ReferencedSOPInstanceUID_ES     = "ReferencedSOPInstanceUID";
+    public static String PatientName_ES = "PatientName";
+    public static String PatientID_ES                    = "PatientID";
+    public static String PatientsBirthDate_ES            = "PatientsBirthDate";
+    public static String PatientsSex_ES                  = "PatientsSex";
+    public static String PatientsAge_ES                  = "PatientsAge";
+    public static String PatientsSize_ES                 = "PatientsSize";
+    public static String PatientsWeight_ES               = "PatientsWeight";
+    public static String SliceThickness_ES               = "SliceThickness";
+    public static String SoftwareVersions_ES             = "SoftwareVersions";
+    public static String ReconstructionDiameter_ES       = "ReconstructionDiameter";
+    public static String GantryDetectorTilt_ES           = "GantryDetectorTilt";
+    public static String FieldOfViewShape_ES             = "FieldOfViewShape";
+    public static String FieldOfViewDimensions_ES        = "FieldOfViewDimensions";
+    public static String CollimatorType_ES               = "CollimatorType";
+    public static String ConvolutionKernel_ES            = "ConvolutionKernel";
+    public static String ActualFrameDuration_ES          = "ActualFrameDuration";
+    public static String PatientPosition_ES              = "PatientPosition";
+    public static String StudyInstanceUID_ES             = "StudyInstanceUID";
+    public static String SeriesInstanceUID_ES            = "SeriesInstanceUID";
+    public static String StudyID_ES                      = "StudyID";
+    public static String SeriesNumber_ES                 = "SeriesNumber";
+    public static String ImagePositionPatient_ES         = "ImagePositionPatient";
+    public static String ImageOrientationPatient_ES      = "ImageOrientationPatient";
+    public static String FrameOfReferenceUID_ES         = "Frameof ReferenceUID";
+    public static String PositionReferenceIndicator_ES   = "PositionReferenceIndicator";
+    public static String SliceLocation_ES                = "SliceLocation";
+
+    public static String ID_ES = "id";//一个dicom文件的id，使用seriesuid+做CRC(用户名年龄性别)+图片序号，生成唯一id
+    public static String NumberOfSlices_ES = "NumberOfSlices"; //病人此序列图片总量
+    public static String ImageNumber = "ImageNumber";//图片在该序列中序号
+    public static String ORGAN_ES = "organ";//器官
+    public static String ENTRYDATE = "entrydate";//录入日期
+    public static String HDFSPATH_ES = "hdfspath";//hdfs文件路径
+
+}
