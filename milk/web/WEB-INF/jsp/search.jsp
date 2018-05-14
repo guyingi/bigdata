@@ -273,169 +273,181 @@ function submitForm(){
 	<p style="font-family:STXinwei;color:white;"><font size="6">欢迎使用</font></p>
 </div>
 
-<div title="" style="width:1000px;height:auto;margin:auto;vertical-align:middle;padding:0px;">
+<div class="easyui-panel" title="Nested Panel" style="width:auto;height:1000px;padding:10px;">
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'west',split:true" style="width:200px;padding:10px">
+            Left Content
+        </div>
+        <div data-options="region:'center'" style="padding:0px">
+            <div title="" style="width:auto;height:auto;margin:auto;vertical-align:middle;padding:0px;">
 
-    <div title="" style="width:auto;height:auto;padding:0px;">
-	<div style="margin:5px 0;"></div>
-	<div class="easyui-panel" title="请输入查询条件" style="width:auto;height:auto;">
-	    <form id="ff" method="post" action="">
-            <div class="easyui-layout" style="width:auto;height:170px;">
-                <div data-options="region:'west',border:false" style="width:100px;"></div>
-                <div data-options="region:'center',border:false" style="width:500px;">
-                    <div class="easyui-layout" style="width:auto;height:155px;">
-                        <div data-options="region:'west',border:false" title="" style="width:280px;height:auto;">
-                            <table cellpadding="2px">
-                                <tr>
-                                    <td>设备:</td>
-                                    <td><input class="easyui-textbox" type="text" name="device" data-options="required:false" /></td>
-                                </tr>
-                                <tr>
-                                    <td>器官:</td>
-                                    <td><input id="organ" class="easyui-combobox" name="organ" type="text"/></td>
-                                </tr>
-                                <tr>
-                                    <td>序列描述:</td>
-                                    <td><input class="easyui-textbox" type="text" name="seriesdescription" data-options="required:false"/></td>
-                                </tr>
-                                <tr>
-                                    <td>医院:</td>
-                                    <td><input id="hospital" class="easyui-combobox" name="institution" type="text"/></td>
-                                </tr>
-                                <tr>
-                                    <td>性别:</td>
-                                    <td>
-                                        <select class="easyui-combobox" name="sex"><option value="M">男</option><option value="F">女</option><option value="U">未知</option><option value="">不限</option></select>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div data-options="region:'center',border:false" title="" style="width:auto;height:auto;">
-                            <table cellpadding="0">
-                                <tr>
-                                    <td>年龄阶段：</td>
-                                    <td>
-                                        <table>
-                                            <tr>
-                                                <td>
-                                                    <input id="age_start" class="easyui-textbox" name="age_start" data-options="validType:['number','length[0,3]']" style="width:50px;"/>
-                                                </td>
-                                                <td>
-                                                    <p style="margin:0;">至</p>
-                                                </td>
-                                                <td>
-                                                    <input class="easyui-textbox" name="age_end" data-options="validType:['number','length[0,3]']" style="width:50px;"/>
-                                                </td>
-                                                <td>
-                                                    <p style="margin:0;">岁</p>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>检查时间段：</td>
-                                    <td>
-                                        <table>
-                                            <tr>
-                                                <td>
-                                                    <input class="easyui-datebox" name="studydate_start" data-options="sharedCalendar:'#cc'" style="width:100px;"/>
-                                                </td>
-                                                <td>
-                                                    <p style="margin:0;">至</p>
-                                                </td>
-                                                <td>
-                                                    <input class="easyui-datebox" name="studydate_end" data-options="sharedCalendar:'#cc'" style="width:100px;"/>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>录入时间段：</td>
-                                    <td>
-                                        <table>
-                                            <tr>
-                                                <td>
-                                                    <input class="easyui-datebox" name="entrydate_start" data-options="sharedCalendar:'#cc'" style="width:100px;">
-                                                </td>
-                                                <td>
-                                                    <p style="margin:0;">至</p>
-                                                </td>
-                                                <td>
-                                                    <input class="easyui-datebox" name="entrydate_end" data-options="sharedCalendar:'#cc'" style="width:100px;">
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>图片张数：</td>
-                                    <td>
-                                        <table>
-                                            <tr>
-                                                <td>
-                                                    <input class="easyui-textbox" name="imagecount_min" data-options="validType:['number','length[0,3]']" style="width:100px;">
-                                                </td>
-                                                <td>
-                                                    <p style="margin:0;">至</p>
-                                                </td>
-                                                <td>
-                                                    <input class="easyui-textbox" name="imagecount_max" data-options="validType:['number','length[0,3]']" style="width:100px;">
-                                                </td>
-                                                <td>
-                                                    <p style="margin:0;">张</p>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div data-options="region:'east',border:false" title="" style="width:200px;height:auto;">
-                            <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px;height:30px;margin:120px 0 0 50px" onclick="submitForm()">Search</a>
-                            <%--<input class="easyui-linkbutton" data-options="iconCls:'icon-search'" type="button" style="width:80px;height:30px;margin:120px 0 0 50px" onclick="submitForm()"/>--%>
-                        </div>
-                        <div id="cc" class="easyui-calendar"></div>  <!-- 这个是用在存放日历那个图标的，必须存在，放哪儿无所谓 -->
+                <div title="" style="width:auto;height:auto;padding:0px;">
+                    <div class="easyui-panel" title="请输入查询条件" style="width:auto;height:auto;">
+                        <form id="ff" method="post" action="">
+                            <div class="easyui-layout" style="width:auto;height:170px;">
+                                <div data-options="region:'west',border:false" style="width:100px;"></div>
+                                <div data-options="region:'center',border:false" style="width:500px;">
+                                    <div class="easyui-layout" style="width:auto;height:155px;">
+                                        <div data-options="region:'west',border:false" title="" style="width:280px;height:auto;">
+                                            <table cellpadding="2px">
+                                                <tr>
+                                                    <td>设备:</td>
+                                                    <td><input class="easyui-textbox" type="text" name="device" data-options="required:false" /></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>器官:</td>
+                                                    <td><input id="organ" class="easyui-combobox" name="organ" type="text"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>序列描述:</td>
+                                                    <td><input class="easyui-textbox" type="text" name="seriesdescription" data-options="required:false"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>医院:</td>
+                                                    <td><input id="hospital" class="easyui-combobox" name="institution" type="text"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>性别:</td>
+                                                    <td>
+                                                        <select class="easyui-combobox" name="sex"><option value="M">男</option><option value="F">女</option><option value="U">未知</option><option value="">不限</option></select>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div data-options="region:'center',border:false" title="" style="width:auto;height:auto;">
+                                            <table cellpadding="0">
+                                                <tr>
+                                                    <td>年龄阶段：</td>
+                                                    <td>
+                                                        <table>
+                                                            <tr>
+                                                                <td>
+                                                                    <input id="age_start" class="easyui-textbox" name="age_start" data-options="validType:['number','length[0,3]']" style="width:50px;"/>
+                                                                </td>
+                                                                <td>
+                                                                    <p style="margin:0;">至</p>
+                                                                </td>
+                                                                <td>
+                                                                    <input class="easyui-textbox" name="age_end" data-options="validType:['number','length[0,3]']" style="width:50px;"/>
+                                                                </td>
+                                                                <td>
+                                                                    <p style="margin:0;">岁</p>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>检查时间段：</td>
+                                                    <td>
+                                                        <table>
+                                                            <tr>
+                                                                <td>
+                                                                    <input class="easyui-datebox" name="studydate_start" data-options="sharedCalendar:'#cc'" style="width:100px;"/>
+                                                                </td>
+                                                                <td>
+                                                                    <p style="margin:0;">至</p>
+                                                                </td>
+                                                                <td>
+                                                                    <input class="easyui-datebox" name="studydate_end" data-options="sharedCalendar:'#cc'" style="width:100px;"/>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>录入时间段：</td>
+                                                    <td>
+                                                        <table>
+                                                            <tr>
+                                                                <td>
+                                                                    <input class="easyui-datebox" name="entrydate_start" data-options="sharedCalendar:'#cc'" style="width:100px;">
+                                                                </td>
+                                                                <td>
+                                                                    <p style="margin:0;">至</p>
+                                                                </td>
+                                                                <td>
+                                                                    <input class="easyui-datebox" name="entrydate_end" data-options="sharedCalendar:'#cc'" style="width:100px;">
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>图片张数：</td>
+                                                    <td>
+                                                        <table>
+                                                            <tr>
+                                                                <td>
+                                                                    <input class="easyui-textbox" name="imagecount_min" data-options="validType:['number','length[0,3]']" style="width:100px;">
+                                                                </td>
+                                                                <td>
+                                                                    <p style="margin:0;">至</p>
+                                                                </td>
+                                                                <td>
+                                                                    <input class="easyui-textbox" name="imagecount_max" data-options="validType:['number','length[0,3]']" style="width:100px;">
+                                                                </td>
+                                                                <td>
+                                                                    <p style="margin:0;">张</p>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div data-options="region:'east',border:false" title="" style="width:200px;height:auto;">
+                                            <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px;height:30px;margin:120px 0 0 50px" onclick="submitForm()">Search</a>
+                                            <%--<input class="easyui-linkbutton" data-options="iconCls:'icon-search'" type="button" style="width:80px;height:30px;margin:120px 0 0 50px" onclick="submitForm()"/>--%>
+                                        </div>
+                                        <div id="cc" class="easyui-calendar"></div>  <!-- 这个是用在存放日历那个图标的，必须存在，放哪儿无所谓 -->
+                                    </div>
+                                </div>
+                                <div data-options="region:'east',border:false" style="width:100px;"></div>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <div data-options="region:'east',border:false" style="width:100px;"></div>
+                <div style="margin:10px 0;"></div>
+
+                <%--下面是结果表格面板--%>
+                <div id="tablediv" class="easyui-panel" title="查询结果" style="width:auto;height:auto" data-options="iconCls:'icon-ok',tools:'#tt'">
+                    <table id="resulttable" title="" class="easyui-datagrid" style="width:auto;height:480px"
+                           url="/milk/ajaxPage"
+                           pageList="[20]"
+                           pageSize="20"
+                           idField="id"
+                           rownumbers="true"
+                           pagination="true"
+                           iconCls="icon-table">
+                        <thead>
+                        <tr>
+                            <th field="ck" checkbox="true"></th>
+                            <th field="id" width="0%">Item ID</th>
+                            <th field="institutionName" width="14%">医院</th>
+                            <th field="organ" width="14%" align="left">器官</th>
+                            <th field="seriesDescription" width="20%" align="left">序列描述</th>
+                            <th field="patientName" width="20%" align="left">名字</th>
+                            <th field="seriesDate" width="15%" align="left">检查日期</th>
+                            <th field="numberOfSlices" width="15%" align="center">张数</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div id="tt">
+                    <a href="/milk/exportallpath"  class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportAllPath();" style="width: 100px;height:18px" align="right">导出全部</a>
+                    <a   class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportSomePath();" style="width:100px;height:18px" align="right">导出选中</a>
+                    <a href="/milk/exportexcel"  class="easyui-linkbutton" data-options="iconCls:'icon-save'"  style="width:100px;height:18px" align="right">导出excel</a>
+                    <a   class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="downloadDicomChecked();" style="width:100px;height:18px" align="right">下载选中</a>
+                </div>
+
             </div>
-	    </form>
-	  </div>
-	  </div>
-    <div style="margin:10px 0;"></div>
-
-    <%--下面是结果表格面板--%>
-    <div id="tablediv" class="easyui-panel" title="查询结果" style="width:auto;height:auto" data-options="iconCls:'icon-ok',tools:'#tt'">
-        <table id="resulttable" title="" class="easyui-datagrid" style="width:auto;height:480px"
-               url="/milk/ajaxPage"
-               pageList="[20]"
-               pageSize="20"
-               idField="id"
-               rownumbers="true"
-               pagination="true"
-               iconCls="icon-table">
-            <thead>
-            <tr>
-                <th field="ck" checkbox="true"></th>
-                <th field="id" width="0%">Item ID</th>
-                <th field="institutionName" width="14%">医院</th>
-                <th field="organ" width="14%" align="left">器官</th>
-                <th field="seriesDescription" width="20%" align="left">序列描述</th>
-                <th field="patientName" width="20%" align="left">名字</th>
-                <th field="seriesDate" width="15%" align="left">检查日期</th>
-                <th field="numberOfSlices" width="15%" align="center">张数</th>
-            </tr>
-            </thead>
-        </table>
+        </div>
+        <div data-options="region:'east'" style="width:300px;padding:10px">
+            Right Content
+        </div>
     </div>
-    <div id="tt">
-        <a href="/milk/exportallpath"  class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportAllPath();" style="width: 100px;height:18px" align="right">导出全部</a>
-        <a   class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportSomePath();" style="width:100px;height:18px" align="right">导出选中</a>
-        <a href="/milk/exportexcel"  class="easyui-linkbutton" data-options="iconCls:'icon-save'"  style="width:100px;height:18px" align="right">导出excel</a>
-        <a   class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="downloadDicomChecked();" style="width:100px;height:18px" align="right">下载选中</a>
-    </div>
-
 </div>
+
 </body>
 </html>
