@@ -262,7 +262,33 @@ function submitForm(){
             }
         });
 }
-
+function showthumbnail(index,record){
+    var obj = new Object()
+    obj.id=record["id"];
+    var paramJsonStr = JSON.stringify(obj)
+    $.ajax({
+        type: "POST",
+        url: "/milk/getdicomThumbnail",
+        data: paramJsonStr,
+        dataType: 'json',
+        traditional:true,
+        contentType: 'application/json;charset=utf-8',
+        success: function (data) {
+            console.log(data);
+            if(data!=null){
+                $("#thumbnailtable").datagrid("loadData",data);
+            }else{
+                $("#hint").html("查询失败");
+            }
+        },
+        error: function () {
+            $("#hint").html("程序运行出错！");
+        }
+    });
+}
+function showPicture(value,row,index){
+    return  '<img height="100" width="100" src=\''+value+'\'/>';
+}
 </script>
 </head>
 <style type="text/css">
@@ -273,9 +299,9 @@ function submitForm(){
 	<p style="font-family:STXinwei;color:white;"><font size="6">欢迎使用</font></p>
 </div>
 
-<div class="easyui-panel" title="Nested Panel" style="width:auto;height:1000px;padding:10px;">
+<div class="easyui-panel" title="Nested Panel" style="width:auto;height:750px;padding:10px;">
     <div class="easyui-layout" data-options="fit:true">
-        <div data-options="region:'west',split:true" style="width:200px;padding:10px">
+        <div data-options="region:'west',split:true" style="width:100px;padding:10px">
             Left Content
         </div>
         <div data-options="region:'center'" style="padding:0px">
@@ -419,7 +445,9 @@ function submitForm(){
                            idField="id"
                            rownumbers="true"
                            pagination="true"
-                           iconCls="icon-table">
+                           iconCls="icon-table"
+                           data-options="onClickRow:showthumbnail"
+                    >
                         <thead>
                         <tr>
                             <th field="ck" checkbox="true"></th>
@@ -443,8 +471,17 @@ function submitForm(){
 
             </div>
         </div>
-        <div data-options="region:'east'" style="width:300px;padding:10px">
-            Right Content
+        <div data-options="region:'east'" style="width:330px;padding:10px">
+            <table id="thumbnailtable" class="easyui-datagrid" title="缩略图" style="width:auto;height:auto"
+                   data-options="singleSelect:true,collapsible:true">
+                <thead>
+                <tr>
+                    <th data-options="field:'image0',width:100,heightalign:'center',formatter:showPicture"></th>
+                    <th data-options="field:'image1',width:100,heightalign:'center',formatter:showPicture"></th>
+                    <th data-options="field:'image2',width:100,heightalign:'center',formatter:showPicture"></th>
+                </tr>
+                </thead>
+            </table>
         </div>
     </div>
 </div>
