@@ -23,8 +23,9 @@
     <mvc:annotation-driven />
     
     <mvc:default-servlet-handler />
-
-    <mvc:resources mapping="/image/favicon.ico" location="/image/"/>
+<!--//favicon.ico-->
+    <mvc:resources mapping="/image" location="/image/"/>
+    <mvc:resources mapping="/temp" location="/temp/"/>
 
     <bean
         class="org.springframework.web.servlet.view.InternalResourceViewResolver">

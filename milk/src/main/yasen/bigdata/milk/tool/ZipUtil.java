@@ -3,7 +3,7 @@ package yasen.bigdata.milk.tool;
 
 /**
  * @Title: ZipUtil.java
- * @Package yasen.bigdata.milk.tool
+ * @Package yasen.bigdata.milk.util
  * @Description: zip压缩工具
  * @author weiguangwu
  * @date  2018/4/23 14:13

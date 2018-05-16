@@ -2,7 +2,7 @@ package yasen.bigdata.milk.tool;
 
 /**
  * @Title: HdfsTool.java
- * @Package yasen.bigdata.milk.tool
+ * @Package yasen.bigdata.milk.util
  * @Description: 该类包含与hdfs文件下载相关的方法
  * @author weiguangwu
  * @date  2018/4/23 14:13

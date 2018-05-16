@@ -18,17 +18,20 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
 
-import yasen.bigdata.milk.conf.SysConstants;
-import yasen.bigdata.milk.pojo.Dicom;
+import yasen.bigdata.milk.consts.SysConstants;
+import yasen.bigdata.milk.service.DataDownloadService;
 import yasen.bigdata.milk.service.SearchService;
 import yasen.bigdata.milk.tool.MilkTool;
 
 @Controller
 @RequestMapping("")
-public class SearchController {
+public class DicomSearchController {
 
 	@Autowired
 	SearchService searchService;
+
+	@Autowired
+    DataDownloadService dataDownloadService;
 
 	@RequestMapping("search")
 	public ModelAndView jump() {
@@ -45,6 +48,7 @@ public class SearchController {
 
         JSONObject result = new JSONObject();
         JSONObject param = formatParameter(parametr);
+        System.out.println(param.toJSONString());
         HttpSession session = request.getSession();
         session.setAttribute("searchParam", param);
 
@@ -67,45 +71,12 @@ public class SearchController {
         HttpSession session = request.getSession();
         JSONObject param = (JSONObject)session.getAttribute("searchParam");
         JSONObject tempResult = searchService.searchByPaging(param, pageid, SysConstants.DEFAULT_PAGE_SIZE);
+        System.out.println(tempResult.toJSONString());
         result.put("total",tempResult.getLong("total"));
         result.put("rows",tempResult.getJSONArray("data"));
         System.out.println("total:"+tempResult.getLong("total"));
         return result;
     }
-
-//    @RequestMapping(value = "ajaxSearch", method = RequestMethod.POST)
-//    @ResponseBody
-//    public JSONObject ajaxSearch(HttpServletRequest request, HttpServletResponse response,@RequestBody Map<String, String> parametr) {
-//        System.out.println("ajaxSearch is called");
-//
-//	    JSONObject param = formatParameter(parametr);
-//        HttpSession session = request.getSession();
-//        session.setAttribute("searchParam", param);
-//        JSONObject result = searchService.searchByPaging(param, 1, SysConstants.DEFAULT_PAGE_SIZE);
-//        result.put(SysConstants.PAGEID_PAGEPARAMNAME,1);
-//        return result;
-//    }
-
-    //ajax search,能正常使用
-//    @RequestMapping(value = "ajaxPage", method = RequestMethod.POST)
-//    @ResponseBody
-//    public JSONObject ajaxPage(HttpServletRequest request, HttpServletResponse response,@RequestBody Map<String, Integer> parameter) {
-//        System.out.println("ajaxPage is called");
-//	    HttpSession session = request.getSession();
-//        JSONObject param = (JSONObject)session.getAttribute("searchParam");
-//
-//        Integer pageid = 0;
-//        if(parameter!=null && parameter.size()==1){
-//            pageid = parameter.get("pageid");
-//            pageid = pageid<1?1:pageid;
-//        }
-//        System.out.println("ajaxPage从sesssion中获取的参数："+param.toJSONString());
-//
-//        JSONObject result = searchService.searchByPaging(param, pageid, SysConstants.DEFAULT_PAGE_SIZE);
-//        result.put(SysConstants.PAGEID_PAGEPARAMNAME,pageid);
-//        printResult(result);
-//        return result;
-//    }
 
     @RequestMapping(value="exportallpath")
     public void exportallpath(HttpServletRequest request, HttpServletResponse response) {
@@ -269,7 +240,6 @@ public class SearchController {
                 response.setContentType("application/zip");
 			else
 			    ;
-            System.out.println("A");
 		    response.setHeader("Content-Disposition", "attachment;fileName="
                     + tempFilePath.substring(tempFilePath.lastIndexOf(MilkTool.getDelimiter())+1, tempFilePath.length()));
 		    long downloadedLength = 0l;
@@ -287,13 +257,10 @@ public class SearchController {
 		        }
 		        os.close();
 		        inputStream.close();
-                System.out.println("B");
 		    } catch (Exception e){
 		    	e.printStackTrace();
 		    }
-            System.out.println("C");
 		}else {
-            System.out.println("D");
             response.setCharacterEncoding("utf-8");
 			response.setContentType("multipart/form-data");
             response.setHeader("Content-Disposition", "attachment;fileName=download failed");
@@ -351,10 +318,57 @@ public class SearchController {
                     param.put(SysConstants.IMAGECOUNT_MIN_PARAM, entry.getValue());
                 }else if(entry.getKey().equals(SysConstants.IMAGECOUNT_MAX_PAGEPARAMNAME)){
                     param.put(SysConstants.IMAGECOUNT_MAX_PARAM, entry.getValue());
+                }else if(entry.getKey().equals(SysConstants.SLICE_THICKNESS_MIN_PAGEPARAMNAME)) {
+                    param.put(SysConstants.SLICE_THICKNESS_MIN_PARAM, entry.getValue());
+                }else if(entry.getKey().equals(SysConstants.SLICE_THICKNESS_MAX_PAGEPARAMNAME)){
+                    param.put(SysConstants.SLICE_THICKNESS_MAX_PARAM, entry.getValue());
                 }
             }
         }
         return param;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "getdicomThumbnail", method = RequestMethod.POST)
+    public JSONObject getDicomThumbnail(HttpServletRequest request,@RequestBody Map<String, String> parametr) {
+        //projectPath是工程绝对路径 C://.../../milk
+        String projectRealPath = request.getSession().getServletContext().getRealPath(SysConstants.LEFT_SLASH);
+        //工程下面temp目录绝对路径，用于存放临时文件，操作需要
+        String tempRealPath = projectRealPath+SysConstants.TEMP_STRING;
+
+        //contextPath是上下文相对路径，/milk，获取这个是因为页面显示需要显示为/milk/temp/2323/00001.jpg
+        String contextPath = request.getContextPath();
+        //上下文路径在后面新增一个临时目录/temp
+        String tempContextPath = contextPath+SysConstants.LEFT_SLASH+SysConstants.TEMP_STRING;
+
+        String id = parametr.get("id");
+        List<String> picturePathList = null;
+        try {
+            picturePathList = dataDownloadService.downloadDicomThumbnail(id,tempRealPath,tempContextPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        JSONObject result = new JSONObject();
+        JSONArray tempArray = new JSONArray();
+        long total = picturePathList.size();
+        result.put("total",total);
+
+        //下面代码块将缩略图相对路径存储到JSONObject中然后返回给前端
+        JSONObject temp = null;
+        for(int i = 0; i < total; i++){
+            if(i % 3 == 0){
+                if(temp != null && temp.size() != 0)
+                    tempArray.add(temp);
+                temp = new JSONObject();
+            }
+            temp.put("image"+(i%3),picturePathList.get(i));
+        }
+        if(temp != null && temp.size() != 0)
+            tempArray.add(temp);
+        result.put("rows",tempArray);
+
+        System.out.println(result.toJSONString());
+        return result;
     }
 
     private void printResult(JSONObject result){

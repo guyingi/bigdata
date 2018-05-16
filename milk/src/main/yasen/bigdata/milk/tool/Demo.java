@@ -2,7 +2,7 @@ package yasen.bigdata.milk.tool;
 
 /**
  * @Title: HdfsTool.java
- * @Package yasen.bigdata.milk.tool
+ * @Package yasen.bigdata.milk.util
  * @Description: 该类没什么用，实验代码
  * @author weiguangwu
  * @date  2018/4/23 14:13
@@ -17,7 +17,7 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ReflectionUtils;
-import yasen.bigdata.milk.conf.ESConstants;
+import yasen.bigdata.milk.consts.ESConstants;
 import yasen.bigdata.milk.service.impl.SearchServiceImpl;
 import yasen.dicom.DicomWritable;
 

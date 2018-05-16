@@ -1,4 +1,4 @@
-//package yasen.bigdata.milk.tool;
+//package yasen.bigdata.milk.util;
 //
 //import com.alibaba.fastjson.JSONException;
 //import com.alibaba.fastjson.JSONObject;

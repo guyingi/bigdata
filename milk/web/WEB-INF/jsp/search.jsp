@@ -299,11 +299,8 @@ function showPicture(value,row,index){
 	<p style="font-family:STXinwei;color:white;"><font size="6">欢迎使用</font></p>
 </div>
 
-<div class="easyui-panel" title="Nested Panel" style="width:auto;height:750px;padding:10px;">
+<div class="easyui-panel" title="" style="width:auto;height:750px;padding:10px;">
     <div class="easyui-layout" data-options="fit:true">
-        <div data-options="region:'west',split:true" style="width:100px;padding:10px">
-            Left Content
-        </div>
         <div data-options="region:'center'" style="padding:0px">
             <div title="" style="width:auto;height:auto;margin:auto;vertical-align:middle;padding:0px;">
 
@@ -313,7 +310,7 @@ function showPicture(value,row,index){
                             <div class="easyui-layout" style="width:auto;height:170px;">
                                 <div data-options="region:'west',border:false" style="width:100px;"></div>
                                 <div data-options="region:'center',border:false" style="width:500px;">
-                                    <div class="easyui-layout" style="width:auto;height:155px;">
+                                    <div class="easyui-layout" style="width:auto;height:165px;">
                                         <div data-options="region:'west',border:false" title="" style="width:280px;height:auto;">
                                             <table cellpadding="2px">
                                                 <tr>
@@ -415,6 +412,24 @@ function showPicture(value,row,index){
                                                                 </td>
                                                                 <td>
                                                                     <p style="margin:0;">张</p>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>SlickThickness：</td>
+                                                    <td>
+                                                        <table>
+                                                            <tr>
+                                                                <td>
+                                                                    <input class="easyui-numberspinner" name="slicethickness_min" value="0" data-options="precision:1,increment:0.1," style="width:120px;"></input>
+                                                                </td>
+                                                                <td>
+                                                                    <p style="margin:0;">至</p>
+                                                                </td>
+                                                                <td>
+                                                                    <input class="easyui-numberspinner" name="slicethickness_min" value="10" data-options="precision:1,increment:0.1," style="width:120px;"></input>
                                                                 </td>
                                                             </tr>
                                                         </table>

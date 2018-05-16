@@ -3,16 +3,19 @@ package yasen.bigdata.milk.tool;
 
 /**
  * @Title: MilkTool.java
- * @Package yasen.bigdata.milk.tool
+ * @Package yasen.bigdata.milk.util
  * @Description: 该工具类主要包含全局可用的一些工具函数
  * @author weiguangwu
  * @date  2018/4/23 14:13
  * @version V1.0
  */
 
-import yasen.bigdata.milk.conf.SysConstants;
+import yasen.bigdata.milk.consts.SysConstants;
+
+import java.util.Random;
 
 public class MilkTool {
+    static Random random = new Random();
 
     /**
      * @Author:weiguangwu
@@ -66,6 +69,19 @@ public class MilkTool {
 	        return "";
 
 	    return arr[2]+SysConstants.LINE+arr[0]+SysConstants.LINE+arr[1];
+    }
+
+    /**
+     * 生成n位随机数
+     * @return
+     */
+    public static int getRandonNumber(int n){
+        int bound = 1;
+        while(n-->1)
+            bound*=10;
+        int temp = 0;
+        while(bound>(temp=random.nextInt(bound*10))){}
+        return temp;
     }
 
 }

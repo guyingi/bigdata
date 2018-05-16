@@ -12,7 +12,8 @@
 <script type="text/javascript" src="js/jquery.easyui.min.js"></script>
 <script>
         $(document).ready(function() {
-            $("#tt").datagrid('hideColumn', "itemid");
+            // $('#grid').datagrid('load',"/milk/image/datagrid_data.json");
+            // $("#tt").datagrid('hideColumn', "itemid");
             // $.ajax({
             //     type: "POST",
             //     url: "/milk/ajaxTest",
@@ -39,45 +40,21 @@
             }
 
         }
+        function A(value,row,index){ return  '<img height="100" width="100" src=\''+value+'\'/>'}
+
 </script>
 </head>
 <body>
-<div style="text-align: left;background-color: #E0ECFF;padding-left: 10px;padding-top: 5px;">
-	<div id="searchField" style="width:250px">
-        <input class="easyui-combobox" data-options="
-		valueField: 'label',
-		textField: 'value',
-		data: [{
-			label: 'java',
-			value: 'Java'
-		},{
-			label: 'perl',
-			value: 'Perl'
-		},{
-			label: 'ruby',
-			value: 'Ruby'
-		}]" />
-    </div>
-
-    <div><input id="hospital" type="button" value="点我" onclick="x()"/></div>
-
-    <table id="tt" title="Checkbox Select" class="easyui-datagrid" style="width:550px;height:250px"
-           url="/milk/ajaxTest"
-           pageList="[10]"
-           idField="itemid" pagination="true"
-           iconCls="icon-save">
-        <thead>
-        <tr>
-            <th field="ck" checkbox="true"></th>
-            <th field="itemid" width="80">Item ID</th>
-            <th field="productid" width="80">Product ID</th>
-            <th field="listprice" width="80" align="right">List Price</th>
-            <th field="unitcost" width="80" align="right">Unit Cost</th>
-            <th field="attr1" width="100">Attribute</th>
-            <th field="status" width="60" align="center">Status</th>
-        </tr>
-        </thead>
-    </table>
-</div>
+<table id="grid" class="easyui-datagrid" title="Basic DataGrid" style="width:auto;height:auto"
+       data-options="singleSelect:true,collapsible:true,method:'get',url:'/milk/image/datagrid_data.json'">
+    <thead>
+    <tr>
+        <th data-options="field:'image1',width:100,heightalign:'center',formatter:A">image1</th>
+        <th data-options="field:'image2',width:100,heightalign:'center',formatter:A">image2</th>
+        <th data-options="field:'image3',width:100,heightalign:'center',formatter:A">image3</th>
+    </tr>
+    </thead>
+</table>
+<img height="100" width="100" src='/milk/temp/0001.jpg'>
 </body>
 </html>

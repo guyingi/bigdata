@@ -1,4 +1,4 @@
-package yasen.bigdata.milk.conf;
+package yasen.bigdata.milk.consts;
 /**
  * @Title: ESConstants.java
  * @Package yasen.bigdata.milk.conf
@@ -71,7 +71,9 @@ public class ESConstants {
     public static String PositionReferenceIndicator_ES   = "PositionReferenceIndicator";
     public static String SliceLocation_ES                = "SliceLocation";
 
-    public static String ID_ES = "id";//一个dicom文件的id，使用seriesuid+做CRC(用户名年龄性别)+图片序号，生成唯一id
+    public static String ID_ES = "id";//一个索引的_id
+    public static String SeriesUID_ES = "SeriesUID";//一个dicom文件的id，使用seriesuid+做CRC(用户名年龄性别)+图片序号，生成唯一id
+    public static String PatientUID_ES = "PatientUID"; //医院8位PatientID+姓名拼音+出生日期+性别(F/M)最后求MD5,需要在多医院中唯一
     public static String NumberOfSlices_ES = "NumberOfSlices"; //病人此序列图片总量
     public static String ImageNumber = "ImageNumber";//图片在该序列中序号
     public static String ORGAN_ES = "organ";//器官

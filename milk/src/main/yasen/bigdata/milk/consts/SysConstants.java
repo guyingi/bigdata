@@ -1,4 +1,4 @@
-package yasen.bigdata.milk.conf;
+package yasen.bigdata.milk.consts;
 
 /**
  * @Title: SysConstants.java
@@ -22,6 +22,8 @@ public class SysConstants {
 
     public static String HTTP_HEAD = "http://";
 
+    public static String TEMP_STRING = "temp";
+
 
 
     /**********************分页查询默认每页显示数量***************************/
@@ -41,6 +43,9 @@ public class SysConstants {
     public static String ENTRYDATE_END_PAGEPARAMNAME = "entrydate_end";
     public static String IMAGECOUNT_MIN_PAGEPARAMNAME = "imagecount_min";
     public static String IMAGECOUNT_MAX_PAGEPARAMNAME = "imagecount_max";
+    public static String SLICE_THICKNESS_MIN_PAGEPARAMNAME = "slicethickness_min";
+    public static String SLICE_THICKNESS_MAX_PAGEPARAMNAME= "slicethickness_max";
+
     public static String PAGEID_PAGEPARAMNAME = "pageid";
     public static String PAGESIZE_PAGEPARAMNAME = "pagesize";
 
@@ -58,6 +63,8 @@ public class SysConstants {
     public static String ENTRYDATE_END_PARAM = "entrydate_end";
     public static String IMAGECOUNT_MIN_PARAM = "imagecount_min";
     public static String IMAGECOUNT_MAX_PARAM = "imagecount_max";
+    public static String SLICE_THICKNESS_MIN_PARAM = "slicethickness_min";
+    public static String SLICE_THICKNESS_MAX_PARAM = "slicethickness_max";
 
     /***************参数与返回值中的一些key名称******************/
     public static String SEARCH_CONDITION = "searchcondition";
