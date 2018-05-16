@@ -16,22 +16,19 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
 import yasen.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
-import yasen.bigdata.infosupplyer.conf.SysConstants;
+import yasen.bigdata.infosupplyer.consts.SysConstants;
 import yasen.bigdata.infosupplyer.pojo.IdSearchParamBean;
 import yasen.bigdata.infosupplyer.pojo.PageSearchParamBean;
 import yasen.bigdata.infosupplyer.service.SearchService;
-import yasen.bigdata.infosupplyer.tool.EsClientFactory;
-import yasen.bigdata.infosupplyer.conf.ESConstant;
+import yasen.bigdata.infosupplyer.factory.EsClientFactory;
+import yasen.bigdata.infosupplyer.consts.ESConstant;
 
 
 import java.util.ArrayList;
@@ -146,6 +143,17 @@ public class SearchServiceImpl implements SearchService {
             }
             matchQueryList.add(rangbuilder);
         }
+        //层厚
+        if(pageSearchParamBean.isSlicethicknessMinAvailable() || pageSearchParamBean.isSlicethicknessMaxAvailable()){
+            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.SliceThickness_ES);
+            if(pageSearchParamBean.isSlicethicknessMinAvailable()){
+                rangbuilder.gte(pageSearchParamBean.getSlicethicknessMin());
+            }
+            if(pageSearchParamBean.isSlicethicknessMaxAvailable()){
+                rangbuilder.lte(pageSearchParamBean.getSlicethicknessMax());
+            }
+            matchQueryList.add(rangbuilder);
+        }
 
         // 等同于bool，将两个查询合并
         BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
@@ -158,8 +166,8 @@ public class SearchServiceImpl implements SearchService {
     private SearchRequestBuilder createSearchRequestBuilder(
             TransportClient transportClient,PageSearchParamBean pageSearchParamBean,InfosupplyerConfiguration conf,
             QueryBuilder queryBuilder){
-        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(conf.getIndex())
-                .setTypes(conf.getType())
+        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(conf.getIndexDicom())
+                .setTypes(conf.getTypeDicom())
                 // 设置查询类型
                 .setSearchType(SearchType.DEFAULT)
                 // 设置查询关键词
@@ -244,13 +252,13 @@ public class SearchServiceImpl implements SearchService {
                     Object o = sourceAsMap.get(backfield);
                     tempdata.put(backfield, o);
                 }
-                tempList.add(tempdata);
             }else{                  //如果没有设定则返回所有字段
                 for(Map.Entry<String,Object> entry : sourceAsMap.entrySet()){
                     tempdata.put(entry.getKey(),entry.getValue());
                 }
-                tempList.add(tempdata);
             }
+            tempdata.put("id",hit.getId());
+            tempList.add(tempdata);
         }
         return tempList;
     }
@@ -319,10 +327,11 @@ public class SearchServiceImpl implements SearchService {
             TransportClient transportClient,IdSearchParamBean idSearchParamBean,InfosupplyerConfiguration conf){
         String[] params = new String[idSearchParamBean.getIds().size()];
         idSearchParamBean.getIds().toArray(params);
-        QueryBuilder queryBuilder = QueryBuilders.termsQuery(ESConstant.ID_ES,params);
+        QueryBuilder queryBuilder = QueryBuilders.idsQuery(conf.getTypeDicom());
+        ((IdsQueryBuilder) queryBuilder).addIds(params);
 
-        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(conf.getIndex())
-                .setTypes(conf.getType())
+        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(conf.getIndexDicom())
+                .setTypes(conf.getTypeDicom())
                 .setQuery(queryBuilder)
                 .setSearchType(SearchType.DEFAULT)
                 .setScroll(new TimeValue(100000))

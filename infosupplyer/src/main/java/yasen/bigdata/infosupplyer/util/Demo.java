@@ -1,4 +1,4 @@
-package yasen.bigdata.infosupplyer.tool;
+package yasen.bigdata.infosupplyer.util;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONReader;
@@ -22,8 +22,9 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import yasen.bigdata.infosupplyer.conf.ESConstant;
+import yasen.bigdata.infosupplyer.consts.ESConstant;
 import yasen.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
+import yasen.bigdata.infosupplyer.factory.EsClientFactory;
 
 import java.io.IOException;
 import java.io.StringReader;

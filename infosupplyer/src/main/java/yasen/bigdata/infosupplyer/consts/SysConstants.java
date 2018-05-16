@@ -1,6 +1,14 @@
-package yasen.bigdata.infosupplyer.conf;
+package yasen.bigdata.infosupplyer.consts;
 
 public class SysConstants {
+
+    public static String LINE = "-";
+    public static String LEFT_SLASH = "/";
+    public static String RIGHT_SLASH = "\\";
+    public static String OS_NAME = "os.name";
+    public static String WINDOWS = "Windows";
+
+
     /***************字段名称常量******************/
     public static String SEARCH_CONDITION = "searchcondition";
     public static String CODE = "code";
@@ -35,6 +43,9 @@ public class SysConstants {
     public static String ENTRYDATE_END_PARAM = "entrydate_end";
     public static String IMAGECOUNT_MIN_PARAM = "imagecount_min";
     public static String IMAGECOUNT_MAX_PARAM = "imagecount_max";
+    public static String SLICE_THICKNESS_MIN_PARAM = "slicethickness_min";
+    public static String SLICE_THICKNESS_MAX_PARAM = "slicethickness_max";
+
     public static String PAGE_ID = "pageid";
     public static String PAGE_SIZE = "pagesize";
 
@@ -44,11 +55,18 @@ public class SysConstants {
     public static String ES_HOST = "es.host";
     public static String ES_TCPPORT = "es.tcpport";
     public static String ES_HTTPPORT = "es.httpport";
-    public static String ES_INDEX = "es.index";
-    public static String ES_TYPE = "es.type";
+    public static String ES_DICOM_INDEX = "es.dicom.index";
+    public static String ES_DICOM_TYPE = "es.dicom.type";
+
+    public static String DICOM_THUMBNAIL_TABLENAME = "dicom.thumbnail.tablename";
+    public static String DICOM_THUMBNAIL_CF = "dicom.thumbnail.cf";
 
 
-
+    /**************HBase表列簇字段****************************/
+    public static String THUMBNAIL = "thumbnail";
+    public static String TAG = "tag"; //脱敏数据的表中使用该字段
+    public static String CREATE_DATE = "createdate"; //kfb元数据字段中有使用
+    public static String BARCODE = "barcode"; //kfb元数据字段中有使用
 
 
 

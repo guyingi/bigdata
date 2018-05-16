@@ -2,9 +2,9 @@ package service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import yasen.bigdata.infosupplyer.conf.SysConstants;
+import yasen.bigdata.infosupplyer.consts.SysConstants;
 import yasen.bigdata.infosupplyer.service.impl.SearchServiceImpl;
-import yasen.bigdata.infosupplyer.conf.ESConstant;
+import yasen.bigdata.infosupplyer.consts.ESConstant;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,7 +31,7 @@ public class SearchServiceTest {
 //        searchcondition.put(SysConstants.SERIES_DESCRIPTION_PARAM,"Flair");
 //        searchcondition.put(SysConstants.ORGAN_PARAM,"brain");
 //        searchcondition.put(SysConstants.INSTITUTION_PARAM,"PUMCH");
-        searchcondition.put(SysConstants.SEX_PARAM,"F");
+//        searchcondition.put(SysConstants.SEX_PARAM,"F");
 //        searchcondition.put(SysConstants.AGE_START_PARAM,"85");
 //        searchcondition.put(SysConstants.AGE_END_PARAM,86);
 //        searchcondition.put(SysConstants.STUDYDATE_START_PARAM,"2018-01-01");
@@ -40,9 +40,11 @@ public class SearchServiceTest {
 //        searchcondition.put(SysConstants.ENTRYDATE_END_PARAM,"2018-04-20");
 //        searchcondition.put(SysConstants.IMAGECOUNT_MIN_PARAM,121);
 //        searchcondition.put(SysConstants.IMAGECOUNT_MAX_PARAM,121);
+        searchcondition.put(SysConstants.SLICE_THICKNESS_MIN_PARAM,0.0);
+        searchcondition.put(SysConstants.SLICE_THICKNESS_MAX_PARAM,4.0);
         json.put("searchcondition",searchcondition);
         json.put("pageid",1);
-        json.put("pagesize",3);
+        json.put("pagesize",10);
         JSONArray backfields = new JSONArray();
 //        backfields.add(SysConstants.InstitutionName_ES);
 //        backfields.add(SysConstants.ORGAN_ES);
@@ -51,7 +53,7 @@ public class SearchServiceTest {
 //        backfields.add(ESConstant.PatientsAge_ES);
 //        backfields.add(ESConstant.SeriesDescription_ES);
 //        backfields.add(ESConstant.SeriesDate_ES);
-        backfields.add(ESConstant.NumberOfSlices_ES);
+        backfields.add(ESConstant.ID_ES);
 //        backfields.add(ESConstant.ID_ES);
         json.put("backfields",backfields);
 

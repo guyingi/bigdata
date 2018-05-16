@@ -17,7 +17,7 @@ package yasen.bigdata.infosupplyer.pojo;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import yasen.bigdata.infosupplyer.conf.ESConstant;
+import yasen.bigdata.infosupplyer.consts.ESConstant;
 
 import java.util.ArrayList;
 import java.util.List;

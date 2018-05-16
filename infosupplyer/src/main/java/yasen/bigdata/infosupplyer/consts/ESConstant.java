@@ -1,4 +1,4 @@
-package yasen.bigdata.infosupplyer.conf;
+package yasen.bigdata.infosupplyer.consts;
 
 /**
  * @Title: ESConstant.java
@@ -98,13 +98,17 @@ public class ESConstant {
     public static String PositionReferenceIndicator_ES   = "PositionReferenceIndicator";
     public static String SliceLocation_ES                = "SliceLocation";
 
-    public static String ID_ES = "id";//一个dicom文件的id，使用seriesuid+做CRC(用户名年龄性别)+图片序号，生成唯一id
-    public static String NumberOfSlices_ES = "NumberOfSlices"; //病人此序列图片总量
+    public static String ID_ES = "id";//一个索引的_id
+
     public static String ImageNumber_ES = "ImageNumber";//图片在该序列中序号
+
+    public static String SeriesUID_ES = "SeriesUID";//一个dicom文件的id，使用seriesuid+做CRC(用户名年龄性别)+图片序号，生成唯一id
+    public static String PatientUID_ES = "PatientUID"; //医院8位PatientID+姓名拼音+出生日期+性别(F/M)最后求MD5,需要在多医院中唯一
+    public static String NumberOfSlices_ES = "NumberOfSlices"; //病人此序列图片总量
     public static String ORGAN_ES = "organ";//器官
     public static String ENTRYDATE_ES = "entrydate";//录入日期
-//    public static String SUFFIX = "suffix"; //后缀，可以为空
-    public static String HDFSPATH_ES = "hdfspath";//hdfs文件路径
+    public static String HDFSPATH = "hdfspath";//hdfs文件路径
+    public static String ROWKEY =  "rowkey"; //dicom序列的hbase元数据表rowkey
 
     /*******************字段map**********************/
     /**********参数中的字段必须要是如下字段的子集**********/
@@ -169,6 +173,8 @@ public class ESConstant {
         ESFIELD.add("PositionReferenceIndicator");
         ESFIELD.add("SliceLocation");
         ESFIELD.add("id");
+        ESFIELD.add("SeriesUID");
+        ESFIELD.add("PatientUID");
         ESFIELD.add("NumberOfSlices");
         ESFIELD.add("organ");
         ESFIELD.add("entrydate");
@@ -187,6 +193,7 @@ public class ESConstant {
     /***************默认返回字段****************/
     public static List<String> DEFAULT_BACK_FIELD = new ArrayList<String>();
     static{
+        DEFAULT_BACK_FIELD.add("SeriesUID");
         DEFAULT_BACK_FIELD.add("InstitutionName");
         DEFAULT_BACK_FIELD.add("organ");
         DEFAULT_BACK_FIELD.add("SeriesDescription");
@@ -194,6 +201,12 @@ public class ESConstant {
         DEFAULT_BACK_FIELD.add("PatientName");
         DEFAULT_BACK_FIELD.add("NumberOfSlices");
     }
+
+    /***************接收参数中的字段****************/
+    public static String BACKFIELDS = "backfields";
+    public static String IDS = "ids";
+    public static String DATA = "data";
+
 
 
 }

@@ -33,8 +33,8 @@ package yasen.bigdata.infosupplyer.pojo;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import yasen.bigdata.infosupplyer.conf.ESConstant;
-import yasen.bigdata.infosupplyer.conf.SysConstants;
+import yasen.bigdata.infosupplyer.consts.ESConstant;
+import yasen.bigdata.infosupplyer.consts.SysConstants;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,6 +62,8 @@ public class PageSearchParamBean {
     private String entrydateEnd;
     private Integer imagecountMin;
     private Integer imagecountMax;
+    private Double slicethicknessMin;
+    private Double slicethicknessMax;
     private boolean paging = false;
     private boolean devicephrase = false;//设备是否整个串匹配，拆分,默认模糊匹配
     private boolean parseError = false;
@@ -181,6 +183,14 @@ public class PageSearchParamBean {
         if(imageCountMaxParam!=null){
             imagecountMax = imageCountMaxParam;
         }
+        Double slicethicknessMinParam = param.getDouble(SysConstants.SLICE_THICKNESS_MIN_PARAM);
+        if(slicethicknessMinParam != null){
+            slicethicknessMin = slicethicknessMinParam;
+        }
+        Double slicethicknessMaxParam = param.getDouble(SysConstants.SLICE_THICKNESS_MAX_PARAM);
+        if(slicethicknessMaxParam != null){
+            slicethicknessMax = slicethicknessMaxParam;
+        }
     }
 
     private void parsePageParam(Integer pageidParam, Integer pagesizeParam){
@@ -246,6 +256,13 @@ public class PageSearchParamBean {
     public boolean isImagecountMaxAvailable(){
         return imagecountMax != null;
     }
+    public boolean isSlicethicknessMinAvailable(){
+        return slicethicknessMin != null;
+    }
+    public boolean isSlicethicknessMaxAvailable(){
+        return slicethicknessMax != null;
+    }
+
     public boolean isBackfieldsAvailable(){
         return backfields!=null;
     }
@@ -331,11 +348,18 @@ public class PageSearchParamBean {
         return imagecountMax;
     }
 
+    public Double getSlicethicknessMin() {
+        return slicethicknessMin;
+    }
+
+    public Double getSlicethicknessMax() {
+        return slicethicknessMax;
+    }
+
     @Override
     public String toString() {
         return "PageSearchParamBean{" +
-                "searchcondition=" + searchcondition +
-                ", pageid=" + pageid +
+                "pageid=" + pageid +
                 ", pagesize=" + pagesize +
                 ", backfields=" + backfields +
                 ", sortfields=" + sortfields +
@@ -346,13 +370,17 @@ public class PageSearchParamBean {
                 ", sex='" + sex + '\'' +
                 ", ageStart=" + ageStart +
                 ", ageEnd=" + ageEnd +
-                ", studydateStart=" + studydateStart +
-                ", studydateEnd=" + studydateEnd +
-                ", entrydateStart=" + entrydateStart +
-                ", entrydateEnd=" + entrydateEnd +
+                ", studydateStart='" + studydateStart + '\'' +
+                ", studydateEnd='" + studydateEnd + '\'' +
+                ", entrydateStart='" + entrydateStart + '\'' +
+                ", entrydateEnd='" + entrydateEnd + '\'' +
                 ", imagecountMin=" + imagecountMin +
                 ", imagecountMax=" + imagecountMax +
-                ", isPaging=" + paging +
+                ", slicethicknessMin=" + slicethicknessMin +
+                ", slicethicknessMax=" + slicethicknessMax +
+                ", paging=" + paging +
+                ", devicephrase=" + devicephrase +
+                ", parseError=" + parseError +
                 '}';
     }
 }

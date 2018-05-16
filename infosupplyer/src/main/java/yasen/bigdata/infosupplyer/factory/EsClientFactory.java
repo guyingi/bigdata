@@ -1,8 +1,8 @@
-package yasen.bigdata.infosupplyer.tool;
+package yasen.bigdata.infosupplyer.factory;
 
 /**
  * @Title: EsClientFactory.java
- * @Package yasen.bigdata.infosupplyer.tool
+ * @Package yasen.bigdata.infosupplyer.util
  * @Description: 获取ES原生java api Client工厂
  * @author weiguangwu
  * @date  2018/4/23 14:13

@@ -1,4 +1,4 @@
-//package yasen.bigdata.infosupplyer.tool;
+//package yasen.bigdata.infosupplyer.util;
 //
 //import com.alibaba.fastjson.JSON;
 //import com.alibaba.fastjson.JSONArray;

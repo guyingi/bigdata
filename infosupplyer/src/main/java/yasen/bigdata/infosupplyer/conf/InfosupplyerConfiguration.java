@@ -11,6 +11,7 @@ package yasen.bigdata.infosupplyer.conf;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import yasen.bigdata.infosupplyer.consts.SysConstants;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,8 +25,14 @@ public class InfosupplyerConfiguration {
     private String eshost = null;
     private String estcpport = null;
     private String eshttpport = null;
-    private String index = null;
-    private String type = null;
+    private String indexDicom = null;
+    private String typeDicom = null;
+
+    private String zookeeperQuorum = null;
+    private String zookeeperClientPort = null;
+
+    private String dicomThumbnailTablename = null;
+    private String dicomThumbnailCf = null;
 
     public InfosupplyerConfiguration(){
         init();
@@ -44,10 +51,16 @@ public class InfosupplyerConfiguration {
         eshost = props.getProperty(SysConstants.ES_HOST);
         estcpport = props.getProperty(SysConstants.ES_TCPPORT);
         eshttpport = props.getProperty(SysConstants.ES_HTTPPORT);
-        index = props.getProperty(SysConstants.ES_INDEX);
-        type = props.getProperty(SysConstants.ES_TYPE);
+        indexDicom = props.getProperty(SysConstants.ES_DICOM_INDEX);
+        typeDicom = props.getProperty(SysConstants.ES_DICOM_TYPE);
 
-        if((type==null || index==null || escluster==null) ||(esip==null && eshost==null)){
+        zookeeperQuorum = props.getProperty("hbase.zookeeper.quorum");
+        zookeeperClientPort = props.getProperty("hbase.zookeeper.property.clientPort");
+
+        dicomThumbnailTablename = props.getProperty(SysConstants.DICOM_THUMBNAIL_TABLENAME);
+        dicomThumbnailCf = props.getProperty(SysConstants.DICOM_THUMBNAIL_CF);
+
+        if((typeDicom==null || indexDicom==null || escluster==null) ||(esip==null && eshost==null)){
             logger.log(Level.ERROR,"必要配置加载失败，系统启动失败,退出系统");
 //            System.out.println("必要配置加载失败，系统启动失败,退出系统");
             System.exit(0);
@@ -72,14 +85,29 @@ public class InfosupplyerConfiguration {
         return eshttpport;
     }
 
-    public String getIndex() {
-        return index;
+    public String getIndexDicom() {
+        return indexDicom;
     }
 
-    public String getType() {
-        return type;
+    public String getTypeDicom() {
+        return typeDicom;
     }
 
+    public String getDicomThumbnailTablename() {
+        return dicomThumbnailTablename;
+    }
+
+    public String getDicomThumbnailCf() {
+        return dicomThumbnailCf;
+    }
+
+    public String getZookeeperQuorum() {
+        return zookeeperQuorum;
+    }
+
+    public String getZookeeperClientPort() {
+        return zookeeperClientPort;
+    }
 
     @Override
     public String toString() {
@@ -88,8 +116,8 @@ public class InfosupplyerConfiguration {
                 ", esip='" + esip + '\'' +
                 ", eshost='" + eshost + '\'' +
                 ", esport='" + estcpport + '\'' +
-                ", index='" + index + '\'' +
-                ", type='" + type + '\'' +
+                ", indexDicom='" + indexDicom + '\'' +
+                ", typeDicom='" + typeDicom + '\'' +
                 '}';
     }
 }

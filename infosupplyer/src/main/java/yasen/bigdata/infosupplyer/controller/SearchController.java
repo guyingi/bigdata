@@ -14,9 +14,9 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import yasen.bigdata.infosupplyer.conf.SysConstants;
+import yasen.bigdata.infosupplyer.consts.SysConstants;
 import yasen.bigdata.infosupplyer.service.SearchService;
-import yasen.bigdata.infosupplyer.conf.ESConstant;
+import yasen.bigdata.infosupplyer.consts.ESConstant;
 
 import java.util.HashMap;
 import java.util.List;
@@ -230,6 +230,10 @@ public class SearchController {
                         obj.put(SysConstants.IMAGECOUNT_MIN_PARAM, Integer.parseInt(e.getValue().toString()));
                     } else if (e.getKey().equals(SysConstants.IMAGECOUNT_MAX_PARAM)) {
                         obj.put(SysConstants.IMAGECOUNT_MAX_PARAM, Integer.parseInt(e.getValue().toString()));
+                    }else if (e.getKey().equals(SysConstants.SLICE_THICKNESS_MIN_PARAM)) {
+                        obj.put(SysConstants.SLICE_THICKNESS_MIN_PARAM, Double.parseDouble(e.getValue().toString()));
+                    } else if (e.getKey().equals(SysConstants.SLICE_THICKNESS_MAX_PARAM)) {
+                        obj.put(SysConstants.SLICE_THICKNESS_MAX_PARAM, Double.parseDouble(e.getValue().toString()));
                     } else {
                         obj.put(e.getKey(), e.getValue().toString());
                     }
