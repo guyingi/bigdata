@@ -311,7 +311,7 @@
     }
 </script>
 <body style="padding:0;">
-<div style="width:auto;height:30px;background: linear-gradient(to right, #0000C6, #FFFFFF);">
+<div style="width:auto;height:4%;background: linear-gradient(to right, #0000C6, #FFFFFF);">
     <div class="easyui-layout" style="width:auto;height:30px;background-color:rgba(255, 255, 255, 0);">
         <div data-options="region:'west',border:false" style="width:90%;background-color:rgba(255, 255, 255, 0);"></div>
         <div data-options="region:'center',border:false" style="background-color:rgba(255, 255, 255, 0);display:flex;flex-direction:row;justify-content:center;align-items:center;">
@@ -323,8 +323,7 @@
     </div>
 </div>
 
-
-<div class="easyui-panel" title="" style="width:auto;height:750px;padding:2px;">
+<div class="easyui-panel" title="" style="width:100%;height:96%;padding:2px;">
     <div class="easyui-layout" data-options="fit:true">
         <div data-options="region:'west',border:true" style="width:150px;height:auto;">
             <div class="easyui-panel" style="height:100%;padding:5px;">
@@ -357,25 +356,22 @@
         </div>
 
         <!--下面是dicom查询页面-->
-        <div data-options="region:'center',title:'dicom查询'">
+        <div data-options="region:'center',title:'打标签'">
             <div class="easyui-panel" title="" style="width:auto;height:750px;padding:0px;">
                 <div class="easyui-layout" data-options="fit:true">
-                    <div data-options="region:'center'" style="padding:0px">
+                    <div data-options="region:'center'" style="padding:0px;height:auto">
                         <div title="" style="width:auto;height:auto;margin:auto;vertical-align:middle;padding:0px;">
 
+                            <%--下面查询面板以及打标签的那一块--%>
                             <div title="" style="width:auto;height:auto;padding:0px;">
-                                <div class="easyui-panel" title="" style="width:auto;height:auto;">
-                                    <form id="ff" method="post" action="">
-                                        <div class="easyui-layout" style="width:auto;height:170px;">
-                                            <div data-options="region:'west',border:false" style="width:50px;"></div>
-                                            <div data-options="region:'center',border:false" style="width:500px;">
-                                                <div class="easyui-layout" style="width:auto;height:165px;">
-                                                    <div data-options="region:'west',border:false" title="" style="width:280px;height:auto;">
+                                <div class="easyui-layout" style="width:auto;height:185px;">
+                                    <div data-options="region:'west',border:false" style="width:1%"></div>
+                                    <div data-options="region:'center',border:false" style="height:auto;">
+                                        <div class="easyui-panel" data-options="border:false" title="" style="width:auto;height:100%;">
+                                            <form id="ff" method="post" action="" >
+                                                <div class="easyui-layout" style="width:100%;height:98%;">
+                                                    <div data-options="region:'west',border:false" title="" style="width:45%;height:100%;">
                                                         <table cellpadding="2px">
-                                                            <tr>
-                                                                <td>设备:</td>
-                                                                <td><input class="easyui-textbox" type="text" name="device" data-options="required:false" /></td>
-                                                            </tr>
                                                             <tr>
                                                                 <td>器官:</td>
                                                                 <td><input id="organ" class="easyui-combobox" name="organ" type="text"/></td>
@@ -394,12 +390,8 @@
                                                                     <select class="easyui-combobox" name="sex"><option value="M">男</option><option value="F">女</option><option value="U">未知</option><option value="">不限</option></select>
                                                                 </td>
                                                             </tr>
-                                                        </table>
-                                                    </div>
-                                                    <div data-options="region:'center',border:false" title="" style="width:auto;height:auto;">
-                                                        <table cellpadding="0">
                                                             <tr>
-                                                                <td>年龄阶段：</td>
+                                                                <td>年龄阶段:</td>
                                                                 <td>
                                                                     <table>
                                                                         <tr>
@@ -419,6 +411,10 @@
                                                                     </table>
                                                                 </td>
                                                             </tr>
+                                                        </table>
+                                                    </div>
+                                                    <div data-options="region:'center',border:false" title="" style="width:55%;height:100%;">
+                                                        <table cellpadding="0">
                                                             <tr>
                                                                 <td>检查时间段：</td>
                                                                 <td>
@@ -469,9 +465,6 @@
                                                                             <td>
                                                                                 <input class="easyui-textbox" name="imagecount_max" data-options="validType:['number','length[0,3]']" style="width:100px;">
                                                                             </td>
-                                                                            <td>
-                                                                                <p style="margin:0;">张</p>
-                                                                            </td>
                                                                         </tr>
                                                                     </table>
                                                                 </td>
@@ -482,35 +475,52 @@
                                                                     <table>
                                                                         <tr>
                                                                             <td>
-                                                                                <input class="easyui-numberspinner" name="slicethickness_min" value="0" data-options="precision:1,increment:0.1," style="width:120px;"></input>
+                                                                                <input class="easyui-numberspinner" name="slicethickness_min" value="0" data-options="precision:1,increment:0.1," style="width:100px;"></input>
                                                                             </td>
                                                                             <td>
                                                                                 <p style="margin:0;">至</p>
                                                                             </td>
                                                                             <td>
-                                                                                <input class="easyui-numberspinner" name="slicethickness_min" value="10" data-options="precision:1,increment:0.1," style="width:120px;"></input>
+                                                                                <input class="easyui-numberspinner" name="slicethickness_min" value="10" data-options="precision:1,increment:0.1," style="width:100px;"></input>
                                                                             </td>
                                                                         </tr>
                                                                     </table>
                                                                 </td>
                                                             </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px;height:30px;margin:0 0 0 60px" onclick="submitForm()">Search</a>
+                                                                </td>
+                                                            </tr>
                                                         </table>
-                                                    </div>
-                                                    <div data-options="region:'east',border:false" title="" style="width:200px;height:auto;">
-                                                        <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px;height:30px;margin:100px 0 0 50px" onclick="submitForm()">Search</a>
                                                     </div>
                                                     <div id="cc" class="easyui-calendar"></div>  <!-- 这个是用在存放日历那个图标的，必须存在，放哪儿无所谓 -->
                                                 </div>
-                                            </div>
-                                            <div data-options="region:'east',border:false" style="width:10px;"></div>
+
+                                                    <div data-options="region:'east',border:false" style="width:10px;"></div>
+
+                                            </form>
                                         </div>
-                                    </form>
+                                    </div>
+                                    <div class="easyui-layout" data-options="region:'east',border:false" title="" style="width:30%;height:auto;border-left:1px solid">
+                                        <div class="easyui-layout" data-options="region:'north',border:false" style="height:70%;background:#B3DFDA;padding:0">
+                                            <div data-options="region:'north',border:false" style="height:70%">
+                                                <p style="margin:30px 0 0 30px">为该批数据打个标签</p>
+                                            </div>
+                                            <div data-options="region:'center',border:false">
+                                                <input class="easyui-textbox" type="text" name="tag" data-options="required:false" style="width:200px;height:30px;"/>
+                                            </div>
+                                        </div>
+                                        <div data-options="region:'center',border:false">
+                                            <a class="easyui-linkbutton" style="width:80px;height:30px;margin:10px 0 0 30px" onclick="">Sign Tag</a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div style="margin:10px 0;"></div>
 
                             <%--下面是结果表格面板--%>
-                            <div id="tablediv" class="easyui-panel" title="查询结果" style="width:auto;height:auto" data-options="tools:'#tt'">
+                            <div id="tablediv" class="easyui-panel" title="查询结果" style="width:auto;height:auto">
                                 <table id="resulttable" title="" class="easyui-datagrid" style="width:auto;height:480px"
                                        url="/milk/ajaxPage"
                                        pageList="[20]"
@@ -535,12 +545,6 @@
                                     </thead>
                                 </table>
                             </div>
-                            <div id="tt">
-                                <a href="/milk/exportallpath"  class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportAllPath();" style="width: 100px;height:20px" align="right">导出全部</a>
-                                <a   class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportSomePath();" style="width:100px;height:20px" align="right">导出选中</a>
-                                <a href="/milk/exportexcel"  class="easyui-linkbutton" data-options="iconCls:'icon-save'"  style="width:100px;height:20px" align="right">导出excel</a>
-                                <a   class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="downloadDicomChecked();" style="width:100px;height:20px" align="right">下载选中</a>
-                            </div>
 
                         </div>
                     </div>
@@ -560,7 +564,6 @@
             </div>
         </div>
 
-        <div data-options="region:'south',border:true" style="height:20px;background:#f1f8ff;"></div>
     </div>
 </div>
 </body>

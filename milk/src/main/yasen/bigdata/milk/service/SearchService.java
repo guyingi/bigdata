@@ -2,6 +2,7 @@ package yasen.bigdata.milk.service;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
 import yasen.bigdata.milk.pojo.Dicom;
@@ -18,12 +19,12 @@ public interface SearchService {
 	* @Author:weiguangwu
 	* @Description:
 	* @params: searchcondition是查询条件，由页面采集
-	 * pageid：需要返回的页码
-	 * pagesize：页面大小
+	 * pageid：需要返回的页码,传数字或者不传，不要传null
+	 * pagesize：页面大小，如果大于零才分页，否则部分也，页码如果有问题自动默认为0
 	* @return:
 	* @Date: 2018/4/24 15:11
 	*/
-	JSONObject searchByPaging(JSONObject searchcondition,int pageid,int pagesize);
+	JSONObject searchByPaging(JSONObject searchcondition, JSONArray backfields, JSONArray sortfields, Integer pageid, Integer pagesize);
 
 	/**
 	* @Author:weiguangwu

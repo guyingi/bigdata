@@ -18,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
 
+import yasen.bigdata.milk.consts.ESConstants;
 import yasen.bigdata.milk.consts.SysConstants;
 import yasen.bigdata.milk.service.DataDownloadService;
 import yasen.bigdata.milk.service.SearchService;
@@ -52,7 +53,23 @@ public class DicomSearchController {
         HttpSession session = request.getSession();
         session.setAttribute("searchParam", param);
 
-        JSONObject tempResult = searchService.searchByPaging(param, 1, SysConstants.DEFAULT_PAGE_SIZE);
+        JSONArray backfields = new JSONArray();
+        backfields.add(ESConstants.InstitutionName_ES);
+        backfields.add(ESConstants.ORGAN_ES);
+        backfields.add(ESConstants.PatientName_ES);
+        backfields.add(ESConstants.SeriesDescription_ES);
+        backfields.add(ESConstants.SeriesDate_ES);
+        backfields.add(ESConstants.NumberOfSlices_ES);
+        backfields.add(ESConstants.ID_ES);
+
+        JSONArray sortfields = new JSONArray();
+        sortfields.add(ESConstants.InstitutionName_ES);
+        sortfields.add(ESConstants.SeriesDescription_ES);
+        sortfields.add(ESConstants.PatientName_ES);
+        sortfields.add(ESConstants.SeriesDate_ES);
+        sortfields.add(ESConstants.NumberOfSlices_ES);
+
+        JSONObject tempResult = searchService.searchByPaging(param, backfields,sortfields,1, SysConstants.DEFAULT_PAGE_SIZE);
         result.put("total",tempResult.getLong("total"));
         result.put("rows",tempResult.getJSONArray("data"));
         System.out.println("total:"+tempResult.getLong("total"));
@@ -67,10 +84,27 @@ public class DicomSearchController {
         System.out.println("ajaxPage");
 
         JSONObject result = new JSONObject();
-        int pageid = Integer.parseInt(page);
+        Integer pageid = Integer.parseInt(page);
         HttpSession session = request.getSession();
         JSONObject param = (JSONObject)session.getAttribute("searchParam");
-        JSONObject tempResult = searchService.searchByPaging(param, pageid, SysConstants.DEFAULT_PAGE_SIZE);
+
+        JSONArray backfields = new JSONArray();
+        backfields.add(ESConstants.InstitutionName_ES);
+        backfields.add(ESConstants.ORGAN_ES);
+        backfields.add(ESConstants.PatientName_ES);
+        backfields.add(ESConstants.SeriesDescription_ES);
+        backfields.add(ESConstants.SeriesDate_ES);
+        backfields.add(ESConstants.NumberOfSlices_ES);
+        backfields.add(ESConstants.ID_ES);
+
+        JSONArray sortfields = new JSONArray();
+        sortfields.add(ESConstants.InstitutionName_ES);
+        sortfields.add(ESConstants.SeriesDescription_ES);
+        sortfields.add(ESConstants.PatientName_ES);
+        sortfields.add(ESConstants.SeriesDate_ES);
+        sortfields.add(ESConstants.NumberOfSlices_ES);
+
+        JSONObject tempResult = searchService.searchByPaging(param, backfields,sortfields,pageid, SysConstants.DEFAULT_PAGE_SIZE);
         System.out.println(tempResult.toJSONString());
         result.put("total",tempResult.getLong("total"));
         result.put("rows",tempResult.getJSONArray("data"));
@@ -112,7 +146,6 @@ public class DicomSearchController {
             tempFilePath = searchService.getDownloadFileByIds(ids,tempDir);
         doDownload(response,tempFilePath,"json");
     }
-
     /**
      * 在下载部分选中项的json文件时，需要传选中项的id值过来，但是ajax方式不能下载，因为
      * javascript不能直接操作磁盘，传给页面的数据存放JavaScript的内存中。所以我采用了使用ajax提交id参数给exportSomeHelp，

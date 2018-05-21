@@ -75,7 +75,7 @@
 
                 <div>
                     <div>
-                        <a href="" class="easyui-linkbutton" style="width:100%;height:32px;background: #37587a;color:#FFFFFF" onclick="submitForm()">登陆</a>
+                        <a href="#" class="easyui-linkbutton" style="width:100%;height:32px;background: #37587a;color:#FFFFFF" onclick="submitForm()">登陆</a>
                     </div>
                 </div>
             </form>

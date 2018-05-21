@@ -1,8 +1,8 @@
 <%--
   Created by IntelliJ IDEA.
   User: WeiGuangWu
-  Date: 2018/5/15
-  Time: 15:16
+  Date: 2018/5/18
+  Time: 13:57
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
@@ -38,6 +38,19 @@
         });
     });
 
+    function add() {
+        $('#acc').accordion('add', {
+            title: 'A',
+            content: 'New Content',
+            selected: false
+        });
+        // $('#acc').accordion('add', {
+        //     title : "A",
+        //     iconCls : 'icon-ok',
+        //     selected : true,
+        //     content : '<div style="padding:10px"><ul name="'+dd+'">操</ul></div>',
+        // });
+    }
 </script>
 <body style="padding:0;">
 <div style="width:auto;height:30px;background: linear-gradient(to right, #0000C6, #FFFFFF);">
@@ -83,12 +96,35 @@
                 </ul>
             </div>
         </div>
-        <div data-options="region:'center',title:'产品介绍'">
-            <h3>这是一个查询系统,提供dicom文件的多条件组合查询。</h3>
-            <h3>提供。</h3>
-            <h3>这是一个查询系统,提供dicom文件的多条件组合查询。</h3>
+        <div data-options="region:'center',title:'下载数据脱敏'">
+            <div class="easyui-layout" style="width:auto;height:100%;">
+                <div data-options="region:'north'" style="height:9%">
+                    <div class="easyui-panel" title="" style="width:auto">
+                        <div  style="margin:0px 0px 0px 35%">
+                            <form id="ff" method="post">
+                                <table cellpadding="5">
+                                    <tr>
+                                        <td>Name:</td>
+                                        <td><input class="easyui-textbox" type="text" name="name" data-options="required:true"></input></td>
+                                        <td>
+                                            <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px;height:30px;" onclick="submitForm()">Search</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div data-options="region:'center',title:'查询结果',iconCls:'icon-ok'">
+                    <div class="easyui-panel"  style="width:auto;height:100%;">
+
+                    </div>
+                </div>
+            </div>
         </div>
-        <div data-options="region:'south',border:true" style="height:20px;background:#f1f8ff;"></div>
+        <div data-options="region:'south',border:true" style="height:20px;background:#f1f8ff;">
+            <a href="#" onclick="add()">点我</a>
+        </div>
     </div>
 </div>
 </body>

@@ -7,10 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
+import yasen.bigdata.infosupplyer.service.ElasticSearchService;
 import yasen.bigdata.infosupplyer.service.HBaseService;
 import yasen.bigdata.infosupplyer.service.SearchService;
+import yasen.bigdata.infosupplyer.service.impl.ElasticSearchServiceImpl;
 import yasen.bigdata.infosupplyer.service.impl.HBaseServiceImpl;
-import yasen.bigdata.infosupplyer.service.impl.SearchServiceImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,13 +24,13 @@ public class DownloadController {
     static Logger logger = Logger.getLogger(DownloadController.class);
 
     @Autowired
-    SearchService searchService;
+    ElasticSearchService elasticSearchService;
 
     @Autowired
     HBaseService hBaseService;
 
     public static void main(String[] args) {
-        SearchService searchService = new SearchServiceImpl();
+        ElasticSearchService searchService = new ElasticSearchServiceImpl();
         HBaseService hBaseService = new HBaseServiceImpl();
 //        String id = request.getParameter("id");
 //        System.out.println("id:"+id);
@@ -84,7 +85,7 @@ public class DownloadController {
         param.put(ESConstant.IDS,ids);
         param.put(ESConstant.BACKFIELDS,backfields);
 
-        JSONObject result = searchService.searchByIds(param);
+        JSONObject result = elasticSearchService.searchByIds(param);
         String rowkey = null;
         if(result.getLong("total")>0){
             rowkey = result.getJSONArray(ESConstant.DATA).getJSONObject(0).getString(ESConstant.ROWKEY);

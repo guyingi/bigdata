@@ -109,6 +109,8 @@ public class ESConstant {
     public static String ENTRYDATE_ES = "entrydate";//录入日期
     public static String HDFSPATH = "hdfspath";//hdfs文件路径
     public static String ROWKEY =  "rowkey"; //dicom序列的hbase元数据表rowkey
+    public static String TAG_ES =  "tag"; //给一批同类别的dicom人为打上一个标签
+
 
     /*******************字段map**********************/
     /**********参数中的字段必须要是如下字段的子集**********/

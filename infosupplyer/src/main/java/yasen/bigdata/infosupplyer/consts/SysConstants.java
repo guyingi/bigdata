@@ -7,10 +7,18 @@ public class SysConstants {
     public static String RIGHT_SLASH = "\\";
     public static String OS_NAME = "os.name";
     public static String WINDOWS = "Windows";
+    public static String DICOM_TEMP = "dicomtemp";
+    public static String DESENSITIZE_TEMP = "desensitizetemp";
 
+
+    public static Integer SUCCESS = 0;
+    public static Integer EXISTS = 1;
+    public static Integer FAILED = -1;
 
     /***************字段名称常量******************/
     public static String SEARCH_CONDITION = "searchcondition";
+    public static String BACKFIELDS = "backfields";
+    public static String SORTFIELDS = "sortfields";
     public static String CODE = "code";
     public static String PAGECONTENT = "pagecount";
     public static String TOTAL = "total";
@@ -25,7 +33,7 @@ public class SysConstants {
     public static Integer DEFAULT_PAGESIZE = 1000;
 
     /****************返回码常量*******************/
-    public static String CODE_000 = "000";  //查询条件参数为空
+    public static String CODE_000 = "000";  //查询成功
     public static String CODE_010 = "010";  //查询条件参数为空
     public static String CODE_011 = "011";  //参数解析错误
 
@@ -49,17 +57,29 @@ public class SysConstants {
     public static String PAGE_ID = "pageid";
     public static String PAGE_SIZE = "pagesize";
 
+    public static String TAG_PARAM = "TAG";
+
     /***************ES配置信息的字段******************/
+
+    public static String DIR_PREFIX_DICOM = "dir.prefix.dicom";
+    public static String DIR_PREFIX_DESENSITIZATION = "dir.prefix.desensitization";
     public static String ES_CLUSTER = "es.cluster";
     public static String ES_IP = "es.ip";
     public static String ES_HOST = "es.host";
     public static String ES_TCPPORT = "es.tcpport";
     public static String ES_HTTPPORT = "es.httpport";
     public static String ES_DICOM_INDEX = "es.dicom.index";
+    public static String ES_DESENSITIZATION_INDEX = "es.disensitization.index";
     public static String ES_DICOM_TYPE = "es.dicom.type";
+    public static String ES_DESENSITIZATION_TYPE = "es.disensitization.type";
 
     public static String DICOM_THUMBNAIL_TABLENAME = "dicom.thumbnail.tablename";
     public static String DICOM_THUMBNAIL_CF = "dicom.thumbnail.cf";
+    public static String DICOM_TABLENAME = "dicom.tablename";
+    public static String DICOM_CF = "dicom.cf";
+    public static String DICOM_DESENSITIZATION_TABLENAME = "dicom.disensitization.tablename";
+    public static String DICOM_DESENSITIZATION_CF = "dicom.disensitization.cf";
+
 
 
     /**************HBase表列簇字段****************************/

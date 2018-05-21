@@ -33,7 +33,7 @@ public class Demo {
     }
     private static void downloadJson(){
         JSONArray backfields = new JSONArray();
-        backfields.add(ESConstants.HDFSPATH_ES);
+        backfields.add(ESConstants.HDFSPATH);
 
         JSONObject json = new JSONObject();
         JSONObject searchcondition = new JSONObject();

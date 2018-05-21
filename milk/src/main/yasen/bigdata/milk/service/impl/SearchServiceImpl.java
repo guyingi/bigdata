@@ -79,36 +79,25 @@ public class SearchServiceImpl implements SearchService {
     }
 
 	@Override
-	public JSONObject searchByPaging(JSONObject searchcondition,int pageid,int pagesize) {
-		MilkConfiguration conf = new MilkConfiguration();
-		List<Dicom> dicomList = new ArrayList<Dicom>();
-		JSONObject result = new JSONObject();
-		JSONArray data = new JSONArray();
-		StringBuilder builder = new StringBuilder();
-		boolean isSuccess = false;
-
-		JSONArray backfields = new JSONArray();
-		backfields.add(ESConstants.InstitutionName_ES);
-		backfields.add(ESConstants.ORGAN_ES);
-		backfields.add(ESConstants.PatientName_ES);
-		backfields.add(ESConstants.SeriesDescription_ES);
-		backfields.add(ESConstants.SeriesDate_ES);
-		backfields.add(ESConstants.NumberOfSlices_ES);
-		backfields.add(ESConstants.ID_ES);
-
-		JSONArray sortfields = new JSONArray();
-		sortfields.add(ESConstants.InstitutionName_ES);
-		sortfields.add(ESConstants.SeriesDescription_ES);
-		sortfields.add(ESConstants.PatientName_ES);
-		sortfields.add(ESConstants.SeriesDate_ES);
-		sortfields.add(ESConstants.NumberOfSlices_ES);
-
+	public JSONObject searchByPaging(JSONObject searchcondition,JSONArray backfields,JSONArray sortfields,Integer pageid,Integer pagesize) {
 		JSONObject json = new JSONObject();
-		json.put(SysConstants.SEARCH_CONDITION,searchcondition);
-		json.put(SysConstants.PAGE_ID,pageid);
-		json.put(SysConstants.PAGE_SIZE,pagesize);
-		json.put(SysConstants.BACKFIELDS,backfields);
-		json.put(SysConstants.SORTFIELDS,sortfields);
+		if (searchcondition == null || searchcondition.size() == 0){
+		    return new JSONObject();
+        } else {
+            json.put(SysConstants.SEARCH_CONDITION,searchcondition);
+        }
+        if(backfields != null && backfields.size() > 0) {
+            json.put(SysConstants.BACKFIELDS, backfields);
+        }
+        if(sortfields != null && sortfields.size() > 0) {
+            json.put(SysConstants.SORTFIELDS,sortfields);
+		}
+        if(pageid != null) {
+            json.put(SysConstants.PAGE_ID, pageid);
+        }
+		if(pagesize != null) {
+            json.put(SysConstants.PAGE_SIZE, pagesize);
+        }
 		String interfaceStr = "/info/_searchpaging";
         JSONObject searchPagingResult = doCallAndGetResult(json,interfaceStr);
 		return searchPagingResult;
@@ -124,7 +113,7 @@ public class SearchServiceImpl implements SearchService {
 		boolean isSuccess = false;
 
 		JSONArray backfields = new JSONArray();
-		backfields.add(ESConstants.HDFSPATH_ES);
+		backfields.add(ESConstants.HDFSPATH);
 
 		JSONObject json = new JSONObject();
 		json.put(SysConstants.SEARCH_CONDITION,searchcondition);
@@ -144,7 +133,7 @@ public class SearchServiceImpl implements SearchService {
         String filepath = tempDir+tempFileName;
         boolean isSuccess = false;
         JSONArray backfields = new JSONArray();
-        backfields.add(ESConstants.HDFSPATH_ES);
+        backfields.add(ESConstants.HDFSPATH);
 
         JSONArray ids = new JSONArray();
         for(String e : list){
@@ -201,7 +190,7 @@ public class SearchServiceImpl implements SearchService {
         boolean isSuccess = false;
 
         JSONArray backfields = new JSONArray();
-        backfields.add(ESConstants.HDFSPATH_ES);
+        backfields.add(ESConstants.HDFSPATH);
         JSONArray ids = new JSONArray();
         for(String e : list){
             ids.add(e);
@@ -221,7 +210,7 @@ public class SearchServiceImpl implements SearchService {
             int size = data.size();
             for(int i=0;i<size;i++){
                 JSONObject jsonObject = data.getJSONObject(i);
-                hdfspaths.add(jsonObject.getString(ESConstants.HDFSPATH_ES));
+                hdfspaths.add(jsonObject.getString(ESConstants.HDFSPATH));
             }
         }
         boolean download = false;

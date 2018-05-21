@@ -3,7 +3,7 @@ package service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
-import yasen.bigdata.infosupplyer.service.impl.SearchServiceImpl;
+import yasen.bigdata.infosupplyer.service.impl.ElasticSearchServiceImpl;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
 
 import java.util.HashSet;
@@ -63,13 +63,13 @@ public class SearchServiceTest {
         json.put("sortfields",sortfields);
         /******************************************/
         System.out.println(json.toJSONString());
-        SearchServiceImpl searchService = new SearchServiceImpl();
+        ElasticSearchServiceImpl searchService = new ElasticSearchServiceImpl();
         JSONObject jsonObject = searchService.searchByPaging(json);
 
         printResult(jsonObject);
     }
     public static void searchAllTest(JSONObject json){
-        SearchServiceImpl searchService = new SearchServiceImpl();
+        ElasticSearchServiceImpl searchService = new ElasticSearchServiceImpl();
         JSONObject jsonObject = searchService.searchAll();
 
         Set<String> hospitalSet = new HashSet<String>();
@@ -175,7 +175,7 @@ public class SearchServiceTest {
         backfields.add(ESConstant.ID_ES);
         json.put("backfields",backfields);
 
-        SearchServiceImpl searchService = new SearchServiceImpl();
+        ElasticSearchServiceImpl searchService = new ElasticSearchServiceImpl();
         JSONObject jsonObject = searchService.searchByIds(json);
 
         printResult(jsonObject);

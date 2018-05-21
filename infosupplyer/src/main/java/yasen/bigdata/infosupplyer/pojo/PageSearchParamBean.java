@@ -42,30 +42,16 @@ import java.util.List;
 
 public class PageSearchParamBean {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
     private JSONObject searchcondition = null;
+    private SearchconditionBean searchconditionBean;
     private Integer pageid = 1;
     private Integer pagesize = 0;
     private List<String> backfields = null;
     private List<String> sortfields = null;
 
-    private String device;
-    private String organ;
-    private String seriesdescription;
-    private String institution;
-    private String sex;
-    private Integer ageStart;
-    private Integer ageEnd;
-    private String studydateStart;
-    private String studydateEnd;
-    private String entrydateStart;
-    private String entrydateEnd;
-    private Integer imagecountMin;
-    private Integer imagecountMax;
-    private Double slicethicknessMin;
-    private Double slicethicknessMax;
+
+
     private boolean paging = false;
-    private boolean devicephrase = false;//设备是否整个串匹配，拆分,默认模糊匹配
     private boolean parseError = false;
 
 
@@ -86,7 +72,7 @@ public class PageSearchParamBean {
     private void parseParameter(JSONObject param)throws Exception{
         searchcondition = param.getJSONObject("searchcondition");
         if(searchcondition!=null) {
-            parseSearchcondition(searchcondition);
+            searchconditionBean = new SearchconditionBean(searchcondition);
         }
         Integer pageidParam = param.getInteger("pageid");
         Integer pagesizeParam = param.getInteger("pagesize");
@@ -128,70 +114,7 @@ public class PageSearchParamBean {
         }
     }
 
-    private void parseSearchcondition(JSONObject param){
-        String deviceParam = param.getString(SysConstants.DEVICE_PARAM);
-        if(deviceParam!=null && deviceParam.length()!=0){
-            device = deviceParam;
-            if(device.indexOf("/")>0)
-                devicephrase = true;
-        }
-        String organParam = param.getString(SysConstants.ORGAN_PARAM);
-        if(organParam!=null && organParam.length()!=0){
-            organ = organParam;
-        }
-        String seriesdescriptionParam = param.getString(SysConstants.SERIES_DESCRIPTION_PARAM);
-        if(seriesdescriptionParam!=null && seriesdescriptionParam.length()!=0){
-            seriesdescription = seriesdescriptionParam;
-        }
-        String institutionParam = param.getString(SysConstants.INSTITUTION_PARAM);
-        if(institutionParam!=null && institutionParam.length()!=0){
-            institution = institutionParam;
-        }
-        String sexParam = param.getString(SysConstants.SEX_PARAM);
-        if(sexParam!=null && sexParam.length()!=0){
-            sex = sexParam;
-        }
-        Integer ageStartParam = param.getInteger(SysConstants.AGE_START_PARAM);
-        if(ageStartParam!=null && ageStartParam>=0){
-            ageStart = ageStartParam;
-        }
-        Integer ageEndParam = param.getInteger(SysConstants.AGE_END_PARAM);
-        if(ageEndParam!=null && ageEndParam>=0){
-            ageEnd = ageEndParam;
-        }
-        String studyDateStartParam = param.getString(SysConstants.STUDYDATE_START_PARAM);
-        if(studyDateStartParam!=null && studyDateStartParam.length()!=0){
-            studydateStart = studyDateStartParam;
-        }
-        String studyDateEndParam = param.getString(SysConstants.STUDYDATE_END_PARAM);
-        if(studyDateEndParam!=null && studyDateEndParam.length()!=0){
-            studydateEnd = studyDateEndParam;
-        }
-        String entrydateStartParam = param.getString(SysConstants.ENTRYDATE_START_PARAM);
-        if(entrydateStartParam!=null && entrydateStartParam.length()!=0){
-            entrydateStart = entrydateStartParam;
-        }
-        String entryDateEndParam = param.getString(SysConstants.ENTRYDATE_END_PARAM);
-        if(entryDateEndParam!=null && entryDateEndParam.length()!=0){
-            entrydateEnd = entryDateEndParam;
-        }
-        Integer imageCountMinParam = param.getInteger(SysConstants.IMAGECOUNT_MIN_PARAM);
-        if(imageCountMinParam!=null){
-            imagecountMin = imageCountMinParam;
-        }
-        Integer imageCountMaxParam = param.getInteger(SysConstants.IMAGECOUNT_MAX_PARAM);
-        if(imageCountMaxParam!=null){
-            imagecountMax = imageCountMaxParam;
-        }
-        Double slicethicknessMinParam = param.getDouble(SysConstants.SLICE_THICKNESS_MIN_PARAM);
-        if(slicethicknessMinParam != null){
-            slicethicknessMin = slicethicknessMinParam;
-        }
-        Double slicethicknessMaxParam = param.getDouble(SysConstants.SLICE_THICKNESS_MAX_PARAM);
-        if(slicethicknessMaxParam != null){
-            slicethicknessMax = slicethicknessMaxParam;
-        }
-    }
+
 
     private void parsePageParam(Integer pageidParam, Integer pagesizeParam){
         if(pageidParam!=null && pageidParam>0){
@@ -216,51 +139,14 @@ public class PageSearchParamBean {
         return pagesize!=null && pagesize>0;
     }
     public boolean isDeviceAvailable(){
-        return device != null;
+        return searchconditionBean.isDeviceAvailable();
     }
-    public boolean isOrganAvailable(){
-        return organ != null;
-    }
+    public boolean isOrganAvailable(){ return searchconditionBean.isOrganAvailable(); }
     public boolean isSeriesdescriptionAvailable(){
-        return seriesdescription != null;
+        return searchconditionBean.isSeriesdescriptionAvailable();
     }
     public boolean isInstitutionAvailable(){
-        return institution != null;
-    }
-
-    //sex:M,F,U    U:unknown
-    public boolean isSexAvailable(){
-        return sex != null;
-    }
-    public boolean isAgeStartAvailable(){
-        return ageStart != null;
-    }
-    public boolean isAgeEndAvailable(){
-        return ageEnd != null;
-    }
-    public boolean isStudydateStartAvailable(){
-        return studydateStart != null;
-    }
-    public boolean isStudydateEndAvailable(){
-        return studydateEnd != null;
-    }
-    public boolean isEntrydateStartAvailable(){
-        return entrydateStart != null;
-    }
-    public boolean isEntrydateEndAvailable(){
-        return entrydateEnd != null;
-    }
-    public boolean isImagecountMinAvailable(){
-        return imagecountMin != null;
-    }
-    public boolean isImagecountMaxAvailable(){
-        return imagecountMax != null;
-    }
-    public boolean isSlicethicknessMinAvailable(){
-        return slicethicknessMin != null;
-    }
-    public boolean isSlicethicknessMaxAvailable(){
-        return slicethicknessMax != null;
+        return searchconditionBean.isInstitutionAvailable();
     }
 
     public boolean isBackfieldsAvailable(){
@@ -272,11 +158,46 @@ public class PageSearchParamBean {
     public boolean isPaging(){
         return paging;
     }
-    public boolean isdevicePhrase(){
-        return devicephrase;
-    }
+
     public boolean isParseError(){
         return parseError;
+    }
+
+    public boolean isSexAvailable(){
+        return searchconditionBean.isSexAvailable();
+    }
+    public boolean isAgeStartAvailable(){
+        return searchconditionBean.isAgeStartAvailable();
+    }
+    public boolean isAgeEndAvailable(){
+        return searchconditionBean.isAgeEndAvailable();
+    }
+    public boolean isStudydateStartAvailable(){
+        return searchconditionBean.isStudydateStartAvailable();
+    }
+    public boolean isStudydateEndAvailable(){
+        return searchconditionBean.isStudydateEndAvailable();
+    }
+    public boolean isEntrydateStartAvailable(){
+        return searchconditionBean.isEntrydateStartAvailable();
+    }
+    public boolean isEntrydateEndAvailable(){
+        return searchconditionBean.isEntrydateEndAvailable();
+    }
+    public boolean isImagecountMinAvailable(){
+        return searchconditionBean.isImagecountMinAvailable();
+    }
+    public boolean isImagecountMaxAvailable(){
+        return searchconditionBean.isImagecountMaxAvailable();
+    }
+    public boolean isSlicethicknessMinAvailable(){
+        return searchconditionBean.isSlicethicknessMinAvailable();
+    }
+    public boolean isSlicethicknessMaxAvailable(){
+        return searchconditionBean.isSlicethicknessMaxAvailable();
+    }
+    public boolean isdevicePhrase(){
+        return searchconditionBean.isdevicePhrase();
     }
 
 
@@ -297,89 +218,76 @@ public class PageSearchParamBean {
     }
 
     public String getDevice() {
-        return device;
+        return searchconditionBean.getDevice();
     }
 
     public String getOrgan() {
-        return organ;
+        return searchconditionBean.getOrgan();
     }
 
     public String getSeriesdescription() {
-        return seriesdescription;
+        return searchconditionBean.getSeriesdescription();
     }
 
     public String getInstitution() {
-        return institution;
+        return searchconditionBean.getInstitution();
     }
 
     public String getSex() {
-        return sex;
+        return searchconditionBean.getSex();
     }
 
     public Integer getAgeStart() {
-        return ageStart;
+        return searchconditionBean.getAgeStart();
     }
 
     public Integer getAgeEnd() {
-        return ageEnd;
+        return searchconditionBean.getAgeEnd();
     }
 
     public String getStudydateStart() {
-        return studydateStart;
+        return searchconditionBean.getStudydateStart();
     }
 
     public String getStudydateEnd() {
-        return studydateEnd;
+        return searchconditionBean.getStudydateEnd();
     }
 
     public String getEntrydateStart() {
-        return entrydateStart;
+        return searchconditionBean.getEntrydateStart();
     }
 
     public String getEntrydateEnd() {
-        return entrydateEnd;
+        return searchconditionBean.getEntrydateEnd();
     }
 
     public Integer getImagecountMin() {
-        return imagecountMin;
+        return searchconditionBean.getImagecountMin();
     }
 
     public Integer getImagecountMax() {
-        return imagecountMax;
+        return searchconditionBean.getImagecountMax();
     }
 
     public Double getSlicethicknessMin() {
-        return slicethicknessMin;
+        return searchconditionBean.getSlicethicknessMin();
     }
 
     public Double getSlicethicknessMax() {
-        return slicethicknessMax;
+        return searchconditionBean.getSlicethicknessMax();
     }
 
     @Override
     public String toString() {
         return "PageSearchParamBean{" +
-                "pageid=" + pageid +
+                "sdf=" + sdf +
+                ", searchconditionBean=" + searchconditionBean.toString() +
+                ", searchcondition=" + searchcondition +
+                ", pageid=" + pageid +
                 ", pagesize=" + pagesize +
                 ", backfields=" + backfields +
                 ", sortfields=" + sortfields +
-                ", device='" + device + '\'' +
-                ", organ='" + organ + '\'' +
-                ", seriesdescription='" + seriesdescription + '\'' +
-                ", institution='" + institution + '\'' +
-                ", sex='" + sex + '\'' +
-                ", ageStart=" + ageStart +
-                ", ageEnd=" + ageEnd +
-                ", studydateStart='" + studydateStart + '\'' +
-                ", studydateEnd='" + studydateEnd + '\'' +
-                ", entrydateStart='" + entrydateStart + '\'' +
-                ", entrydateEnd='" + entrydateEnd + '\'' +
-                ", imagecountMin=" + imagecountMin +
-                ", imagecountMax=" + imagecountMax +
-                ", slicethicknessMin=" + slicethicknessMin +
-                ", slicethicknessMax=" + slicethicknessMax +
                 ", paging=" + paging +
-                ", devicephrase=" + devicephrase +
                 ", parseError=" + parseError +
                 '}';
     }

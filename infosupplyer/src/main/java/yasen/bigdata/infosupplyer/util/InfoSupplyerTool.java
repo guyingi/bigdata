@@ -1,7 +1,10 @@
 package yasen.bigdata.infosupplyer.util;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import yasen.bigdata.infosupplyer.consts.ESConstant;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
 
 import java.io.UnsupportedEncodingException;
@@ -152,5 +155,93 @@ public class InfoSupplyerTool {
         String result = "0000000000"+numberStr;
         result = result.substring(result.length()-n,result.length());
         return result;
+    }
+
+    /**
+     * @Author:weiguangwu
+     * @Description:格式化参数，将接口接收的参数转化为PageSearchParamBean能解析的内容
+     * @params:[parameter]
+     * @return: com.alibaba.fastjson.JSONObject
+     * @Date: 2018/4/23 14:42
+     */
+    public static JSONObject formatParameter(Map<String, Object> parameter) {
+        JSONObject param = new JSONObject();
+        for (Map.Entry<String, Object> entry : parameter.entrySet()) {
+            if (entry.getKey().equals(SysConstants.SEARCH_CONDITION)) {
+                HashMap<String, Object> hashmap = (HashMap<String, Object>) entry.getValue();
+                JSONObject obj = new JSONObject();
+                for (Map.Entry<String, Object> e : hashmap.entrySet()) {
+                    if (e.getKey().equals(SysConstants.DEVICE_PARAM)) {
+                        obj.put(ESConstant.ManufacturersModelName_ES, e.getValue().toString());
+                    } else if (e.getKey().equals(SysConstants.AGE_START_PARAM)) {
+                        obj.put(SysConstants.AGE_START_PARAM, Integer.parseInt(e.getValue().toString()));
+                    } else if (e.getKey().equals(SysConstants.AGE_END_PARAM)) {
+                        obj.put(SysConstants.AGE_END_PARAM, Integer.parseInt(e.getValue().toString()));
+                    } else if (e.getKey().equals(SysConstants.IMAGECOUNT_MIN_PARAM)) {
+                        obj.put(SysConstants.IMAGECOUNT_MIN_PARAM, Integer.parseInt(e.getValue().toString()));
+                    } else if (e.getKey().equals(SysConstants.IMAGECOUNT_MAX_PARAM)) {
+                        obj.put(SysConstants.IMAGECOUNT_MAX_PARAM, Integer.parseInt(e.getValue().toString()));
+                    }else if (e.getKey().equals(SysConstants.SLICE_THICKNESS_MIN_PARAM)) {
+                        obj.put(SysConstants.SLICE_THICKNESS_MIN_PARAM, Double.parseDouble(e.getValue().toString()));
+                    } else if (e.getKey().equals(SysConstants.SLICE_THICKNESS_MAX_PARAM)) {
+                        obj.put(SysConstants.SLICE_THICKNESS_MAX_PARAM, Double.parseDouble(e.getValue().toString()));
+                    } else {
+                        obj.put(e.getKey(), e.getValue().toString());
+                    }
+                }
+                param.put(SysConstants.SEARCH_CONDITION, obj);
+            } else if (entry.getKey().equals(SysConstants.BACKFIELDS)) {
+                List<String> list = (List<String>) entry.getValue();
+                JSONArray arr = new JSONArray();
+                for (String e : list) {
+                    arr.add(e);
+                }
+                param.put(SysConstants.BACKFIELDS, arr);
+            } else if (entry.getKey().equals(SysConstants.SORTFIELDS)) {
+                List<String> list = (List<String>) entry.getValue();
+                JSONArray arr = new JSONArray();
+                for (String e : list) {
+                    arr.add(e);
+                }
+                param.put(SysConstants.SORTFIELDS, arr);
+            } else {
+                if (entry.getKey().equals(SysConstants.PAGE_ID)) {
+                    param.put(SysConstants.PAGE_ID, Integer.parseInt(entry.getValue().toString()));
+                } else if (entry.getKey().equals(SysConstants.PAGE_SIZE)) {
+                    param.put(SysConstants.PAGE_SIZE, Integer.parseInt(entry.getValue().toString()));
+                } else {
+                    param.put(entry.getKey(), entry.getValue().toString());
+                }
+            }
+        }
+        return param;
+    }
+
+    /**
+     * 格式化字符串日期20170302 to /2017/03/02
+     * 如果解析出错，时间默认为19270/01/01
+     * @param dateString
+     * @return
+     */
+    public static String parseDateToPath(String dateString){
+        String year = "1970";
+        String month = "01";
+        String day = "01";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        Date date = null;
+        try {
+            date = sdf.parse(dateString);
+        } catch (ParseException e) {
+            logger.log(Level.ERROR,e);
+            e.printStackTrace();
+        }
+        if(date!=null){
+            Calendar instance = Calendar.getInstance();
+            instance.setTime(date);
+            year = instance.get(Calendar.YEAR)+"";
+            month = instance.get(Calendar.MONTH)+1+"";
+            day = instance.get(Calendar.DAY_OF_MONTH)+"";
+        }
+        return SysConstants.LEFT_SLASH+year+ SysConstants.LEFT_SLASH+month+ SysConstants.LEFT_SLASH+day;
     }
 }

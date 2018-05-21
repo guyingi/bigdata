@@ -1,5 +1,6 @@
 package yasen.bigdata.infosupplyer.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.TableName;
@@ -7,6 +8,7 @@ import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.springframework.stereotype.Service;
 import yasen.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
+import yasen.bigdata.infosupplyer.consts.ESConstant;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
 import yasen.bigdata.infosupplyer.service.HBaseService;
 import yasen.bigdata.infosupplyer.util.HBaseUtil;
@@ -15,12 +17,34 @@ import yasen.bigdata.infosupplyer.util.ZipUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.*;
 
 @Service("HBaseService")
 public class HBaseServiceImpl implements HBaseService {
 
     Connection conn = null;
     InfosupplyerConfiguration infosupplyerConfiguration = null;
+    static List<String> IntegerFieldList = new ArrayList<String>();
+    static List<String> LongFieldList = new ArrayList<String>();
+    static List<String> DoubleFieldList = new ArrayList<String>();
+
+    static{
+        IntegerFieldList.add(ESConstant.PatientsAge_ES);
+        IntegerFieldList.add(ESConstant.SeriesNumber_ES);
+        IntegerFieldList.add(ESConstant.NumberOfSlices_ES);
+
+        LongFieldList.add(ESConstant.StudyTime_ES);
+        LongFieldList.add(ESConstant.SeriesTime_ES);
+        LongFieldList.add(ESConstant.AcquisitionTime_ES);
+        LongFieldList.add(ESConstant.ImageTime_ES);
+
+        DoubleFieldList.add(ESConstant.PatientsSize_ES);
+        DoubleFieldList.add(ESConstant.PatientsWeight_ES);
+        DoubleFieldList.add(ESConstant.SliceThickness_ES);
+        DoubleFieldList.add(ESConstant.ReconstructionDiameter_ES);
+        DoubleFieldList.add(ESConstant.SliceLocation_ES);
+    }
 
     public HBaseServiceImpl(){
         conn = HBaseUtil.getConnection();
@@ -64,4 +88,134 @@ public class HBaseServiceImpl implements HBaseService {
         tempDir.deleteOnExit();
         return path+File.separator+filename;
     }
+
+
+
+    @Override
+    public void updateColumn(String tablename, String rowkey, String cf, String qualify, String value) throws IOException {
+        Table table = conn.getTable(TableName.valueOf(tablename));
+        Put put = new Put(Bytes.toBytes(rowkey));
+        put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(qualify),Bytes.toBytes(value));
+        table.put(put);
+    }
+
+    @Override
+    public void updateTagForDicom(String tablename, List<String> rowkeys, String cf, String qualify, String value) throws IOException {
+        Table table = conn.getTable(TableName.valueOf(tablename));
+        int batchSize = 1000;
+        int counter = 0;
+        List<Put> puts = new ArrayList<Put>();
+        for(String rowkey : rowkeys){
+            counter++;
+            Put put = new Put(Bytes.toBytes(rowkey));
+            put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(qualify),Bytes.toBytes(value));
+            puts.add(put);
+            if(counter % batchSize == 0){
+                table.put(puts);
+                puts = new ArrayList<Put>();
+            }
+        }
+        table.put(puts);
+    }
+
+    @Override
+    public int putOne(String tableName, String cf, JSONObject metaJson) throws IOException {
+        String rowkey = metaJson.getString(ESConstant.ROWKEY);
+        if(isExists(tableName,rowkey)){
+            return SysConstants.EXISTS;
+        }
+        BufferedMutatorParams params = new BufferedMutatorParams(TableName.valueOf(tableName));
+        try(BufferedMutator mutator = conn.getBufferedMutator(params)){
+            Put put = new Put(Bytes.toBytes(rowkey));
+            for(String key : metaJson.keySet()){
+                if(IntegerFieldList.contains(key)){
+                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(metaJson.getInteger(key)));
+                }else if(LongFieldList.contains(key)){
+                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(metaJson.getLong(key)));
+                }else if(DoubleFieldList.contains(key)){
+                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(metaJson.getDouble(key)));
+                }else{
+                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(metaJson.getString(key)));
+                }
+            }
+            mutator.mutate(put);
+            mutator.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return SysConstants.SUCCESS;
+    }
+
+    @Override
+    public int putOne(String tableName, String cf, Map<String, String> metaMap) throws IOException {
+        JSONObject metaJSON = new JSONObject();
+        for(Map.Entry<String,String> entry : metaMap.entrySet()){
+            metaJSON.put(entry.getKey(),entry.getValue());
+        }
+        return putOne(tableName, cf,metaJSON);
+    }
+
+    @Override
+    public int putBatch(String tableName, String cf, Map<String, String> colvalues) {
+        return 0;
+    }
+
+    @Override
+    public int putCell(String tableName, String rowkey, String cf, String col, byte[] value) throws IOException {
+        if(isExists(tableName,rowkey)){
+            return SysConstants.EXISTS;
+        }
+        BufferedMutatorParams params = new BufferedMutatorParams(TableName.valueOf(tableName));
+        try(BufferedMutator mutator = conn.getBufferedMutator(params)){
+            Put put = new Put(Bytes.toBytes(rowkey));
+            put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(col),value);
+            mutator.mutate(put);
+            mutator.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return SysConstants.SUCCESS;
+    }
+
+    @Override
+    public boolean delete(String tableName, String rowkey) {
+        HTable table = null;
+        long length = 0;
+        try {
+            table = (HTable)conn.getTable(TableName.valueOf(tableName));
+            Delete delete = new Delete(rowkey.getBytes()); // 根据主键查询
+            table.delete(delete);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                table.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isExists(String tableName, String rowkey){
+        HTable table = null;
+        long length = 0;
+        try {
+            table = (HTable)conn.getTable(TableName.valueOf(tableName));
+            Get get = new Get(rowkey.getBytes()); // 根据主键查询
+            Result result = table.get(get);
+            length = result.rawCells().length;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                table.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return length>0;
+    }
+
 }

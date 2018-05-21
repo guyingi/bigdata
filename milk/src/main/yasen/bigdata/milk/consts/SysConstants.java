@@ -75,6 +75,9 @@ public class SysConstants {
     public static String IDS = "ids";
     public static String DATA = "data";
     public static String CODE = "code";
+    public static String TOTAL = "total";
+    public static String TAG = "tag";
+
 
     /****************编码*******************************/
     public static String CODE_000 = "000";

@@ -40,6 +40,48 @@ public class GlobalController {
         return mav;
     }
 
+    @RequestMapping(value = "signtag", method = RequestMethod.GET)
+    public ModelAndView signtag(HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession();
+        String username = null;
+        if(session != null){
+            username = (String)session.getAttribute("username");
+        }
+        System.out.println("signtag:"+username);
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("signtag");
+        mav.addObject("username",username);
+        return mav;
+    }
+
+    @RequestMapping(value = "desensitization", method = RequestMethod.GET)
+    public ModelAndView desensitization(HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession();
+        String username = null;
+        if(session != null){
+            username = (String)session.getAttribute("username");
+        }
+        System.out.println("desensitization:"+username);
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("desensitization");
+        mav.addObject("username",username);
+        return mav;
+    }
+
+    @RequestMapping(value = "downloaddesensitization", method = RequestMethod.GET)
+    public ModelAndView downloaddesensitization(HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession();
+        String username = null;
+        if(session != null){
+            username = (String)session.getAttribute("username");
+        }
+        System.out.println("downloaddesensitization:"+username);
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("downloaddesensitization");
+        mav.addObject("username",username);
+        return mav;
+    }
+
     @RequestMapping(value = "navigation", method = RequestMethod.GET)
     public ModelAndView navigation(HttpServletRequest request, HttpServletResponse response) {
         String username=  request.getParameter("username");

@@ -10,8 +10,19 @@ package yasen.bigdata.milk.tool;
  * @version V1.0
  */
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONReader;
+import yasen.bigdata.milk.conf.MilkConfiguration;
 import yasen.bigdata.milk.consts.SysConstants;
+import yasen.bigdata.milk.pojo.Dicom;
 
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class MilkTool {
@@ -84,4 +95,77 @@ public class MilkTool {
         return temp;
     }
 
+    public static JSONObject doCallAndGetResult(JSONObject parameter, String interfaceStr){
+        MilkConfiguration conf = new MilkConfiguration();
+        JSONObject result = new JSONObject();
+        JSONArray data = new JSONArray();
+        List<Dicom> dicomList = new ArrayList<Dicom>();
+        StringBuilder builder = new StringBuilder();
+        boolean isSuccess = false;
+        System.out.println(parameter.toJSONString());
+        try {
+            byte[] param = parameter.toString().getBytes("UTF-8");
+            String url = SysConstants.HTTP_HEAD+conf.getInfosupplyerip()+":"+conf.getInfosupplyerport()+interfaceStr;
+            URL restServiceURL = new URL(url);
+
+            HttpURLConnection httpConnection = (HttpURLConnection) restServiceURL.openConnection();
+            httpConnection.setRequestMethod("POST");
+            httpConnection.setRequestProperty("Accept", "application/json");
+            httpConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            //httpConnection.setRequestProperty("Connection", "Keep-Alive");
+            httpConnection.setRequestProperty("Charset", "UTF-8");
+            httpConnection.setDoOutput(true);
+            httpConnection.setDoInput(true);
+
+            //传递参数
+            httpConnection.setRequestProperty("Content-Length", String.valueOf(param));
+            OutputStream outputStream = httpConnection.getOutputStream();
+            outputStream.write(param);
+            outputStream.flush();
+            outputStream.close();
+            System.out.println("返回码："+httpConnection.getResponseCode());
+
+            if (httpConnection.getResponseCode() == 200) {
+                InputStream inputStream = httpConnection.getInputStream();
+                BufferedReader tBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                String tempStr = null;
+                while ((tempStr = tBufferedReader.readLine()) != null) {
+                    builder.append(tempStr);
+                }
+                inputStream.close();
+                isSuccess = true;
+            } else {
+                System.out.println("从infosupplyer获取文件失败");
+            }
+//		    System.out.println("接收到的数据："+builder.toString());
+            httpConnection.disconnect();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+        if(isSuccess) {
+            JSONReader reader = new JSONReader(new StringReader(builder.toString()));
+            reader.startObject();
+            while (reader.hasNext()){
+                String key = reader.readString();
+                if(key.equals("code")){
+                    result.put("code",reader.readObject(String.class));
+                }else if(key.equals("pagecount")){
+                    result.put("pagecount",reader.readObject(Long.class));
+                }else if(key.equals("total")){
+                    result.put("total",reader.readObject(Long.class));
+                }else if(key.equals("data")){
+                    reader.startArray();
+                    while(reader.hasNext()){
+                        Dicom dicom = JSON.parseObject(reader.readObject().toString(), Dicom.class);
+                        dicomList.add(dicom);
+                    }
+                    reader.endArray();
+                    result.put("data",dicomList);
+                }
+            }
+            reader.endObject();
+        }
+        return result;
+    }
 }

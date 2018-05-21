@@ -23,8 +23,8 @@ public class ESConstants {
     public static String InstanceCreationTime_ES         = "InstanceCreationTime";
     public static String InstanceCreatorUID_ES           = "InstanceCreatorUID";
     public static String SOPClassUID_ES                  = "SOPClassUID";
-    //    public static String SOPInstanceUID               = "SOPInstanceUID"; //一个序列为单位，不需要单张图片标识号
-    public static String StudyDate_ES = "StudyDate";
+    //    public static String SOPInstanceUID_ES               = "SOPInstanceUID"; //一个序列为单位，不需要单张图片标识号
+    public static String StudyDate_ES                    = "StudyDate";
     public static String SeriesDate_ES = "SeriesDate";
     public static String AcquisitionDate_ES              = "AcquisitionDate";
     public static String ImageDate_ES                    = "ImageDate";
@@ -41,14 +41,14 @@ public class ESConstants {
     public static String StationName_ES                  = "StationName";
     public static String StudyDescription_ES             = "StudyDescription";
     public static String SeriesDescription_ES = "SeriesDescription";
-    public static String ManufacturersModelName_ES       = "ManufacturersModelName";
+    public static String ManufacturersModelName_ES = "ManufacturersModelName";
     public static String ReferencedSOPClassUID_ES        = "ReferencedSOPClassUID";
     public static String ReferencedSOPInstanceUID_ES     = "ReferencedSOPInstanceUID";
     public static String PatientName_ES = "PatientName";
     public static String PatientID_ES                    = "PatientID";
     public static String PatientsBirthDate_ES            = "PatientsBirthDate";
-    public static String PatientsSex_ES                  = "PatientsSex";
-    public static String PatientsAge_ES                  = "PatientsAge";
+    public static String PatientsSex_ES = "PatientsSex";
+    public static String PatientsAge_ES = "PatientsAge";
     public static String PatientsSize_ES                 = "PatientsSize";
     public static String PatientsWeight_ES               = "PatientsWeight";
     public static String SliceThickness_ES               = "SliceThickness";
@@ -72,12 +72,15 @@ public class ESConstants {
     public static String SliceLocation_ES                = "SliceLocation";
 
     public static String ID_ES = "id";//一个索引的_id
+
+    public static String ImageNumber_ES = "ImageNumber";//图片在该序列中序号
+
     public static String SeriesUID_ES = "SeriesUID";//一个dicom文件的id，使用seriesuid+做CRC(用户名年龄性别)+图片序号，生成唯一id
     public static String PatientUID_ES = "PatientUID"; //医院8位PatientID+姓名拼音+出生日期+性别(F/M)最后求MD5,需要在多医院中唯一
     public static String NumberOfSlices_ES = "NumberOfSlices"; //病人此序列图片总量
-    public static String ImageNumber = "ImageNumber";//图片在该序列中序号
     public static String ORGAN_ES = "organ";//器官
-    public static String ENTRYDATE = "entrydate";//录入日期
-    public static String HDFSPATH_ES = "hdfspath";//hdfs文件路径
+    public static String ENTRYDATE_ES = "entrydate";//录入日期
+    public static String HDFSPATH = "hdfspath";//hdfs文件路径
+    public static String ROWKEY =  "rowkey"; //dicom序列的hbase元数据表rowkey
 
 }
