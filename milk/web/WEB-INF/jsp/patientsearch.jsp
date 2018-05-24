@@ -74,6 +74,9 @@
                         <span>功能菜单</span>
                         <ul>
                             <li data-options="iconCls:'icon-search'">
+                                <span>首页</span>
+                            </li>
+                            <li data-options="iconCls:'icon-search'">
                                 <span>查询dicom</span>
                             </li>
                             <li data-options="iconCls:'icon-search'">
@@ -87,9 +90,6 @@
                             </li>
                             <li data-options="iconCls:'icon-search'">
                                 <span>下载脱敏数据</span>
-                            </li>
-                            <li data-options="iconCls:'icon-search'">
-                                <span>首页</span>
                             </li>
                         </ul>
                     </li>

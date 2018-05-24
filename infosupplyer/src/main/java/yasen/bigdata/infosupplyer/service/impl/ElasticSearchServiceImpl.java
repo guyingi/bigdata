@@ -16,6 +16,9 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
@@ -73,6 +76,12 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         //创建查询条件
         //精确值的字段：MRI序列，性别
         //如果有该查询条件则加到querybuilder中，否则则不加
+
+        //标签
+        if(pageSearchParamBean.isTagAvailable()){
+            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.TAG_ES, pageSearchParamBean.getTag()));
+        }
+
         //医院
         if(pageSearchParamBean.isInstitutionAvailable()){
             //此处使用termsQuery(String name,String value)精确匹配单个值
@@ -155,6 +164,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             }
             matchQueryList.add(rangbuilder);
         }
+
 
         // 等同于bool，将两个查询合并
         BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
@@ -330,7 +340,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         UpdateRequestBuilder updateRequestBuilder = transportClient.prepareUpdate(index, type, id);
         Map<String,String> map = new HashMap<String,String>();
         map.put(field,value);
-        updateRequestBuilder.setUpsert(map);
+        updateRequestBuilder.setDoc(map);
         UpdateResponse updateResponse = updateRequestBuilder.execute().actionGet();
         System.out.println("update status:"+updateResponse.status());
     }
@@ -415,6 +425,48 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             metaJSON.put(entry.getKey(),entry.getValue());
         }
         return insertOne(index, type, id, metaJSON);
+    }
+
+    @Override
+    public JSONObject searchAggregation(String index, String type,Map<String,String> searchcondition, String aggrfield) {
+        TransportClient transportClient = EsClientFactory.getTransportClient();
+
+//        AggregationBuilders
+//                .global("agg")
+//                .subAggregation(AggregationBuilders.terms("genders").field("gender"));
+        AbstractAggregationBuilder aggregation = AggregationBuilders.terms("per_count").field(aggrfield+".keyword");
+        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(index).setTypes(type)
+                .addAggregation(aggregation);
+
+        if(searchcondition != null && searchcondition.size()!=0) {
+            BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
+            for (Map.Entry<String, String> entry : searchcondition.entrySet()) {
+                QueryBuilder matchQuery = QueryBuilders.matchQuery(entry.getKey(), entry.getValue());
+                boolBuilder.must(matchQuery);
+            }
+            searchRequestBuilder.setQuery(boolBuilder);
+        }else{
+            searchRequestBuilder.setQuery(QueryBuilders.matchAllQuery());
+        }
+        SearchResponse response = searchRequestBuilder.execute().actionGet();
+
+        JSONObject result = new JSONObject();
+        JSONArray data = new JSONArray();
+        Terms terms = response.getAggregations().get("per_count");
+        List<? extends Terms.Bucket> buckets = terms.getBuckets();
+        for(Terms.Bucket bucket:buckets){
+            JSONObject temp = new JSONObject();
+            temp.put(aggrfield,bucket.getKey());
+            temp.put(SysConstants.COUNT,bucket.getDocCount());
+            data.add(temp);
+        }
+        long total = buckets.size();
+        result.put(SysConstants.TOTAL,total);
+        result.put(SysConstants.CODE,SysConstants.CODE_000);
+        result.put(SysConstants.DATA,data);
+        System.out.println(result.toJSONString());
+        transportClient.close();
+        return result;
     }
 
     private JSONObject createErrorMsg(String code,String interfaceStr,String msg){

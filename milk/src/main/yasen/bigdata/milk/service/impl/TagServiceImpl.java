@@ -43,8 +43,8 @@ public class TagServiceImpl implements TagService {
             return 0L;
         }
         String interfaceStr = "/info/tagfordicom";
-
-        JSONObject result = MilkTool.doCallAndGetResult(json, interfaceStr);
+        String calltype = "tag";
+        JSONObject result = MilkTool.doCallAndGetResult(json, interfaceStr,calltype);
         if(SysConstants.CODE_000.equals(result.getString(SysConstants.CODE))){
             return result.getLong(SysConstants.TOTAL);
         }
@@ -52,8 +52,35 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public boolean doDesensitize(String tag) {
-        return false;
+    public Long doDesensitize(String tag) {
+        String interfaceStr = "/info/desensitizedicom";
+        JSONObject param = new JSONObject();
+        param.put("tag",tag);
+        String calltype = "tag";
+        JSONObject result = MilkTool.doCallAndGetResult(param, interfaceStr,calltype);
+        if(SysConstants.CODE_000.equals(result.getString(SysConstants.CODE))){
+            return result.getLong(SysConstants.TOTAL);
+        }
+        return 0L;
+    }
+
+    @Override
+    public JSONObject searchTags(String tag) {
+        JSONObject result = new JSONObject();
+
+        String interfaceStr = "/info/searchtags";
+        JSONObject param = new JSONObject();
+        param.put(SysConstants.TAG,tag);
+        String calltype = "tag";
+        JSONObject tempResult = MilkTool.doCallAndGetResult(param, interfaceStr,calltype);
+        System.out.println("milk收到的结果"+tempResult.toJSONString());
+        if(SysConstants.CODE_000.equals(tempResult.getString(SysConstants.CODE))){
+            result.put(SysConstants.TOTAL,tempResult.getLong(SysConstants.TOTAL));
+            JSONArray jsonArray = tempResult.getJSONArray(SysConstants.DATA);
+            result.put(SysConstants.ROWS,jsonArray);
+        }
+        System.out.println(result.toJSONString());
+        return result;
     }
 
 

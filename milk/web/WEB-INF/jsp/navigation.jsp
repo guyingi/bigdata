@@ -61,6 +61,9 @@
                         <span>功能菜单</span>
                         <ul>
                             <li data-options="iconCls:'icon-search'">
+                                <span>首页</span>
+                            </li>
+                            <li data-options="iconCls:'icon-search'">
                                 <span>查询dicom</span>
                             </li>
                             <li data-options="iconCls:'icon-search'">
@@ -75,18 +78,13 @@
                             <li data-options="iconCls:'icon-search'">
                                 <span>下载脱敏数据</span>
                             </li>
-                            <li data-options="iconCls:'icon-search'">
-                                <span>首页</span>
-                            </li>
                         </ul>
                     </li>
                 </ul>
             </div>
         </div>
         <div data-options="region:'center',title:'产品介绍'">
-            <h3>这是一个查询系统,提供dicom文件的多条件组合查询。</h3>
-            <h3>提供。</h3>
-            <h3>这是一个查询系统,提供dicom文件的多条件组合查询。</h3>
+            <h3>这是雅森公司的内部数据检索系统,提供基于医疗数据之上的多种功能，包括检索，数据转换，下载。</h3>
         </div>
         <div data-options="region:'south',border:true" style="height:20px;background:#f1f8ff;"></div>
     </div>

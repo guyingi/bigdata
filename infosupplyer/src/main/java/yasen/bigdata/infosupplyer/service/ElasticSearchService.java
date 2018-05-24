@@ -67,9 +67,44 @@ public interface ElasticSearchService {
     void  updateField(String index,String type,String id,String field,String value);
 
 
+    /**
+     * 查询ES中指定index,type,id,field的值
+     * @param index
+     * @param type
+     * @param id
+     * @param field
+     * @return
+     */
     public Object getField(String index, String type, String id, String field);
 
+    /**
+     * 在ES指定index,type,id定位的doc插入或者更新某个field,参数为json
+     * @param index
+     * @param type
+     * @param id
+     * @param metaMsg
+     * @return
+     */
     int insertOne(String index,String type,String id,JSONObject metaMsg);
+
+    /**
+     * 在ES指定index,type,id定位的doc插入或者更新某个field,参数为map
+     * @param index
+     * @param type
+     * @param id
+     * @param metaMsg
+     * @return
+     */
     int insertOne(String index,String type,String id,Map<String,String> metaMsg);
+
+    /**
+     * ES聚合查询，在ES指定index,type中查询符合条件searchcondition的记录，根据aggrfield返回sum聚合
+     * @param index
+     * @param type
+     * @param searchcondition  查询条件
+     * @param aggrfield 聚合字段sum聚合
+     * @return
+     */
+    JSONObject searchAggregation(String index,String type,Map<String,String> searchcondition,String aggrfield);
 
 }

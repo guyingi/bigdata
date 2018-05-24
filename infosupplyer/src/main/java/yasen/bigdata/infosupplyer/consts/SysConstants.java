@@ -7,9 +7,9 @@ public class SysConstants {
     public static String RIGHT_SLASH = "\\";
     public static String OS_NAME = "os.name";
     public static String WINDOWS = "Windows";
-    public static String DICOM_TEMP = "dicomtemp";
-    public static String DESENSITIZE_TEMP = "desensitizetemp";
-
+    public static String DICOM_TEMP = "dicomtemp";  //脱敏操作中临时存放dicom文件的目录
+    public static String DESENSITIZE_TEMP = "desensitizetemp"; //脱敏操作临时存放脱敏后的数据的目录
+    public static String TAG_TEMP = "tagtemp"; //下载脱敏数据，临时存放脱敏数据的目录，因为以tag为单位下载
 
     public static Integer SUCCESS = 0;
     public static Integer EXISTS = 1;
@@ -26,6 +26,8 @@ public class SysConstants {
     public static String ERROR = "error";
     public static String INTERFACE = "interface";
     public static String MSG = "msg";
+    public static String COUNT = "count";
+
 
 
     /****************其他常量字符串*******************/
@@ -53,11 +55,12 @@ public class SysConstants {
     public static String IMAGECOUNT_MAX_PARAM = "imagecount_max";
     public static String SLICE_THICKNESS_MIN_PARAM = "slicethickness_min";
     public static String SLICE_THICKNESS_MAX_PARAM = "slicethickness_max";
+    public static String TAG_PARAM = "tag";
+
 
     public static String PAGE_ID = "pageid";
     public static String PAGE_SIZE = "pagesize";
 
-    public static String TAG_PARAM = "TAG";
 
     /***************ES配置信息的字段******************/
 
@@ -87,6 +90,27 @@ public class SysConstants {
     public static String TAG = "tag"; //脱敏数据的表中使用该字段
     public static String CREATE_DATE = "createdate"; //kfb元数据字段中有使用
     public static String BARCODE = "barcode"; //kfb元数据字段中有使用
+
+
+    /**************乳腺脱敏数据定性信息表breast_roi中在数据库中对应的字段******************/
+    public static String SERIES_UID = "series_uid";
+    public static String LOCATION = "location";
+    public static String CLASSIFICATION = "classification";
+    public static String SHAPE = "shape";
+    public static String BOUNDARY1 = "boundary1";
+    public static String BOUNDARY2 = "boundary2";
+    public static String DENSITY = "density";
+    public static String QUADRANT = "quadrant";
+    public static String RISK = "risk";
+
+
+    /***************乳腺脱敏数据病灶轮廓信息表roi2d中在数据库中对应的字段**************/
+    public static String ROI2D_SERIES_UID = "roi2d_series_uid";
+    public static String ROI2D_POINTS = "roi2d_points";
+
+    /***************Series详细信息表series中在数据库中对应的字段**************/
+    public static String SERIES_DES= "series_des";
+
 
 
 

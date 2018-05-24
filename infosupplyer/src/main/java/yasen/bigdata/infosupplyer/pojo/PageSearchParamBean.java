@@ -199,7 +199,9 @@ public class PageSearchParamBean {
     public boolean isdevicePhrase(){
         return searchconditionBean.isdevicePhrase();
     }
-
+    public boolean isTagAvailable(){
+        return searchconditionBean.isTagAvailable();
+    }
 
     public Integer getPageid() {
         return pageid;
@@ -276,6 +278,8 @@ public class PageSearchParamBean {
     public Double getSlicethicknessMax() {
         return searchconditionBean.getSlicethicknessMax();
     }
+
+    public String getTag(){ return searchconditionBean.getTag(); }
 
     @Override
     public String toString() {

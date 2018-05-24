@@ -26,4 +26,10 @@ public interface TagService {
      */
     Integer signForDicom(JSONObject param);
 
+    /**
+     * 查询所有dicom序列的标签，以及每个标签下序列的数量
+     * @return
+     */
+    JSONObject searchtags(String tag);
+
 }

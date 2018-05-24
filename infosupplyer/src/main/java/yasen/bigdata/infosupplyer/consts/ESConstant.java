@@ -181,6 +181,7 @@ public class ESConstant {
         ESFIELD.add("organ");
         ESFIELD.add("entrydate");
         ESFIELD.add("hdfspath");
+        ESFIELD.add("rowkey");
     }
 
     /*********************ES中的文本排序需要拼接子field的字段**********************/
@@ -209,6 +210,10 @@ public class ESConstant {
     public static String IDS = "ids";
     public static String DATA = "data";
 
+
+    /**************多个器官名称******************/
+    public static String BREAST = "breast";
+    public static String LUNG = "lung";
 
 
 }

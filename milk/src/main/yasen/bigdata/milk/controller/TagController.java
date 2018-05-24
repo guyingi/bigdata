@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import yasen.bigdata.milk.consts.ESConstants;
 import yasen.bigdata.milk.consts.SysConstants;
+import yasen.bigdata.milk.service.DataDownloadService;
 import yasen.bigdata.milk.service.SearchService;
 import yasen.bigdata.milk.service.TagService;
 import yasen.bigdata.milk.tool.MilkTool;
@@ -29,6 +30,9 @@ public class TagController {
     @Autowired
     SearchService searchService;
 
+    @Autowired
+    DataDownloadService dataDownloadService;
+
     @ResponseBody
     @RequestMapping(value = "dosigntag", method = RequestMethod.POST)
     public JSONObject dosigntag(HttpServletRequest request, HttpServletResponse response, @RequestBody Map<String, String> parametr) {
@@ -39,12 +43,11 @@ public class TagController {
         HttpSession session = request.getSession();
         JSONObject param = (JSONObject)session.getAttribute("searchParam");
 
-        //TODO 根据条件参数查询出所有SeriUID,以List<的方式返回>，需要SeriesUID,rowkey
-        JSONArray backfields = new JSONArray();
-        backfields.add(ESConstants.SeriesUID_ES);
-        backfields.add(ESConstants.ROWKEY);
         Long count = tagService.signTag(param, tag);
+        System.out.println("此次打标签的数量："+count);
         result.put("result",true);
+        result.put("total",count);
+        result.put("tag",tag);
         return result;
     }
 
@@ -90,9 +93,9 @@ public class TagController {
         System.out.println("desensitize is called");
         String tag = parametr.get("tag");
 
-        boolean tempResult = tagService.doDesensitize(tag);
+        long count = tagService.doDesensitize(tag);
         JSONObject result = new JSONObject();
-        if(tempResult){
+        if(count>0){
             result.put("result",true);
         }else{
             result.put("result",false);
@@ -101,6 +104,29 @@ public class TagController {
     }
 
 
-    //根据tag下载脱敏数据
+    //根据tag查询脱敏数据
+    @ResponseBody
+    @RequestMapping(value = "searchTag", method = RequestMethod.POST)
+    public JSONObject searchTag(HttpServletRequest request, HttpServletResponse response, @RequestBody Map<String, String> parametr) {
+        System.out.println("searchTag is called");
+        String tag = parametr.get("tag");
+        JSONObject result = tagService.searchTags(tag);
+        System.out.println(result);
+        return result;
+    }
 
+    //根据tag下载脱敏数据
+    @ResponseBody
+    @RequestMapping(value = "downloadDesensitizeByTag", method = RequestMethod.GET)
+    public void downloadDesensitizeByTag(HttpServletRequest request, HttpServletResponse response, @RequestBody Map<String, String> parametr) {
+        System.out.println("downloadDesensitizeByTag is called");
+        String tag = request.getParameter("tag");
+        //projectPath是工程绝对路径 C://.../../milk
+        String projectRealPath = request.getSession().getServletContext().getRealPath(SysConstants.LEFT_SLASH);
+        //工程下面temp目录绝对路径，用于存放临时文件，操作需要
+        String tempRealPath = projectRealPath+SysConstants.TEMP_STRING;
+        String zipFilePath = dataDownloadService.downloadDesensitizeDdicomByTag(tag, tempRealPath);
+        MilkTool.doDownload(response,zipFilePath,"zip");
+        System.out.println(tag);
+    }
 }

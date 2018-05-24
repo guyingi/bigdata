@@ -18,6 +18,7 @@ import yasen.bigdata.milk.conf.MilkConfiguration;
 import yasen.bigdata.milk.consts.SysConstants;
 import yasen.bigdata.milk.pojo.Dicom;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -95,11 +96,8 @@ public class MilkTool {
         return temp;
     }
 
-    public static JSONObject doCallAndGetResult(JSONObject parameter, String interfaceStr){
+    public static JSONObject doCallAndGetResult(JSONObject parameter, String interfaceStr,String calltype){
         MilkConfiguration conf = new MilkConfiguration();
-        JSONObject result = new JSONObject();
-        JSONArray data = new JSONArray();
-        List<Dicom> dicomList = new ArrayList<Dicom>();
         StringBuilder builder = new StringBuilder();
         boolean isSuccess = false;
         System.out.println(parameter.toJSONString());
@@ -142,30 +140,115 @@ public class MilkTool {
         }catch (IOException e){
             e.printStackTrace();
         }
-
-        if(isSuccess) {
-            JSONReader reader = new JSONReader(new StringReader(builder.toString()));
-            reader.startObject();
-            while (reader.hasNext()){
-                String key = reader.readString();
-                if(key.equals("code")){
-                    result.put("code",reader.readObject(String.class));
-                }else if(key.equals("pagecount")){
-                    result.put("pagecount",reader.readObject(Long.class));
-                }else if(key.equals("total")){
-                    result.put("total",reader.readObject(Long.class));
-                }else if(key.equals("data")){
-                    reader.startArray();
-                    while(reader.hasNext()){
-                        Dicom dicom = JSON.parseObject(reader.readObject().toString(), Dicom.class);
-                        dicomList.add(dicom);
-                    }
-                    reader.endArray();
-                    result.put("data",dicomList);
-                }
-            }
-            reader.endObject();
+        JSONObject result = null;
+        if(isSuccess && calltype.equals("dicom")){
+            result = parseResultForDicom(builder);
+        }else if(isSuccess && calltype.equals("tag")){
+            result = parseResultForSearchTag(builder);
         }
+        return result;
+    }
+    //做具体的下载操作，将文件写出给前端
+    public static void doDownload(HttpServletResponse response, String tempFilePath, String filetype){
+        if(tempFilePath!=null) {
+            System.out.println("临时文件目录："+tempFilePath);
+            response.setCharacterEncoding("utf-8");
+            if(filetype.equals("json"))
+                response.setContentType("multipart/form-data");
+            else if(filetype.equals("xls"))
+                response.setContentType("application/msexcel");
+            else if(filetype.equals("zip"))
+                response.setContentType("application/zip");
+            else
+                ;
+            response.setHeader("Content-Disposition", "attachment;fileName="
+                    + tempFilePath.substring(tempFilePath.lastIndexOf(MilkTool.getDelimiter())+1, tempFilePath.length()));
+            long downloadedLength = 0l;
+            long available = 0l;
+            try {
+                //打开本地文件流
+                InputStream inputStream = new FileInputStream(tempFilePath);
+                available = inputStream.available();
+                OutputStream os = response.getOutputStream();
+                byte[] b = new byte[2048];
+                int length;
+                while ((length = inputStream.read(b)) > 0) {
+                    os.write(b, 0, length);
+                    downloadedLength += b.length;
+                }
+                os.close();
+                inputStream.close();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }else {
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("multipart/form-data");
+            response.setHeader("Content-Disposition", "attachment;fileName=download failed");
+
+            try {
+                OutputStream os = response.getOutputStream();
+                os.write((new String("下载失败")).getBytes("utf-8"));
+                os.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    private static JSONObject parseResultForDicom(StringBuilder builder){
+        JSONObject result = new JSONObject();
+        JSONArray data = new JSONArray();
+        List<Dicom> dicomList = new ArrayList<Dicom>();
+        JSONReader reader = new JSONReader(new StringReader(builder.toString()));
+        reader.startObject();
+        while (reader.hasNext()){
+            String key = reader.readString();
+            if(key.equals("code")){
+                result.put("code",reader.readObject(String.class));
+            }else if(key.equals("pagecount")){
+                result.put("pagecount",reader.readObject(Long.class));
+            }else if(key.equals("total")){
+                result.put("total",reader.readObject(Long.class));
+            }else if(key.equals("data")){
+                reader.startArray();
+                while(reader.hasNext()){
+                    Dicom dicom = JSON.parseObject(reader.readObject().toString(), Dicom.class);
+                    dicomList.add(dicom);
+                }
+                reader.endArray();
+                result.put("data",dicomList);
+            }
+        }
+        reader.endObject();
+        return result;
+    }
+
+    private static JSONObject parseResultForSearchTag(StringBuilder builder){
+        JSONObject result = new JSONObject();
+        JSONArray data = new JSONArray();
+        JSONReader reader = new JSONReader(new StringReader(builder.toString()));
+        reader.startObject();
+        while (reader.hasNext()){
+            String key = reader.readString();
+            if(key.equals("code")){
+                result.put("code",reader.readObject(String.class));
+            }else if(key.equals("pagecount")){
+                result.put("pagecount",reader.readObject(Long.class));
+            }else if(key.equals("total")){
+                result.put("total",reader.readObject(Long.class));
+            }else if(key.equals("data")){
+                reader.startArray();
+                while(reader.hasNext()){
+                    JSONObject o = (JSONObject)reader.readObject();
+                    data.add(o);
+                }
+                reader.endArray();
+                result.put("data",data);
+            }
+        }
+        reader.endObject();
         return result;
     }
 }

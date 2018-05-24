@@ -36,6 +36,8 @@
                 }
             }
         });
+
+        searchtag();
     });
 
     function add() {
@@ -50,6 +52,66 @@
         //     selected : true,
         //     content : '<div style="padding:10px"><ul name="'+dd+'">操</ul></div>',
         // });
+    }
+
+    function searchtag() {
+        var tag = $("#tag").val();
+        var obj = new Object();
+        obj.tag = tag;
+        $.ajax({
+            type: "POST",
+            url: "/milk/searchTag",
+            data: JSON.stringify(obj),
+            dataType: 'json',
+            traditional:true,
+            contentType: 'application/json;charset=utf-8',
+            success: function (data) {
+                console.log(data);
+                if(data!=null){
+                    $("#tagtable").datagrid("loadData",data);
+                }else{
+                    $("#hint").html("查询失败");
+                }
+            },
+            error: function () {
+                $("#hint").html("程序运行出错！");
+            }
+        });
+    }
+
+    function downloadTagChecked(){
+        //下载选中项的dicom文件
+        var arr = new Array();
+        var rows = $('#tagtable').datagrid('getSelections');
+        for(var i=0;i<rows.length;i++){
+            arr.push(rows[i].tag);
+        }
+        if(arr.length==0){
+            alert("未选中任何项")
+        }else{
+            var obj = new Object()
+            obj.tags=arr;
+            var paramJsonStr = JSON.stringify(obj)
+            // $.ajax({
+            //     type: "POST",
+            //     url: "/milk/downloaddicomhelp",
+            //     data: paramJsonStr,
+            //     dataType: 'json',
+            //     traditional:true,
+            //     contentType: 'application/json;charset=utf-8',
+            //     success: function (data) {
+            //     },
+            //     error: function () {
+            //         $("#hint").html("程序运行出错！");
+            //     }
+            // });
+            simulationForm("/milk/downloadDesensitizeByTag?tag=SB");
+        }
+    }
+    function simulationForm(url) {
+        var form = $('<form method="post" action="'+url+'"></form>');
+        form.appendTo("body").submit().remove();
+        return;
     }
 </script>
 <body style="padding:0;">
@@ -74,6 +136,9 @@
                         <span>功能菜单</span>
                         <ul>
                             <li data-options="iconCls:'icon-search'">
+                                <span>首页</span>
+                            </li>
+                            <li data-options="iconCls:'icon-search'">
                                 <span>查询dicom</span>
                             </li>
                             <li data-options="iconCls:'icon-search'">
@@ -88,15 +153,12 @@
                             <li data-options="iconCls:'icon-search'">
                                 <span>下载脱敏数据</span>
                             </li>
-                            <li data-options="iconCls:'icon-search'">
-                                <span>首页</span>
-                            </li>
                         </ul>
                     </li>
                 </ul>
             </div>
         </div>
-        <div data-options="region:'center',title:'下载数据脱敏'">
+        <div data-options="region:'center',title:'下载脱敏数据'">
             <div class="easyui-layout" style="width:auto;height:100%;">
                 <div data-options="region:'north'" style="height:9%">
                     <div class="easyui-panel" title="" style="width:auto">
@@ -104,10 +166,10 @@
                             <form id="ff" method="post">
                                 <table cellpadding="5">
                                     <tr>
-                                        <td>Name:</td>
-                                        <td><input class="easyui-textbox" type="text" name="name" data-options="required:true"></input></td>
+                                        <td>Tag:</td>
+                                        <td><input id="tag" class="easyui-textbox" type="text" name="name" data-options="required:true"/></td>
                                         <td>
-                                            <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px;height:30px;" onclick="submitForm()">Search</a>
+                                            <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px;height:30px;" onclick="searchtag()">Search</a>
                                         </td>
                                     </tr>
                                 </table>
@@ -115,15 +177,25 @@
                         </div>
                     </div>
                 </div>
-                <div data-options="region:'center',title:'查询结果',iconCls:'icon-ok'">
+                <div data-options="region:'center',title:'查询结果',iconCls:'',tools:'#tt'">
                     <div class="easyui-panel"  style="width:auto;height:100%;">
-
+                        <table id="tagtable" class="easyui-datagrid" title="" style="width:auto;height:100%"
+                               data-options="url:'/milk/searchTag',method:'POST'">
+                            <thead>
+                            <tr>
+                                <th field="ck" checkbox="true"></th>
+                                <th data-options="field:'tag',width:80">tag</th>
+                                <th data-options="field:'count',width:100">count</th>
+                            </tr>
+                            </thead>
+                        </table>
                     </div>
                 </div>
+                <div id="tt">
+                    <a   class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportSomeTag();" style="width:100px;height:18px" align="right">导出选中</a>
+                    <a   class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="downloadTagChecked();" style="width:100px;height:18px" align="right">下载选中</a>
+                </div>
             </div>
-        </div>
-        <div data-options="region:'south',border:true" style="height:20px;background:#f1f8ff;">
-            <a href="#" onclick="add()">点我</a>
         </div>
     </div>
 </div>

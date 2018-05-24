@@ -110,4 +110,20 @@ public class HdfsServiceImpl implements HdfsService {
         }
         return SysConstants.SUCCESS;
     }
+
+    @Override
+    public String[] downDicomDesensitization(String localDir, String remoteDir, Configuration hdfsconf) throws IOException {
+        String desensitizedFileName = remoteDir.substring(remoteDir.lastIndexOf(SysConstants.LEFT_SLASH), remoteDir.length());
+        String[] localFilePath = new String[2];
+        localFilePath[0] = localDir+File.separator+desensitizedFileName+".mhd";
+        localFilePath[1] = localDir+File.separator+desensitizedFileName+".raw";
+        FileSystem fs = FileSystem.get(hdfsconf);
+        fs.copyToLocalFile(new Path(remoteDir+SysConstants.LEFT_SLASH+desensitizedFileName+".mhd"),
+                new Path(localDir+File.separator+desensitizedFileName+".mhd"));
+        fs.copyToLocalFile(new Path(remoteDir+SysConstants.LEFT_SLASH+desensitizedFileName+".raw"),
+                new Path(localDir+File.separator+desensitizedFileName+".raw"));
+        return localFilePath;
+    }
+
+
 }

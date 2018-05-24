@@ -76,6 +76,7 @@ public class SysConstants {
     public static String DATA = "data";
     public static String CODE = "code";
     public static String TOTAL = "total";
+    public static String ROWS = "rows";
     public static String TAG = "tag";
 
 

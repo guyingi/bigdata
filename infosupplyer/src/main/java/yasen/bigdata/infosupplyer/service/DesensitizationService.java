@@ -1,5 +1,6 @@
 package yasen.bigdata.infosupplyer.service;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public interface DesensitizationService {
@@ -20,4 +21,12 @@ public interface DesensitizationService {
      * @return  返回上传成功的个数
      */
      int uploadDicomDesensitization(String desensitizationDir, String tag) throws IOException;
+
+
+    /**
+     * 这个方法是根据标签名下载所有属于该标签的脱敏数据，包括标记数据。
+     * @param tag
+     * @return 返回本地临时目录中的zip压缩文件
+     */
+     String downloadDesensitizeDicomByTag(String tag) throws Exception;
 }

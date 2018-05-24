@@ -26,6 +26,7 @@ public class SearchconditionBean {
     private Integer imagecountMax;
     private Double slicethicknessMin;
     private Double slicethicknessMax;
+    private String tag;
     private boolean devicephrase = false;//设备是否整个串匹配，拆分,默认模糊匹配
 
     public SearchconditionBean(JSONObject searchcondition){
@@ -95,6 +96,11 @@ public class SearchconditionBean {
         if(slicethicknessMaxParam != null){
             slicethicknessMax = slicethicknessMaxParam;
         }
+        String tagParam = param.getString(SysConstants.TAG_PARAM);
+        if(tagParam != null){
+            tag = tagParam;
+        }
+
     }
 
     public boolean isDeviceAvailable(){
@@ -146,6 +152,9 @@ public class SearchconditionBean {
     }
     public boolean isdevicePhrase(){
         return devicephrase;
+    }
+    public boolean isTagAvailable(){
+        return tag != null;
     }
 
     public String getDevice() {
@@ -208,6 +217,8 @@ public class SearchconditionBean {
         return slicethicknessMax;
     }
 
+    public String getTag(){ return tag; }
+
     @Override
     public String toString() {
         return "SearchconditionBean{" +
@@ -226,6 +237,7 @@ public class SearchconditionBean {
                 ", imagecountMax=" + imagecountMax +
                 ", slicethicknessMin=" + slicethicknessMin +
                 ", slicethicknessMax=" + slicethicknessMax +
+                ", tag='" + tag + '\'' +
                 ", devicephrase=" + devicephrase +
                 '}';
     }

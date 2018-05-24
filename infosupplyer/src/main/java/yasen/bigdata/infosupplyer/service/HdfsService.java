@@ -17,4 +17,14 @@ public interface HdfsService {
     boolean downloadDicom(List<String> paths, String localPath);
 
     int upDicomDesensitization(String localDir,String remoteDir,Configuration hdfsconf) throws IOException;
+
+    /**
+     *
+     * @param localDir
+     * @param remoteDir
+     * @param hdfsconf
+     * @return  返回值的数组中包含两个元素，第一个是下载到本地后.mhd文件的绝对路径，第二个是raw文件在本地的绝对路径
+     * @throws IOException
+     */
+    String[] downDicomDesensitization(String localDir,String remoteDir,Configuration hdfsconf) throws IOException;
 }

@@ -11,4 +11,11 @@ public interface DataDownloadService {
      */
     List<String> downloadDicomThumbnail(String id,String tempRealDir,String tempContextPath) throws Exception;
 
+
+    /**
+     *
+     * @param tag
+     * @return
+     */
+    String downloadDesensitizeDdicomByTag(String tag,String tempRealDir);
 }

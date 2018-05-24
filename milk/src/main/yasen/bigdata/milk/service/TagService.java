@@ -22,9 +22,15 @@ public interface TagService {
     /**
      * 做实际的脱敏操作
      * @param tag
+     * @return 返回被脱敏序列的数量
+     */
+    Long doDesensitize(String tag);
+
+    /**
+     * 该方法查询所有已经存在的所有标签并返回每个标签的的序列数量。
      * @return
      */
-    boolean doDesensitize(String tag);
+    JSONObject searchTags(String tag);
 
 
 }

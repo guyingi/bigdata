@@ -11,10 +11,7 @@ import java.util.Set;
 
 public class SearchServiceTest {
     public static void main(String[] args) {
-        JSONObject json = new JSONObject();
-//        searchAllTest(json);
-        searchByPagingTest();
-//        searchByIds();
+        searchAggregationTest();
     }
 
 
@@ -40,8 +37,9 @@ public class SearchServiceTest {
 //        searchcondition.put(SysConstants.ENTRYDATE_END_PARAM,"2018-04-20");
 //        searchcondition.put(SysConstants.IMAGECOUNT_MIN_PARAM,121);
 //        searchcondition.put(SysConstants.IMAGECOUNT_MAX_PARAM,121);
-        searchcondition.put(SysConstants.SLICE_THICKNESS_MIN_PARAM,0.0);
-        searchcondition.put(SysConstants.SLICE_THICKNESS_MAX_PARAM,4.0);
+//        searchcondition.put(SysConstants.SLICE_THICKNESS_MIN_PARAM,0.0);
+//        searchcondition.put(SysConstants.SLICE_THICKNESS_MAX_PARAM,4.0);
+        searchcondition.put(SysConstants.TAG,"AA");
         json.put("searchcondition",searchcondition);
         json.put("pageid",1);
         json.put("pagesize",10);
@@ -177,8 +175,15 @@ public class SearchServiceTest {
 
         ElasticSearchServiceImpl searchService = new ElasticSearchServiceImpl();
         JSONObject jsonObject = searchService.searchByIds(json);
-
         printResult(jsonObject);
+
     }
+
+    public static void searchAggregationTest(){
+        ElasticSearchServiceImpl searchService = new ElasticSearchServiceImpl();
+        JSONObject jsonObject = searchService.searchAggregation("dicomindex", "dicomtype", null, "tag");
+        System.out.println(jsonObject.toJSONString());
+    }
+
 
 }

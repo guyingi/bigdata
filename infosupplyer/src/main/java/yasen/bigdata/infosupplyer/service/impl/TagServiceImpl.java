@@ -14,9 +14,7 @@ import yasen.bigdata.infosupplyer.service.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author WeiGuangWu
@@ -87,18 +85,22 @@ public class TagServiceImpl implements TagService {
             elasticSearchService.updateField(infosupplyerConfiguration.getIndexDicom(),
                     infosupplyerConfiguration.getTypeDicom(),id,ESConstant.TAG_ES,tag);
         }
-
         return seriesids.size();
     }
 
-    public static void main(String[] args) {
-//        String path = TagServiceImpl.class.getClass().getResource("/").getPath();
-//        path = path.substring(1,path.length());
-//        path = path.substring(0,path.length()-1);
-//        String temp = path+SysConstants.LEFT_SLASH+"temp";
-//        System.out.println(temp);
-//        File file = new File(temp);
-//        file.mkdir();
-        System.out.println(File.separator);
+    @Override
+    public JSONObject searchtags(String tag) {
+        JSONObject result = null;
+        if(tag != null && tag.length() != 0){
+            Map<String,String> map = new HashMap<String,String>();
+            map.put(SysConstants.TAG,tag);
+            result = elasticSearchService.searchAggregation(infosupplyerConfiguration.getIndexDicom(),
+                    infosupplyerConfiguration.getTypeDicom(), map, SysConstants.TAG);
+        }else{
+            result = elasticSearchService.searchAggregation(infosupplyerConfiguration.getIndexDicom(),
+                    infosupplyerConfiguration.getTypeDicom(), null, SysConstants.TAG);
+        }
+        return result;
     }
+
 }

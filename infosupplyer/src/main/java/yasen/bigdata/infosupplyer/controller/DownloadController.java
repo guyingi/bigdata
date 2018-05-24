@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
+import yasen.bigdata.infosupplyer.service.DesensitizationService;
 import yasen.bigdata.infosupplyer.service.ElasticSearchService;
 import yasen.bigdata.infosupplyer.service.HBaseService;
 import yasen.bigdata.infosupplyer.service.SearchService;
@@ -28,6 +29,9 @@ public class DownloadController {
 
     @Autowired
     HBaseService hBaseService;
+
+    @Autowired
+    DesensitizationService desensitizationService;
 
     public static void main(String[] args) {
         ElasticSearchService searchService = new ElasticSearchServiceImpl();
@@ -73,7 +77,7 @@ public class DownloadController {
 
     //下载dicom文件缩略图
     @RequestMapping("/downloadDicomNail")
-    public String downloadFile(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public String downloadDicomNail(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String id = request.getParameter("id");
         System.out.println("id:"+id);
         //访问ES获取rowkey
@@ -89,7 +93,7 @@ public class DownloadController {
         String rowkey = null;
         if(result.getLong("total")>0){
             rowkey = result.getJSONArray(ESConstant.DATA).getJSONObject(0).getString(ESConstant.ROWKEY);
-            System.out.println(rowkey);
+            System.out.println("rowkey:"+rowkey);
         }else{
             return null;
         }
@@ -110,6 +114,29 @@ public class DownloadController {
 
         //删除压缩文件
         deleteTempFile(zipFilePath);
+
+        return null;
+    }
+
+
+
+    @RequestMapping("/downloadDesensitizeDdicomByTag")
+    public String downloadDesensitizeDdicomByTag(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String tag = request.getParameter("id");
+        System.out.println("tag:"+tag);
+
+//        String zipFilePath = null;
+//        try {
+//            zipFilePath = desensitizationService.downloadDesensitizeDicomByTag(tag);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("压缩文件路径："+zipFilePath);
+//        //读取压缩文件，写出输出流
+//        writeOutZip(zipFilePath,response);
+//
+//        //删除压缩文件
+//        deleteTempFile(zipFilePath);
 
         return null;
     }

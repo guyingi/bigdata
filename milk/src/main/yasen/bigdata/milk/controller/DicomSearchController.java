@@ -81,7 +81,7 @@ public class DicomSearchController {
     public JSONObject ajaxPage(HttpServletRequest request, HttpServletResponse response,
                                @RequestParam(value="page", required=false) String page,
                                @RequestParam(value="rows", required=false) String rows) {
-        System.out.println("ajaxPage");
+        System.out.println("ajaxPage  is called");
 
         JSONObject result = new JSONObject();
         Integer pageid = Integer.parseInt(page);
@@ -121,7 +121,7 @@ public class DicomSearchController {
         String tempFilePath = null;
         if(param!=null)
             tempFilePath = searchService.getDownloadFile(param, tempDir);
-        doDownload(response,tempFilePath,"json");
+        MilkTool.doDownload(response,tempFilePath,"json");
     }
 
 
@@ -144,7 +144,7 @@ public class DicomSearchController {
         String tempFilePath = null;
         if(ids!=null)
             tempFilePath = searchService.getDownloadFileByIds(ids,tempDir);
-        doDownload(response,tempFilePath,"json");
+        MilkTool.doDownload(response,tempFilePath,"json");
     }
     /**
      * 在下载部分选中项的json文件时，需要传选中项的id值过来，但是ajax方式不能下载，因为
@@ -185,7 +185,7 @@ public class DicomSearchController {
         String tempFilePath = null;
         if(param!=null)
             tempFilePath = searchService.exportExcel(param, tempDir);
-        doDownload(response,tempFilePath,"excel");
+        MilkTool.doDownload(response,tempFilePath,"excel");
     }
 
     @RequestMapping(value="downloaddicom")
@@ -208,7 +208,7 @@ public class DicomSearchController {
         if(ids!=null && ids.size()!=0) {
             tempFilePath = searchService.getDicomZipByIds(ids, tempDir);
         }
-        doDownload(response,tempFilePath,"zip");
+        MilkTool.doDownload(response,tempFilePath,"zip");
     }
 
     @RequestMapping(value = "downloaddicomhelp", method = RequestMethod.POST)
@@ -260,53 +260,6 @@ public class DicomSearchController {
         return list;
     }
 
-    //做具体的下载操作，将文件写出给前端
-    private void doDownload(HttpServletResponse response,String tempFilePath,String filetype){
-        if(tempFilePath!=null) {
-			System.out.println("临时文件目录："+tempFilePath);
-			response.setCharacterEncoding("utf-8");
-			if(filetype.equals("json"))
-		        response.setContentType("multipart/form-data");
-			else if(filetype.equals("xls"))
-                response.setContentType("application/msexcel");
-			else if(filetype.equals("zip"))
-                response.setContentType("application/zip");
-			else
-			    ;
-		    response.setHeader("Content-Disposition", "attachment;fileName="
-                    + tempFilePath.substring(tempFilePath.lastIndexOf(MilkTool.getDelimiter())+1, tempFilePath.length()));
-		    long downloadedLength = 0l;
-		    long available = 0l;
-		    try {
-		        //打开本地文件流
-		        InputStream inputStream = new FileInputStream(tempFilePath);
-		        available = inputStream.available();
-		        OutputStream os = response.getOutputStream();
-		        byte[] b = new byte[2048];
-		        int length;
-		        while ((length = inputStream.read(b)) > 0) {
-		            os.write(b, 0, length);
-		            downloadedLength += b.length;
-		        }
-		        os.close();
-		        inputStream.close();
-		    } catch (Exception e){
-		    	e.printStackTrace();
-		    }
-		}else {
-            response.setCharacterEncoding("utf-8");
-			response.setContentType("multipart/form-data");
-            response.setHeader("Content-Disposition", "attachment;fileName=download failed");
-
-            try {
-                OutputStream os = response.getOutputStream();
-                os.write((new String("下载失败")).getBytes("utf-8"));
-                os.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
 
 	private JSONObject parseParameter(HttpServletRequest request) {

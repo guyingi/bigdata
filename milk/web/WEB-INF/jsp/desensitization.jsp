@@ -18,6 +18,13 @@
 </head>
 <script type="text/javascript">
 $(function(){
+    //加载页面的时候将id列隐藏
+    $("#resulttable").datagrid('hideColumn', "id");
+
+    $('#resulttable').datagrid('getPager').pagination({//分页栏下方文字显示
+        displayMsg:'当前显示{from}-{to} 共{total}条记录',
+    });
+
     $('#tree').tree({
         onClick: function(node){
             if("查询dicom" == node.text){
@@ -65,6 +72,7 @@ function submit() {
     });
 }
 function desensitize() {
+    $("#hint").html("正在脱敏处理....稍等");
     //请求做脱敏处理
     var tag = $("#tablediv").panel("options").title;
     var obj = new Object()
@@ -78,10 +86,9 @@ function desensitize() {
         contentType: 'application/json;charset=utf-8',
         success: function (data) {
             console.log(data);
-            if(data!=null){
-                $("#resulttable").datagrid("loadData",data);
-            }else{
-                $("#hint").html("查询失败");
+            if(data.result){
+                $("#hint").html("");
+                $.messager.confirm('消息', '脱敏完成', function(r){});
             }
         },
         error: function () {
@@ -113,6 +120,9 @@ function desensitize() {
                         <span>功能菜单</span>
                         <ul>
                             <li data-options="iconCls:'icon-search'">
+                                <span>首页</span>
+                            </li>
+                            <li data-options="iconCls:'icon-search'">
                                 <span>查询dicom</span>
                             </li>
                             <li data-options="iconCls:'icon-search'">
@@ -126,9 +136,6 @@ function desensitize() {
                             </li>
                             <li data-options="iconCls:'icon-search'">
                                 <span>下载脱敏数据</span>
-                            </li>
-                            <li data-options="iconCls:'icon-search'">
-                                <span>首页</span>
                             </li>
                         </ul>
                     </li>
@@ -155,7 +162,7 @@ function desensitize() {
                                             <a class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:80px;height:30px;" onclick="desensitize()">开始脱敏</a>
                                         </td>
                                         <td>
-                                            <p>正在脱敏处理....</p>
+                                            <p id="hint"></p>
                                         </td>
                                     </tr>
                                 </table>

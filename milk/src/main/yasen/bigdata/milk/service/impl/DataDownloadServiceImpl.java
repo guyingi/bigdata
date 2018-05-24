@@ -58,6 +58,17 @@ public class DataDownloadServiceImpl implements DataDownloadService {
         return result;
     }
 
+    @Override
+    public String downloadDesensitizeDdicomByTag(String tag,String tempRealDir) {
+        String zipFilePath = tempRealDir+MilkTool.getDelimiter()+tag+".zip";
+        //infosupplyer提供的下载接口
+        String interfaceStr = "/data/downloadDesensitizeDdicomByTag";
+        //调用下载方法，做具体下载工作
+        doCallAndWriteToDisk(tag,interfaceStr,zipFilePath);
+
+        return zipFilePath;
+    }
+
     public boolean doCallAndWriteToDisk(String id,String interfaceStr,String filepath){
         MilkConfiguration conf = new MilkConfiguration();
         boolean isSuccess = false;
@@ -102,5 +113,7 @@ public class DataDownloadServiceImpl implements DataDownloadService {
         }
         return isSuccess;
     }
+
+
 
 }

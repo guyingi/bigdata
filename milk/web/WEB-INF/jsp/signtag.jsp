@@ -150,36 +150,30 @@
         });
     });
 
-    function exportSomePath(){
-        //导出选中项hdfs路径
-        var arr = new Array();
-        var rows = $('#resulttable').datagrid('getSelections');
-        for(var i=0;i<rows.length;i++){
-            arr.push(rows[i].id);
-        }
-        if(arr.length==0){
-            alert("未选中任何项")
-        }else{
-            var obj = new Object()
-            obj.type="some";
-            obj.ids=arr;
-            var paramJsonStr = JSON.stringify(obj)
-            $.ajax({
-                type: "POST",
-                url: "/milk/exportdsomepathhelp",
-                data: paramJsonStr,
-                dataType: 'json',
-                traditional:true,
-                contentType: 'application/json;charset=utf-8',
-                success: function (data) {
-                },
-                error: function () {
-                    $("#hint").html("程序运行出错！");
+    function dosigntag(){
+        var tag = $("#tag").val();
+        var obj = new Object();
+        obj.tag = tag;
+        var paramJsonStr = JSON.stringify(obj);
+        $.ajax({
+            type: "POST",
+            url: "/milk/dosigntag",
+            data: paramJsonStr,
+            dataType: 'json',
+            traditional:true,
+            contentType: 'application/json;charset=utf-8',
+            success: function (data) {
+                console.log(data);
+                if(data.result){
+                    //打标签成功
+                    $.messager.confirm('消息', '你成功为该批序列打上了'+data.tag+'的标签，数量'+data.total, function(r){});
                 }
-            });
+            },
+            error: function () {
+                $("#hint").html("程序运行出错！");
+            }
+        });
 
-            simulationForm("/milk/exportdsomepath");
-        }
     }
     function simulationForm(url) {
         var form = $('<form method="post" action="'+url+'"></form>');
@@ -201,63 +195,6 @@
                 }
             });
         }
-    }
-    function downloadDicomChecked() {
-        //下载选中项的dicom文件
-        var arr = new Array();
-        var rows = $('#resulttable').datagrid('getSelections');
-        for(var i=0;i<rows.length;i++){
-            arr.push(rows[i].id);
-        }
-        if(arr.length==0){
-            alert("未选中任何项")
-        }else{
-            var obj = new Object()
-            obj.ids=arr;
-            var paramJsonStr = JSON.stringify(obj)
-            $.ajax({
-                type: "POST",
-                url: "/milk/downloaddicomhelp",
-                data: paramJsonStr,
-                dataType: 'json',
-                traditional:true,
-                contentType: 'application/json;charset=utf-8',
-                success: function (data) {
-                },
-                error: function () {
-                    $("#hint").html("程序运行出错！");
-                }
-            });
-            simulationForm("/milk/downloaddicom");
-        }
-    }
-    function downloadDicomSingle(event) {
-        //下载dicom文件
-        event = event ? event : window.event;
-        var obj = event.srcElement ? event.srcElement : event.target;
-        var $obj = $(obj);
-        var id = $obj.attr("value")
-        //这时obj就是触发事件的对象，可以使用它的各个属性
-        //还可以将obj转换成jque
-        var arr = new Array();
-        arr.push(id);
-        var obj = new Object()
-        obj.ids=arr;
-        var paramJsonStr = JSON.stringify(obj)
-        $.ajax({
-            type: "POST",
-            url: "/milk/downloadDicomHelp",
-            data: paramJsonStr,
-            dataType: 'json',
-            traditional:true,
-            contentType: 'application/json;charset=utf-8',
-            success: function (data) {
-            },
-            error: function () {
-                $("#hint").html("程序运行出错！");
-            }
-        });
-
     }
 
     function submitForm(){
@@ -285,6 +222,8 @@
     function showthumbnail(index,record){
         var obj = new Object()
         obj.id=record["id"];
+        var thumbnailtitle = "行号："+(index+1)+"的略缩图"
+        $("#thumbnailtable").panel({title: thumbnailtitle});
         var paramJsonStr = JSON.stringify(obj)
         $.ajax({
             type: "POST",
@@ -332,6 +271,9 @@
                         <span>功能菜单</span>
                         <ul>
                             <li data-options="iconCls:'icon-search'">
+                                <span>首页</span>
+                            </li>
+                            <li data-options="iconCls:'icon-search'">
                                 <span>查询dicom</span>
                             </li>
                             <li data-options="iconCls:'icon-search'">
@@ -345,9 +287,6 @@
                             </li>
                             <li data-options="iconCls:'icon-search'">
                                 <span>下载脱敏数据</span>
-                            </li>
-                            <li data-options="iconCls:'icon-search'">
-                                <span>首页</span>
                             </li>
                         </ul>
                     </li>
@@ -387,7 +326,7 @@
                                                             <tr>
                                                                 <td>性别:</td>
                                                                 <td>
-                                                                    <select class="easyui-combobox" name="sex"><option value="M">男</option><option value="F">女</option><option value="U">未知</option><option value="">不限</option></select>
+                                                                    <select class="easyui-combobox" name="sex" style="width:100px"><option value="M">男</option><option value="F">女</option><option value="U">未知</option><option value="">不限</option></select>
                                                                 </td>
                                                             </tr>
                                                             <tr>
@@ -481,7 +420,7 @@
                                                                                 <p style="margin:0;">至</p>
                                                                             </td>
                                                                             <td>
-                                                                                <input class="easyui-numberspinner" name="slicethickness_min" value="10" data-options="precision:1,increment:0.1," style="width:100px;"></input>
+                                                                                <input class="easyui-numberspinner" name="slicethickness_max" value="10" data-options="precision:1,increment:0.1," style="width:100px;"></input>
                                                                             </td>
                                                                         </tr>
                                                                     </table>
@@ -508,11 +447,11 @@
                                                 <p style="margin:30px 0 0 30px">为该批数据打个标签</p>
                                             </div>
                                             <div data-options="region:'center',border:false">
-                                                <input class="easyui-textbox" type="text" name="tag" data-options="required:false" style="width:200px;height:30px;"/>
+                                                <input id="tag" class="easyui-textbox" type="text" name="tag" data-options="required:false" style="width:200px;height:30px;"/>
                                             </div>
                                         </div>
                                         <div data-options="region:'center',border:false">
-                                            <a class="easyui-linkbutton" style="width:80px;height:30px;margin:10px 0 0 30px" onclick="">Sign Tag</a>
+                                            <a class="easyui-linkbutton" style="width:80px;height:30px;margin:10px 0 0 30px" onclick="dosigntag();">Sign Tag</a>
                                         </div>
                                     </div>
                                 </div>
@@ -549,8 +488,8 @@
                         </div>
                     </div>
                     <div data-options="region:'east'" style="width:330px;padding:10px">
-                        <table id="thumbnailtable" class="easyui-datagrid" title="缩略图" style="width:auto;height:auto"
-                               data-options="singleSelect:true,collapsible:true,url:'image/datagrid_data.json'">
+                        <table id="thumbnailtable" class="easyui-datagrid" title="" style="width:auto;height:auto"
+                               data-options="singleSelect:true,collapsible:true">
                             <thead>
                             <tr>
                                 <th data-options="field:'image0',width:100,heightalign:'center',formatter:showPicture"></th>

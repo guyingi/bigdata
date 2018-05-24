@@ -202,7 +202,8 @@
             });
         }
     }
-    function downloadDicomChecked() {
+    function downloadDicomChecked(event) {
+
         //下载选中项的dicom文件
         var arr = new Array();
         var rows = $('#resulttable').datagrid('getSelections');
@@ -286,6 +287,8 @@
         var obj = new Object()
         obj.id=record["id"];
         var paramJsonStr = JSON.stringify(obj)
+        var thumbnailtitle = "行号："+(index+1)+"的略缩图"
+        $("#thumbnailtable").panel({title: thumbnailtitle});
         $.ajax({
             type: "POST",
             url: "/milk/getdicomThumbnail",
@@ -333,6 +336,9 @@
                         <span>功能菜单</span>
                         <ul>
                             <li data-options="iconCls:'icon-search'">
+                                <span>首页</span>
+                            </li>
+                            <li data-options="iconCls:'icon-search'">
                                 <span>查询dicom</span>
                             </li>
                             <li data-options="iconCls:'icon-search'">
@@ -346,9 +352,6 @@
                             </li>
                             <li data-options="iconCls:'icon-search'">
                                 <span>下载脱敏数据</span>
-                            </li>
-                            <li data-options="iconCls:'icon-search'">
-                                <span>首页</span>
                             </li>
                         </ul>
                     </li>
@@ -391,7 +394,7 @@
                                                             <tr>
                                                                 <td>性别:</td>
                                                                 <td>
-                                                                    <select class="easyui-combobox" name="sex"><option value="M">男</option><option value="F">女</option><option value="U">未知</option><option value="">不限</option></select>
+                                                                    <select class="easyui-combobox" name="sex" style="width:100px"><option value="M">男</option><option value="F">女</option><option value="U">未知</option><option value="">不限</option></select>
                                                                 </td>
                                                             </tr>
                                                         </table>
@@ -461,13 +464,13 @@
                                                                     <table>
                                                                         <tr>
                                                                             <td>
-                                                                                <input class="easyui-textbox" name="imagecount_min" data-options="validType:['number','length[0,3]']" style="width:100px;">
+                                                                                <input class="easyui-textbox" name="imagecount_min" data-options="validType:['number','length[0,6]']" style="width:100px;">
                                                                             </td>
                                                                             <td>
                                                                                 <p style="margin:0;">至</p>
                                                                             </td>
                                                                             <td>
-                                                                                <input class="easyui-textbox" name="imagecount_max" data-options="validType:['number','length[0,3]']" style="width:100px;">
+                                                                                <input class="easyui-textbox" name="imagecount_max" data-options="validType:['number','length[0,6]']" style="width:100px;">
                                                                             </td>
                                                                             <td>
                                                                                 <p style="margin:0;">张</p>
@@ -488,7 +491,7 @@
                                                                                 <p style="margin:0;">至</p>
                                                                             </td>
                                                                             <td>
-                                                                                <input class="easyui-numberspinner" name="slicethickness_min" value="10" data-options="precision:1,increment:0.1," style="width:120px;"></input>
+                                                                                <input class="easyui-numberspinner" name="slicethickness_max" value="10" data-options="precision:1,increment:0.1," style="width:120px;"></input>
                                                                             </td>
                                                                         </tr>
                                                                     </table>
@@ -539,14 +542,15 @@
                                 <a href="/milk/exportallpath"  class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportAllPath();" style="width: 100px;height:20px" align="right">导出全部</a>
                                 <a   class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportSomePath();" style="width:100px;height:20px" align="right">导出选中</a>
                                 <a href="/milk/exportexcel"  class="easyui-linkbutton" data-options="iconCls:'icon-save'"  style="width:100px;height:20px" align="right">导出excel</a>
-                                <a   class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="downloadDicomChecked();" style="width:100px;height:20px" align="right">下载选中</a>
+                                <a  id="downloadchecked" class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="downloadDicomChecked();" style="width:100px;height:20px" align="right">下载选中</a>
                             </div>
 
                         </div>
                     </div>
                     <div data-options="region:'east'" style="width:330px;padding:10px">
-                        <table id="thumbnailtable" class="easyui-datagrid" title="缩略图" style="width:auto;height:auto"
-                               data-options="singleSelect:true,collapsible:true,url:'image/datagrid_data.json'">
+                        <table id="thumbnailtable" class="easyui-datagrid" title="" style="width:auto;height:auto"
+                               data-options="singleSelect:true,collapsible:true">
+                            <%--url:'image/datagrid_data.json'--%>
                             <thead>
                             <tr>
                                 <th data-options="field:'image0',width:100,heightalign:'center',formatter:showPicture"></th>
