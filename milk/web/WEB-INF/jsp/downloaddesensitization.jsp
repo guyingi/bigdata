@@ -88,28 +88,14 @@
         }
         if(arr.length==0){
             alert("未选中任何项")
-        }else{
-            var obj = new Object()
-            obj.tags=arr;
-            var paramJsonStr = JSON.stringify(obj)
-            // $.ajax({
-            //     type: "POST",
-            //     url: "/milk/downloaddicomhelp",
-            //     data: paramJsonStr,
-            //     dataType: 'json',
-            //     traditional:true,
-            //     contentType: 'application/json;charset=utf-8',
-            //     success: function (data) {
-            //     },
-            //     error: function () {
-            //         $("#hint").html("程序运行出错！");
-            //     }
-            // });
-            simulationForm("/milk/downloadDesensitizeByTag?tag=SB");
+        }else if(arr.length > 1){
+            alert("多个tag请用另一种方式下载")
+        } else{
+            simulationForm("/milk/downloadDesensitizeByTag?tag="+arr[0]);
         }
     }
     function simulationForm(url) {
-        var form = $('<form method="post" action="'+url+'"></form>');
+        var form = $('<form method="POST" action="'+url+'"></form>');
         form.appendTo("body").submit().remove();
         return;
     }

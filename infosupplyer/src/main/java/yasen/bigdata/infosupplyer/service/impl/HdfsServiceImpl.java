@@ -52,11 +52,12 @@ public class HdfsServiceImpl implements HdfsService {
 
     private boolean downloadSingleSeries(String hdfsPath,String localPath){
         boolean isSuccess = true;
-        String dirname = hdfsPath.substring(hdfsPath.lastIndexOf("/")+1,hdfsPath.length());
+        String seriesdirname = hdfsPath.substring(hdfsPath.lastIndexOf("/")+1,hdfsPath.length());
 //        System.out.println(localPath+dirname);
-        File localSeriaDir = new File(localPath+File.separator+dirname);
-        if(!localSeriaDir.exists()) {
-            localSeriaDir.mkdirs();
+        String localSeriesDir = localPath+File.separator+seriesdirname;
+        File localSeriesDirFile = new File(localSeriesDir);
+        if(!localSeriesDirFile.exists()) {
+            localSeriesDirFile.mkdirs();
         }
         Configuration conf = new Configuration();
         conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
@@ -76,7 +77,7 @@ public class HdfsServiceImpl implements HdfsService {
             int count = 0;
             while (reader.next(key, value)) {
 
-                String filepath = localPath+File.separator+dirname+File.separator+key.toString();
+                String filepath = localSeriesDir+File.separator+key.toString();
                 File file = new File(filepath);
                 if(!file.exists())
                     file.createNewFile();
@@ -113,7 +114,7 @@ public class HdfsServiceImpl implements HdfsService {
 
     @Override
     public String[] downDicomDesensitization(String localDir, String remoteDir, Configuration hdfsconf) throws IOException {
-        String desensitizedFileName = remoteDir.substring(remoteDir.lastIndexOf(SysConstants.LEFT_SLASH), remoteDir.length());
+        String desensitizedFileName = remoteDir.substring(remoteDir.lastIndexOf(SysConstants.LEFT_SLASH)+1, remoteDir.length());
         String[] localFilePath = new String[2];
         localFilePath[0] = localDir+File.separator+desensitizedFileName+".mhd";
         localFilePath[1] = localDir+File.separator+desensitizedFileName+".raw";
@@ -122,6 +123,7 @@ public class HdfsServiceImpl implements HdfsService {
                 new Path(localDir+File.separator+desensitizedFileName+".mhd"));
         fs.copyToLocalFile(new Path(remoteDir+SysConstants.LEFT_SLASH+desensitizedFileName+".raw"),
                 new Path(localDir+File.separator+desensitizedFileName+".raw"));
+        fs.close();
         return localFilePath;
     }
 

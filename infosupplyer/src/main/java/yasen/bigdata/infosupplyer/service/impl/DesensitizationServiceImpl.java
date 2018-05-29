@@ -13,10 +13,12 @@ import yasen.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
 import yasen.bigdata.infosupplyer.dao.BreastRoiDao;
+import yasen.bigdata.infosupplyer.dao.DicomTagDao;
 import yasen.bigdata.infosupplyer.dao.Rio2dDao;
 import yasen.bigdata.infosupplyer.dao.SeriesDao;
 import yasen.bigdata.infosupplyer.factory.ConfigFactory;
 import yasen.bigdata.infosupplyer.pojo.BreastRoiInfoBean;
+import yasen.bigdata.infosupplyer.pojo.db.DicomTag;
 import yasen.bigdata.infosupplyer.service.DesensitizationService;
 import yasen.bigdata.infosupplyer.service.ElasticSearchService;
 import yasen.bigdata.infosupplyer.service.HBaseService;
@@ -36,49 +38,32 @@ public class DesensitizationServiceImpl implements DesensitizationService {
     InfosupplyerConfiguration infosupplyerConfiguration = null;
     Configuration hdfsConf = ConfigFactory.getHdfsConfiguration();
 
-//    @Autowired
+    @Autowired
     ElasticSearchService elasticSearchService;
 
-//    @Autowired
+    @Autowired
     HBaseService hBaseService;
 
-//    @Autowired
+    @Autowired
     HdfsService hdfsService;
-//    ElasticSearchService elasticSearchService = null;
-//    UploaderConfiguration uploaderConf = null;
-//    Configuration hdfsConf = ConfigFactory.getHdfsConfiguration();
-//    HbaseService hbaseService = null;
-//    HdfsService hdfsService = null;
 
-    public DesensitizationServiceImpl(){
+    @Autowired
+    Rio2dDao rio2dDao;
+
+    @Autowired
+    SeriesDao seriesDao;
+
+    @Autowired
+    BreastRoiDao breastRoiDao;
+
+    @Autowired
+    DicomTagDao dicomTagDao;
+
+    public DesensitizationServiceImpl() {
         elasticSearchService = new ElasticSearchServiceImpl();
         hBaseService = new HBaseServiceImpl();
         hdfsService = new HdfsServiceImpl();
         infosupplyerConfiguration = new InfosupplyerConfiguration();
-    }
-
-    public static void main(String[] arg) throws IOException {
-//        String dicomTempDir = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\infosupplyer\\target\\classes\\dicomtemp";
-        String desensitizetemp = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\infosupplyer\\target\\classes\\desensitizetemp";
-//        String[] args = new String[4];
-//        args[0] = "python";
-//        args[1] = "E:\\Users\\WeiGuangWu\\PycharmProjects\\ExportRaw\\py\\demo.py";
-//        args[2] = dicomTempDir;
-//        args[3] = desensitizetemp;
-//        int returnvalue = -2;
-//        try {
-//            Process p = Runtime.getRuntime().exec(args);
-//            try {
-//                returnvalue = p.waitFor();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println("returnvalue:"+returnvalue);
-        DesensitizationServiceImpl desensitizationService = new DesensitizationServiceImpl();
-        desensitizationService.uploadDicomDesensitization(desensitizetemp,"SB");
     }
 
     @Override
@@ -87,12 +72,17 @@ public class DesensitizationServiceImpl implements DesensitizationService {
         boolean success = true;
         Long total = 0L;
 
-        String path = TagServiceImpl.class.getClass().getResource("/").getPath();
-        path = path.substring(1, path.length());
-        path = path.substring(0, path.length() - 1);
-        path = path.replace("/",File.separator);
+        //path是工程的类路径
+        String path = null;
+        // /temp/desensitizetemp/desensitizebeforetemp 临时存放下载下来的待脱敏数据目录
+        String desensitizeBeforeTempPath = infosupplyerConfiguration.getDesensitizeBeforeTempPath();
+        ///temp/desensitizetemp/desensitizeaftertemp 是存放脱敏后的数据的临时目录
+        String desensitizeAfterTempPath = infosupplyerConfiguration.getDesensitizeAfterTempPath();
 
-        //获取序列id以及hdfs路径
+        String desensitizeBeforeTagPath = desensitizeBeforeTempPath + File.separator + tag;
+        String desensitizeAfterTagPath = desensitizeAfterTempPath + File.separator + tag;
+
+        /**********根据tag字段查询属于这批tag的所有dicom序列的唯一id,以及hdfs路径******/
         List<String> hdfspaths = new ArrayList<>();
         if(success) {
             JSONObject param = new JSONObject();
@@ -118,54 +108,66 @@ public class DesensitizationServiceImpl implements DesensitizationService {
         }
 
         //创建本地临时目录
-
-        String dicomTempDir = null;
         if(success) {
-            String dicomtemp = path + File.separator + SysConstants.DICOM_TEMP;
-            File file = new File(dicomtemp);
-            file.mkdir();
-            dicomTempDir = file.getAbsolutePath();  //C:\\xx\temp
-
+            if(! new File(desensitizeBeforeTagPath).exists()){
+                new File(desensitizeBeforeTagPath).mkdirs();
+            }
             //下载dicom文件到本地，存放于临时目录
-            if(!hdfsService.downloadDicom(hdfspaths, dicomTempDir))
+            if(!hdfsService.downloadDicom(hdfspaths, desensitizeBeforeTagPath))
                 success = false;
         }
 
-        //将上一步临时目录中的数据脱敏处理存放于另一个临时目录
-        String desensitizetemp = path + File.separator + SysConstants.DESENSITIZE_TEMP;
-        String[] args = new String[4];
-        args[0] = "python";
-        args[1] = "E:\\Users\\WeiGuangWu\\PycharmProjects\\ExportRaw\\py\\demo.py";
-        args[2] = dicomTempDir;
-        args[3] = desensitizetemp;
-        int returnvalue = -2;
-        try {
-            Process p = Runtime.getRuntime().exec(args);
+        //将上一步临时目录中的数据脱敏处理并存放于另一个临时目录
+        if(success){
+            String[] args = new String[4];
+            args[0] = infosupplyerConfiguration.getPythoncmd();
+            args[1] = infosupplyerConfiguration.getPythonscript();
+            args[2] = desensitizeBeforeTagPath;
+            args[3] = desensitizeAfterTagPath;
+            int returnvalue = -2;
             try {
-                returnvalue = p.waitFor();
-            } catch (InterruptedException e) {
+                Process p = Runtime.getRuntime().exec(args);
+                try {
+                    returnvalue = p.waitFor();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } catch (IOException e) {
                 e.printStackTrace();
+                success = false;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            success = false;
+            if(returnvalue == 0 &&
+                    new File(desensitizeBeforeTagPath).listFiles().length
+                            ==new File(desensitizeAfterTagPath).listFiles().length) {
+                success = true;
+            }else {
+                success = false;
+            }
         }
-        if(returnvalue == 0)
-            success = true;
 
         System.out.println("脱敏结果："+success);
         //调用上传接口，上传存放脱敏数据的临时目录
         if(success){
             try {
-                uploadDicomDesensitization(desensitizetemp,tag);
+                uploadDicomDesensitization(desensitizeAfterTagPath,tag);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
+        /*********删除临时目录*************************/
+        InfoSupplyerTool.delFolder(desensitizeBeforeTagPath);
+        InfoSupplyerTool.delFolder(desensitizeAfterTagPath);
+
+        /**********修改tag状态为已脱敏***********************/
+        DicomTag dicomTag = new DicomTag();
+        dicomTag.setTagname(tag);
+        dicomTag.setDesensitize(1);
+        dicomTagDao.updateDesensitize(dicomTag);
+
+        System.out.println("脱敏结束");
         return total;
     }
-
 
     @Override
     public int uploadDicomDesensitization(String desensitizationDir,String tag) throws IOException {
@@ -193,6 +195,10 @@ public class DesensitizationServiceImpl implements DesensitizationService {
         String studyID = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicom(), infosupplyerConfiguration.getTypeDicom(), seriesUID, ESConstant.StudyID_ES);
         String rowkey = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicom(), infosupplyerConfiguration.getTypeDicom(), seriesUID, ESConstant.ROWKEY);
         System.out.println("步骤2:patientUID"+patientUID+",studyID:"+studyID+",rowkey:"+rowkey);
+        if(rowkey == null){
+            System.out.println("文件名为："+seriesDir.getAbsolutePath()+"的脱敏数据在es中无数据，该次上传失败");
+            return SysConstants.FAILED;
+        }
 
         /**
          * 步骤3：目录/yasen/bigdata/raw/tag/year/month/day/seriesUID下面存放raw+mhd文件
@@ -251,16 +257,12 @@ public class DesensitizationServiceImpl implements DesensitizationService {
         }
 
         /**步骤零：准备工作*/
-        //1.获得本地临时目录
-        String rootpath = TagServiceImpl.class.getClass().getResource("/").getPath();
-        rootpath = rootpath.substring(1, rootpath.length());
-        rootpath = rootpath.substring(0, rootpath.length() - 1);
-        rootpath = rootpath.replace("/",File.separator);
-        String tagtemp = rootpath+File.separator+SysConstants.TAG_TEMP+File.separator+tag;
-        if(!(new File(tagtemp).exists())){
-            new File(tagtemp).mkdirs();
+        String desensitizeDownloadTemp = infosupplyerConfiguration.getDesensitizeDownloadTempPath();
+        String desensitizeDownloadTagPath = desensitizeDownloadTemp + File.separator + tag;
+        if(!(new File(desensitizeDownloadTagPath).exists())){
+            new File(desensitizeDownloadTagPath).mkdirs();
         }
-
+        System.out.println("临时目录："+desensitizeDownloadTagPath);
 
         /**步骤一：查询es获得该tag下面所有series_UID,SeriesInstanceUID,StudyInstanceUID，organ，hdfs路径*/
         //1.构造查询条件
@@ -272,7 +274,6 @@ public class DesensitizationServiceImpl implements DesensitizationService {
             backfields.add(ESConstant.SeriesInstanceUID_ES);
             backfields.add(ESConstant.SeriesUID_ES);
             backfields.add(ESConstant.ORGAN_ES);
-            backfields.add(ESConstant.HDFSPATH);
             JSONObject param = new JSONObject();
             param.put(SysConstants.SEARCH_CONDITION, searchcondition);
             param.put(SysConstants.BACKFIELDS, backfields);
@@ -295,6 +296,7 @@ public class DesensitizationServiceImpl implements DesensitizationService {
                     studies.put(studyInstanceUID,jsonObjects);
                 }else{
                     List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
+                    jsonObjects.add(jsonObject);
                     studies.put(studyInstanceUID,jsonObjects);
                 }
             }
@@ -324,16 +326,29 @@ public class DesensitizationServiceImpl implements DesensitizationService {
         if(success){
            if(organ.equals(ESConstant.BREAST)){
                //对于乳腺而言
-               createDesensitizeDataOnLocalForBreast(tag,studies,tagtemp);
+               createDesensitizeDataOnLocalForBreast(tag,studies,desensitizeDownloadTagPath);
            }else if(organ.equals(ESConstant.LUNG)){
                //对于肺而言
-               createDesensitizeDataOnLocalForLung(tag,studies,tagtemp);
+               createDesensitizeDataOnLocalForLung(tag,studies,desensitizeDownloadTagPath);
            }
+        }
+        //删除hdfs api产生的crc校验文件，
+        {
+            File tagtempfile = new File(desensitizeDownloadTagPath);
+            for(File e : tagtempfile.listFiles()){
+                System.out.println(e.getName());
+                if(e.getName().endsWith("crc")){
+                    e.delete();
+                }
+            }
         }
 
         /**步骤四：将临时文件目录tagtemp压缩为zip,返回压缩后的文件的绝对路径*/
-        ZipUtil.zip(tagtemp,rootpath,tag+".zip");
-        String zipFilePath = rootpath + File.separator + tag+".zip";
+        ZipUtil.zip(desensitizeDownloadTagPath,desensitizeDownloadTemp,tag+".zip");
+        String zipFilePath = desensitizeDownloadTemp + File.separator + tag+".zip";
+        if(new File(desensitizeDownloadTagPath).exists()){
+            InfoSupplyerTool.delFolder(desensitizeDownloadTagPath);
+        }
         return zipFilePath;
     }
 
@@ -360,8 +375,9 @@ public class DesensitizationServiceImpl implements DesensitizationService {
     }
 
     private void  createDesensitizeDataOnLocalForBreast(String tag,Map<String,List<JSONObject>> studies,String tagtemp) throws IOException {
-        int seq = 1;
+        int seq = 0;
         for(Map.Entry<String,List<JSONObject>> entry : studies.entrySet()){
+            seq++;
             //1.得到一个study下所有SeriesInstanceUID,存入list
             List<String> seriesList = new ArrayList<>();
             List<JSONObject> value = entry.getValue();
@@ -369,23 +385,21 @@ public class DesensitizationServiceImpl implements DesensitizationService {
                 seriesList.add(jsonObject.getString(ESConstant.SeriesInstanceUID_ES));
             }
             //2.访问数据库，查询info.csv需要的数据
-            SeriesDao seriesDao = new SeriesDao();
             List<String> seriesuids = new ArrayList<String>();
             for(String seriessop : seriesList){
                 String seriesuid = seriesDao.searchSingleFieldBySeriessop(seriessop,SysConstants.SERIES_UID);
+                System.out.println("seriesuid:"+seriesuid);
                 seriesuids.add(seriesuid);
             }
-            BreastRoiDao breastRoiDao = new BreastRoiDao();
-            Map<String, BreastRoiInfoBean> breastRoiInfoBySeriesuid = breastRoiDao.getBreastRoiInfoBySeriesuid(seriesuids);
+            Map<String, BreastRoiInfoBean> breastRoiInfo = breastRoiDao.getBreastRoiInfoBySeriesuid(seriesuids);
 
             //3.访问数据，查询ROI.csv需要的数据
-            Rio2dDao rio2dDao = new Rio2dDao();
-            Map<String, String> roiCoordinateBySeriesuid = rio2dDao.getRoiCoordinateBySeriesuid(seriesuids);
+            Map<String, String> roiCoordinates = rio2dDao.getRoiCoordinateBySeriesuid(seriesuids);
 
             //4.创建csv文件名，写入本地临时目录
             String roiinfoName = tag+"_"+InfoSupplyerTool.formatDigitalToNBit(seq+"",6)+"_info.csv";
             String roiinfoFilePath = tagtemp+File.separator+roiinfoName;
-            String roiName = tag+"_"+InfoSupplyerTool.formatDigitalToNBit(seq+"",6)+"ROI.csv";
+            String roiName = tag+"_"+InfoSupplyerTool.formatDigitalToNBit(seq+"",6)+"_ROI.csv";
             String roiFilePath = tagtemp+File.separator+roiName;
 
 
@@ -395,46 +409,67 @@ public class DesensitizationServiceImpl implements DesensitizationService {
             HSSFSheet roisheet = roiworkbook.createSheet(roiinfoName);
             int count = 1;
             for(String seriesuid : seriesuids){
+                if(breastRoiInfo.size() != 0) {
+                    BreastRoiInfoBean breastRoiInfoBean = breastRoiInfo.get(seriesuid);
+                    if(breastRoiInfoBean != null) {
+                        HSSFRow roiinforow = roiinfosheet.createRow(count - 1);
+                        roiinforow.createCell(0).setCellValue(InfoSupplyerTool.formatDigitalToNBit(count + "", 4));
+                        roiinforow.createCell(1).setCellValue(breastRoiInfoBean.getLocation());
+                        roiinforow.createCell(2).setCellValue(breastRoiInfoBean.getClassification());
+                        roiinforow.createCell(3).setCellValue(breastRoiInfoBean.getShape());
+                        roiinforow.createCell(4).setCellValue(breastRoiInfoBean.getBoundary1()); //这里采用名称为studydate,实际是seriesDate
+                        roiinforow.createCell(5).setCellValue(breastRoiInfoBean.getBoundary2());
+                        roiinforow.createCell(6).setCellValue(breastRoiInfoBean.getDensity());
+                        roiinforow.createCell(7).setCellValue(breastRoiInfoBean.getQuadrant());
+                        roiinforow.createCell(8).setCellValue(breastRoiInfoBean.getRisk());
+                    }
+                }
 
-                BreastRoiInfoBean breastRoiInfoBean = breastRoiInfoBySeriesuid.get(seriesuid);
-                HSSFRow roiinforow = roiinfosheet.createRow(count-1);
-                roiinforow.createCell(0).setCellValue(InfoSupplyerTool.formatDigitalToNBit(count+"",4));
-                roiinforow.createCell(1).setCellValue(breastRoiInfoBean.getLocation());
-                roiinforow.createCell(2).setCellValue(breastRoiInfoBean.getClassification());
-                roiinforow.createCell(3).setCellValue(breastRoiInfoBean.getShape());
-                roiinforow.createCell(4).setCellValue(breastRoiInfoBean.getBoundary1()); //这里采用名称为studydate,实际是seriesDate
-                roiinforow.createCell(5).setCellValue(breastRoiInfoBean.getBoundary2());
-                roiinforow.createCell(6).setCellValue(breastRoiInfoBean.getDensity());
-                roiinforow.createCell(7).setCellValue(breastRoiInfoBean.getQuadrant());
-                roiinforow.createCell(8).setCellValue(breastRoiInfoBean.getRisk());
 
-
-                String roiCoordinate = roiCoordinateBySeriesuid.get(seriesuid);
-                JSONArray jsonArray = (JSONArray)JSON.parse(roiCoordinate);
-                int size = jsonArray.size();
-                HSSFRow roirow = roisheet.createRow(count - 1);
-                roirow.createCell(0).setCellValue(InfoSupplyerTool.formatDigitalToNBit(count+"",4));
-                for(int i=0; i < size; i++){
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    Double x = jsonObject.getDouble("x");
-                    Double y = jsonObject.getDouble("y");
-                    roirow.createCell(2*i+1).setCellValue(x);
-                    roirow.createCell(2*i+2).setCellValue(y);
+                if(roiCoordinates.size() != 0) {
+                    String roiCoordinate = roiCoordinates.get(seriesuid);
+                    if(roiCoordinate != null){
+                        JSONArray jsonArray = (JSONArray) JSON.parse(roiCoordinate);
+                        int size = jsonArray.size();
+                        HSSFRow roirow = roisheet.createRow(count - 1);
+                        roirow.createCell(0).setCellValue(InfoSupplyerTool.formatDigitalToNBit(count + "", 4));
+                        for (int i = 0; i < size; i++) {
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            Double x = jsonObject.getDouble("x");
+                            Double y = jsonObject.getDouble("y");
+                            roirow.createCell(2 * i + 1).setCellValue(x);
+                            roirow.createCell(2 * i + 2).setCellValue(y);
+                        }
+                    }
                 }
             }
             FileOutputStream roiinfofout = new FileOutputStream(new File(roiinfoFilePath));
-            FileOutputStream roifout = new FileOutputStream(new File(roiFilePath));
             roiinfoworkbook.write(roiinfofout);
+            roiinfoworkbook.close();
+            roiinfofout.close();
+            FileOutputStream roifout = new FileOutputStream(new File(roiFilePath));
             roiworkbook.write(roifout);
+            roiworkbook.close();
+            roifout.close();
 
             //5.循环处理series，查询series对应部位，创建.mhd，.raw文件名,从hdfs拷贝数据到本地
             for(JSONObject jsonObject : value){
                 //es中的seriesinstanceuid与数据库表series中seriessop对应
                 String seriessop = jsonObject.getString(ESConstant.SeriesInstanceUID_ES);
+                String seriesUID = jsonObject.getString(ESConstant.SeriesUID_ES);
                 String series_des = seriesDao.searchSingleFieldBySeriessop(seriessop,SysConstants.SERIES_DES);
+                series_des = series_des.replace(SysConstants.SPACE,"").trim();
+
                 String name = tag+"_"+InfoSupplyerTool.formatDigitalToNBit(seq+"",6)+"_"+series_des;
-                String hdfspath = jsonObject.getString(ESConstant.HDFSPATH);
-                String[] desensitizedFileLocal = hdfsService.downDicomDesensitization(hdfspath, tagtemp,hdfsConf);
+                //因为LMLO类型的可能有多个，所以文件名命名需要在末尾加个数据
+                int tempnumber = 1;
+                while(new File(tagtemp+File.separator+name+".mhd").exists()){
+                    name += "-"+tempnumber;
+                }
+
+                String hdfspath = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicomDisensitization(),
+                        infosupplyerConfiguration.getTypeDicomDisensitization(),seriesUID,ESConstant.HDFSPATH);
+                String[] desensitizedFileLocal = hdfsService.downDicomDesensitization(tagtemp,hdfspath,hdfsConf);
                 String mhdFilePath = desensitizedFileLocal[0];
                 String rawFilePath = desensitizedFileLocal[1];
 
@@ -451,32 +486,40 @@ public class DesensitizationServiceImpl implements DesensitizationService {
                         positionline = number;
                     mhdtemp[number++] = temp;
                 }
+                br.close();
+                lnr.close();
                 mhdtemp[positionline] = "ElementDataFile = "+ name+".raw";
                 FileWriter fw = new FileWriter(mhdFilePath);
                 for(String line : mhdtemp){
                     fw.write(line);
+                    fw.write("\n");
                 }
                 fw.close();
 
                 //修改raw文件名
                 new File(rawFilePath).renameTo(new File(tagtemp+File.separator+name+".raw"));
+                new File(mhdFilePath).renameTo(new File(tagtemp+File.separator+name+".mhd"));
             }
         }
     }
 
     private void createDesensitizeDataOnLocalForLung(String tag,Map<String,List<JSONObject>> studies,String tagtemp) throws IOException {
-        int seq = 1;
+        int seq = 0;
 
         for (Map.Entry<String, List<JSONObject>> entry : studies.entrySet()) {
+            seq++;
             List<String> hdfs = new ArrayList<>();
             List<JSONObject> values = entry.getValue();
             for(JSONObject value : values){
-                hdfs.add(value.getString(ESConstant.HDFSPATH));
+                String seriesUID = value.getString(ESConstant.SeriesUID_ES);
+                String hdfspath = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicomDisensitization(),
+                        infosupplyerConfiguration.getTypeDicomDisensitization(),seriesUID,ESConstant.HDFSPATH);
+                hdfs.add(hdfspath);
             }
             /**步骤四：从hdfs下载.mhd,.raw数据到本地临时目录*/
             for(String hdfspath : hdfs){
                 String name = tag+"_"+InfoSupplyerTool.formatDigitalToNBit(seq+"",6);
-                String[] desensitizedFileLocal = hdfsService.downDicomDesensitization(hdfspath, tagtemp,hdfsConf);
+                String[] desensitizedFileLocal = hdfsService.downDicomDesensitization(tagtemp,hdfspath, hdfsConf);
                 //读取mhd文件，修改其中的ElementDataFile属性，这个属性是raw文件名。
                 String mhdFilePath = desensitizedFileLocal[0];
                 String rawFilePath = desensitizedFileLocal[1];
@@ -492,15 +535,19 @@ public class DesensitizationServiceImpl implements DesensitizationService {
                         positionline = number;
                     mhdtemp[number++] = temp;
                 }
+                br.close();
+                lnr.close();
                 mhdtemp[positionline] = "ElementDataFile = "+ name+".raw";
                 FileWriter fw = new FileWriter(mhdFilePath);
                 for(String line : mhdtemp){
                     fw.write(line);
+                    fw.write("\n");
                 }
                 fw.close();
 
                 //修改raw文件名
                 new File(rawFilePath).renameTo(new File(tagtemp+File.separator+name+".raw"));
+                new File(mhdFilePath).renameTo(new File(tagtemp+File.separator+name+".mhd"));
             }
         }
     }

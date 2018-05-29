@@ -5,11 +5,17 @@ public class SysConstants {
     public static String LINE = "-";
     public static String LEFT_SLASH = "/";
     public static String RIGHT_SLASH = "\\";
+    public static String SPACE = " ";
     public static String OS_NAME = "os.name";
     public static String WINDOWS = "Windows";
-    public static String DICOM_TEMP = "dicomtemp";  //脱敏操作中临时存放dicom文件的目录
-    public static String DESENSITIZE_TEMP = "desensitizetemp"; //脱敏操作临时存放脱敏后的数据的目录
-    public static String TAG_TEMP = "tagtemp"; //下载脱敏数据，临时存放脱敏数据的目录，因为以tag为单位下载
+    public static String TEMP_DIRNAME = "temp";
+    public static String DICOM_TEMP_DIRNAME = "dicomtemp";  //脱敏操作中临时存放dicom文件的目录
+    public static String DESENSITIZE_TEMP_DIRNAME = "desensitizetemp"; //脱敏操作临时存放脱敏后的数据的目录
+    public static String DESENSITIZE_BEFORE_TEMP_DIRNAME = "desensitizebeforetemp"; //脱敏操作临时存放脱敏后的数据的目录
+    public static String DESENSITIZE_AFTER_TEMP_DIRNAME = "desensitizeaftertemp"; //脱敏操作临时存放脱敏后的数据的目录
+    public static String DESENSITIZE_TDOWNLOAD_TEMP_DIRNAME = "desensitizedownloadtemp"; //下载脱敏数据，临时存放脱敏数据的目录，因为以tag为单位下载
+    public static String THUMBNAIL_TEMP_DIRNAME = "thumbnailtemp"; //下载脱敏数据，临时存放脱敏数据的目录，因为以tag为单位下载
+
 
     public static Integer SUCCESS = 0;
     public static Integer EXISTS = 1;
@@ -82,6 +88,9 @@ public class SysConstants {
     public static String DICOM_CF = "dicom.cf";
     public static String DICOM_DESENSITIZATION_TABLENAME = "dicom.disensitization.tablename";
     public static String DICOM_DESENSITIZATION_CF = "dicom.disensitization.cf";
+
+    public static String PYTHON_CMD = "pythoncmd";
+    public static String PYTHON_SCRIPT = "pythonscript";
 
 
 

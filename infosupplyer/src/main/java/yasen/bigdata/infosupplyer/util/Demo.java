@@ -34,8 +34,21 @@ import java.util.concurrent.TimeUnit;
 
 public class Demo {
     public static void main(String[] args) {
+//        String path = Demo.
+//                class
+//                .getClass()
+//                .getProtectionDomain()
+//                .getCodeSource()
+//                .getLocation()
+//                .getPath();
+        System.out.println(Demo.
+                class
+                .getClass().getResource("/")
+               );
+    }
 
 
+    private static void readDataFromWithJSONReader(){
         String json = "{\"string\": [1,2,3]}";
         String str1 = "{\"a\":\"1\"}";
         // 如果json数据以形式保存在文件中，用FileReader进行流读取，path为json数据文件路径。
@@ -105,42 +118,7 @@ public class Demo {
         }
         reader.endObject();
         System.out.println("start fastjson");
-
-
-
-
-
-
-
-
-//        fun();
-//        String str = "{\"total\":0,\"code\":\"000\",\"data\":[],\"pagecount\":1}";
-//        String str1 = "{\"a\":\"1\"}";
-//        JSONReader reader = new JSONReader(new StringReader(str1));
-//        reader.startObject();
-//        System.out.println(reader.readString());
-//        while (reader.hasNext()){
-//            String key = reader.readString();
-//            if(key.equals("000")){
-//                result.put("code",reader.readObject(String.class));
-//            }else if(key.equals("pagecount")){
-//                result.put("pagecount",reader.readObject(Long.class));
-//            }else if(key.equals("total")){
-//                result.put("total",reader.readObject(Long.class));
-//            }else if(key.equals("data")){
-//                JSONObject temp = new JSONObject();
-//                reader.startArray();
-//                while(reader.hasNext()){
-//                    Dicom dicom = JSON.parseObject(reader.readObject().toString(), Dicom.class);
-//                    dicomList.add(dicom);
-//                }
-//                reader.endArray();
-//                result.put("data",dicomList);
-//            }
-//        }
-//        reader.endObject();
     }
-
 
 
 

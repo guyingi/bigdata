@@ -3,14 +3,18 @@ package yasen.bigdata.infosupplyer.controller;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import yasen.bigdata.infosupplyer.service.DesensitizationService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/photo")
+@RequestMapping("/test")
 public class TestController {
+
+    @Autowired
+    DesensitizationService desensitizationService;
 
 //    @RequestMapping("/")
 //    public ModelAndView index(ModelAndView mav){
@@ -54,9 +58,32 @@ public class TestController {
         return "hello";
     }
 
-    @RequestMapping("/")
-    public String gg() {
+    @RequestMapping("/1")
+    public String signtagtest() {
+        //打标签测试
+
         return "hheh";
+    }
+    @RequestMapping("/2")
+    public String desentizedtest() {
+        //脱敏测试
+        System.out.println("2 脱敏测试");
+        Long br = desensitizationService.desensitizedicom("BR");
+        return br+"";
+    }
+
+
+    @RequestMapping("/3")
+    public String downdesentizedtest() {
+        //下载脱敏数据测试
+        System.out.println("3 下载脱敏数据测试");
+        String br = null;
+        try {
+            br = desensitizationService.downloadDesensitizeDicomByTag("BR");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return br;
     }
 
     /**************下面都是一些测试接口，有不同传参方式，保留，用时可以参考************/

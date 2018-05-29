@@ -10,12 +10,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
+import yasen.bigdata.infosupplyer.dao.DicomTagDao;
+import yasen.bigdata.infosupplyer.pojo.db.DicomTag;
 import yasen.bigdata.infosupplyer.service.DesensitizationService;
 import yasen.bigdata.infosupplyer.service.ElasticSearchService;
 import yasen.bigdata.infosupplyer.service.TagService;
 import yasen.bigdata.infosupplyer.service.impl.DesensitizationServiceImpl;
 import yasen.bigdata.infosupplyer.util.InfoSupplyerTool;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,6 +41,9 @@ public class TagController{
 
     @Autowired
     DesensitizationService desensitizationService;
+
+    @Autowired
+    DicomTagDao dicomTagDao;
 
     @PostMapping("/tagfordicom")
     public JSONObject tagfordicom(@RequestBody Map<String, Object> parameter) {
@@ -63,8 +69,14 @@ public class TagController{
     }
 
 
+    /**
+     * 查询标签以及该标签下面序列数量
+     * @param parameter
+     * @return
+     */
     @PostMapping("/searchtags")
     public JSONObject searchtags(@RequestBody Map<String, Object> parameter){
+        System.out.println("searchtags is called");
         JSONObject result = new JSONObject();
         String tag = (String)parameter.get(SysConstants.TAG_PARAM);
         if(tag != null && tag.length() != 0){
@@ -85,6 +97,35 @@ public class TagController{
         System.out.println("info 发送："+result.toJSONString());
         return result;
     }
+
+    /**
+     * 查询标签以及该标签下面序列数量
+     * @param
+     * @return
+     */
+    @PostMapping("/listtags")
+    public JSONObject listtags(@RequestBody Map<String, Object> parameter){
+        System.out.println("listtags is called");
+        List<DicomTag> list = dicomTagDao.list();
+        JSONObject result = new JSONObject();
+        JSONArray data = new JSONArray();
+
+        result.put(SysConstants.CODE,SysConstants.CODE_000);
+        result.put(SysConstants.TOTAL,list.size());
+
+        for(DicomTag dicomTag : list){
+            JSONObject element = new JSONObject();
+            element.put("tagname",dicomTag.getTagname());
+            element.put("count",dicomTag.getCount());
+            element.put("desensitize",dicomTag.getDesensitize());
+            data.add(element);
+        }
+        result.put(SysConstants.DATA,data);
+        System.out.println("info 发送："+result.toJSONString());
+        return result;
+    }
+
+
 
     public static void main(String[] args) {
         String tag = "tag";

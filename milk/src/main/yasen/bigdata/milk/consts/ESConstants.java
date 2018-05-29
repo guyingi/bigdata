@@ -82,5 +82,7 @@ public class ESConstants {
     public static String ENTRYDATE_ES = "entrydate";//录入日期
     public static String HDFSPATH = "hdfspath";//hdfs文件路径
     public static String ROWKEY =  "rowkey"; //dicom序列的hbase元数据表rowkey
+    public static String TAG_ES =  "tag"; //给一批具有相同属性的数据打上一个标签
+
 
 }

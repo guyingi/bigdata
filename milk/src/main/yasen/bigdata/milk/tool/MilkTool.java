@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONReader;
 import yasen.bigdata.milk.conf.MilkConfiguration;
+import yasen.bigdata.milk.consts.DataTypeEnum;
 import yasen.bigdata.milk.consts.SysConstants;
 import yasen.bigdata.milk.pojo.Dicom;
 
@@ -96,58 +97,6 @@ public class MilkTool {
         return temp;
     }
 
-    public static JSONObject doCallAndGetResult(JSONObject parameter, String interfaceStr,String calltype){
-        MilkConfiguration conf = new MilkConfiguration();
-        StringBuilder builder = new StringBuilder();
-        boolean isSuccess = false;
-        System.out.println(parameter.toJSONString());
-        try {
-            byte[] param = parameter.toString().getBytes("UTF-8");
-            String url = SysConstants.HTTP_HEAD+conf.getInfosupplyerip()+":"+conf.getInfosupplyerport()+interfaceStr;
-            URL restServiceURL = new URL(url);
-
-            HttpURLConnection httpConnection = (HttpURLConnection) restServiceURL.openConnection();
-            httpConnection.setRequestMethod("POST");
-            httpConnection.setRequestProperty("Accept", "application/json");
-            httpConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-            //httpConnection.setRequestProperty("Connection", "Keep-Alive");
-            httpConnection.setRequestProperty("Charset", "UTF-8");
-            httpConnection.setDoOutput(true);
-            httpConnection.setDoInput(true);
-
-            //传递参数
-            httpConnection.setRequestProperty("Content-Length", String.valueOf(param));
-            OutputStream outputStream = httpConnection.getOutputStream();
-            outputStream.write(param);
-            outputStream.flush();
-            outputStream.close();
-            System.out.println("返回码："+httpConnection.getResponseCode());
-
-            if (httpConnection.getResponseCode() == 200) {
-                InputStream inputStream = httpConnection.getInputStream();
-                BufferedReader tBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                String tempStr = null;
-                while ((tempStr = tBufferedReader.readLine()) != null) {
-                    builder.append(tempStr);
-                }
-                inputStream.close();
-                isSuccess = true;
-            } else {
-                System.out.println("从infosupplyer获取文件失败");
-            }
-//		    System.out.println("接收到的数据："+builder.toString());
-            httpConnection.disconnect();
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-        JSONObject result = null;
-        if(isSuccess && calltype.equals("dicom")){
-            result = parseResultForDicom(builder);
-        }else if(isSuccess && calltype.equals("tag")){
-            result = parseResultForSearchTag(builder);
-        }
-        return result;
-    }
     //做具体的下载操作，将文件写出给前端
     public static void doDownload(HttpServletResponse response, String tempFilePath, String filetype){
         if(tempFilePath!=null) {
@@ -197,10 +146,65 @@ public class MilkTool {
     }
 
 
-    private static JSONObject parseResultForDicom(StringBuilder builder){
+    public static JSONObject doCallAndGetResult(JSONObject parameter,String interfaceStr,DataTypeEnum dataTypeEnum){
+        MilkConfiguration conf = new MilkConfiguration();
         JSONObject result = new JSONObject();
-        JSONArray data = new JSONArray();
-        List<Dicom> dicomList = new ArrayList<Dicom>();
+        StringBuilder builder = new StringBuilder();
+        boolean isSuccess = false;
+        System.out.println(parameter.toJSONString());
+        try {
+            byte[] param = parameter.toString().getBytes("UTF-8");
+            String url = SysConstants.HTTP_HEAD+conf.getInfosupplyerip()+":"+conf.getInfosupplyerport()+interfaceStr;
+            URL restServiceURL = new URL(url);
+
+            HttpURLConnection httpConnection = (HttpURLConnection) restServiceURL.openConnection();
+            httpConnection.setRequestMethod("POST");
+            httpConnection.setRequestProperty("Accept", "application/json");
+            httpConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            //httpConnection.setRequestProperty("Connection", "Keep-Alive");
+            httpConnection.setRequestProperty("Charset", "UTF-8");
+            httpConnection.setDoOutput(true);
+            httpConnection.setDoInput(true);
+
+            //传递参数
+            httpConnection.setRequestProperty("Content-Length", String.valueOf(param));
+            OutputStream outputStream = httpConnection.getOutputStream();
+            outputStream.write(param);
+            outputStream.flush();
+            outputStream.close();
+            System.out.println("返回码："+httpConnection.getResponseCode());
+
+            if (httpConnection.getResponseCode() == 200) {
+                InputStream inputStream = httpConnection.getInputStream();
+                BufferedReader tBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                String tempStr = null;
+                while ((tempStr = tBufferedReader.readLine()) != null) {
+                    builder.append(tempStr);
+                }
+                inputStream.close();
+                isSuccess = true;
+            } else {
+                System.out.println("从infosupplyer获取文件失败");
+            }
+//		    System.out.println("接收到的数据："+builder.toString());
+            httpConnection.disconnect();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+        if(isSuccess) {
+            if(dataTypeEnum == DataTypeEnum.DICOM){
+                result = parseResultDicomType(builder);
+            }else if(dataTypeEnum == DataTypeEnum.OTHER){
+                result = parseResultOtherType(builder);
+            }
+        }
+        return result;
+    }
+
+    private static JSONObject parseResultDicomType(StringBuilder builder){
+        JSONObject result = new JSONObject();
+        JSONArray dataList = new JSONArray();
         JSONReader reader = new JSONReader(new StringReader(builder.toString()));
         reader.startObject();
         while (reader.hasNext()){
@@ -215,19 +219,19 @@ public class MilkTool {
                 reader.startArray();
                 while(reader.hasNext()){
                     Dicom dicom = JSON.parseObject(reader.readObject().toString(), Dicom.class);
-                    dicomList.add(dicom);
+                    dataList.add(dicom);
                 }
                 reader.endArray();
-                result.put("data",dicomList);
+                result.put("data",dataList);
             }
         }
         reader.endObject();
         return result;
     }
 
-    private static JSONObject parseResultForSearchTag(StringBuilder builder){
+    private static JSONObject parseResultOtherType(StringBuilder builder){
         JSONObject result = new JSONObject();
-        JSONArray data = new JSONArray();
+        JSONArray dataList = new JSONArray();
         JSONReader reader = new JSONReader(new StringReader(builder.toString()));
         reader.startObject();
         while (reader.hasNext()){
@@ -241,11 +245,10 @@ public class MilkTool {
             }else if(key.equals("data")){
                 reader.startArray();
                 while(reader.hasNext()){
-                    JSONObject o = (JSONObject)reader.readObject();
-                    data.add(o);
+                    dataList.add(reader.readObject());
                 }
                 reader.endArray();
-                result.put("data",data);
+                result.put("data",dataList);
             }
         }
         reader.endObject();

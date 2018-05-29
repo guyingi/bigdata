@@ -7,7 +7,9 @@ import org.apache.log4j.Logger;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -22,12 +24,7 @@ public class InfoSupplyerTool {
 
     public static void main(String[] args) {
 
-        try {
-            Date parse = sdf.parse("20100204");
-            System.out.println(parse.toString());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        System.out.println(getRunnerPath());
     }
 
     synchronized public static int formatInteger(String data){
@@ -244,4 +241,91 @@ public class InfoSupplyerTool {
         }
         return SysConstants.LEFT_SLASH+year+ SysConstants.LEFT_SLASH+month+ SysConstants.LEFT_SLASH+day;
     }
+
+    /**
+     * 清空文件夹，只是删除子文件，传入的目录不做删除
+     */
+    public static boolean delAllFile(String path) {
+        boolean flag = false;
+        File file = new File(path);
+        if (!file.exists()) {
+            return flag;
+        }
+        if (!file.isDirectory()) {
+            return flag;
+        }
+        String[] tempList = file.list();
+        File temp = null;
+        for (int i = 0; i < tempList.length; i++) {
+            if (path.endsWith(File.separator)) {
+                temp = new File(path + tempList[i]);
+            } else {
+                temp = new File(path + File.separator + tempList[i]);
+            }
+            if (temp.isFile()) {
+                temp.delete();
+            }
+            if (temp.isDirectory()) {
+                delAllFile(path + "/" + tempList[i]);//先删除文件夹里面的文件
+                delFolder(path + "/" + tempList[i]);//再删除空文件夹
+                flag = true;
+            }
+        }
+        return flag;
+    }
+    /*********删除整个文件夹，包括所有子文件和本文件夹************/
+    public static void delFolder(String folderPath) {
+        try {
+            delAllFile(folderPath); //删除完里面所有内容
+            String filePath = folderPath;
+            filePath = filePath.toString();
+            java.io.File myFilePath = new java.io.File(filePath);
+            myFilePath.delete(); //删除空文件夹
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void delSingleFile(String filePath){
+        if(new File(filePath).exists()){
+            new File(filePath).delete();
+        }
+    }
+
+
+    public static String getRunnerPath(){
+        String rootPath = "";
+        String path = InfoSupplyerTool.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        if("windows".equals(getOS())){
+            rootPath = path.substring(1, path.length()-1);
+            rootPath = rootPath.replace(SysConstants.LEFT_SLASH,"\\");
+        }else if("linux".equals(getOS())){
+            //file:/home/ms/project/microservice/infosupplyer-1.0-SNAPSHOT.jar!/BOOT-INF/classes!/
+            String temp1 = path.split(":")[1].split("!")[0];
+            String tempArr[] = temp1.split("/");
+            for(String e : tempArr){
+                if(!e.endsWith(".jar")){
+                    if(e.length()!=0)
+                        rootPath += "/"+e;
+                }else{
+                    break;
+                }
+            }
+        }
+        return rootPath;
+    }
+
+    public static String getOS(){
+        Properties prop = System.getProperties();
+        String os = prop.getProperty("os.name");
+        if(os.startsWith("win")|| os.startsWith("Win")){
+            return "windows";
+        }else if(os.startsWith("Linux")|| os.startsWith("linux")){
+            return "linux";
+        }else{
+            return "";
+        }
+
+    }
+
 }

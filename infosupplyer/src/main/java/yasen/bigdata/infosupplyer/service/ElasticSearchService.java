@@ -75,7 +75,7 @@ public interface ElasticSearchService {
      * @param field
      * @return
      */
-    public Object getField(String index, String type, String id, String field);
+    Object getField(String index, String type, String id, String field);
 
     /**
      * 在ES指定index,type,id定位的doc插入或者更新某个field,参数为json

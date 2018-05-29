@@ -182,6 +182,7 @@ public class ESConstant {
         ESFIELD.add("entrydate");
         ESFIELD.add("hdfspath");
         ESFIELD.add("rowkey");
+        ESFIELD.add("tag");
     }
 
     /*********************ES中的文本排序需要拼接子field的字段**********************/
@@ -191,6 +192,7 @@ public class ESConstant {
         ESTEXT_SORT_CHILD_FIELD.add("organ");
         ESTEXT_SORT_CHILD_FIELD.add("PatientName");
         ESTEXT_SORT_CHILD_FIELD.add("SeriesDescription");
+        ESTEXT_SORT_CHILD_FIELD.add("tag");
     }
 
     /***************默认返回字段****************/
@@ -203,6 +205,7 @@ public class ESConstant {
         DEFAULT_BACK_FIELD.add("SeriesDate");
         DEFAULT_BACK_FIELD.add("PatientName");
         DEFAULT_BACK_FIELD.add("NumberOfSlices");
+        DEFAULT_BACK_FIELD.add("tag");
     }
 
     /***************接收参数中的字段****************/
@@ -214,6 +217,7 @@ public class ESConstant {
     /**************多个器官名称******************/
     public static String BREAST = "breast";
     public static String LUNG = "lung";
+    public static String BRAIN = "brain";
 
 
 }

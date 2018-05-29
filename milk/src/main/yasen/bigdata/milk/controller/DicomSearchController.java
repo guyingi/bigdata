@@ -60,6 +60,7 @@ public class DicomSearchController {
         backfields.add(ESConstants.SeriesDescription_ES);
         backfields.add(ESConstants.SeriesDate_ES);
         backfields.add(ESConstants.NumberOfSlices_ES);
+        backfields.add(ESConstants.TAG_ES);
         backfields.add(ESConstants.ID_ES);
 
         JSONArray sortfields = new JSONArray();
@@ -67,6 +68,7 @@ public class DicomSearchController {
         sortfields.add(ESConstants.SeriesDescription_ES);
         sortfields.add(ESConstants.PatientName_ES);
         sortfields.add(ESConstants.SeriesDate_ES);
+        sortfields.add(ESConstants.TAG_ES);
         sortfields.add(ESConstants.NumberOfSlices_ES);
 
         JSONObject tempResult = searchService.searchByPaging(param, backfields,sortfields,1, SysConstants.DEFAULT_PAGE_SIZE);
@@ -95,6 +97,7 @@ public class DicomSearchController {
         backfields.add(ESConstants.SeriesDescription_ES);
         backfields.add(ESConstants.SeriesDate_ES);
         backfields.add(ESConstants.NumberOfSlices_ES);
+        backfields.add(ESConstants.TAG_ES);
         backfields.add(ESConstants.ID_ES);
 
         JSONArray sortfields = new JSONArray();
@@ -102,6 +105,7 @@ public class DicomSearchController {
         sortfields.add(ESConstants.SeriesDescription_ES);
         sortfields.add(ESConstants.PatientName_ES);
         sortfields.add(ESConstants.SeriesDate_ES);
+        sortfields.add(ESConstants.TAG_ES);
         sortfields.add(ESConstants.NumberOfSlices_ES);
 
         JSONObject tempResult = searchService.searchByPaging(param, backfields,sortfields,pageid, SysConstants.DEFAULT_PAGE_SIZE);

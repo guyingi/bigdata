@@ -532,8 +532,9 @@
                                         <th field="organ" width="14%" align="left">器官</th>
                                         <th field="seriesDescription" width="20%" align="left">序列描述</th>
                                         <th field="patientName" width="20%" align="left">名字</th>
-                                        <th field="seriesDate" width="15%" align="left">检查日期</th>
-                                        <th field="numberOfSlices" width="15%" align="center">张数</th>
+                                        <th field="seriesDate" width="10%" align="left">检查日期</th>
+                                        <th field="numberOfSlices" width="10%" align="center">张数</th>
+                                        <th field="tag" width="10%" align="center">Tag</th>
                                     </tr>
                                     </thead>
                                 </table>

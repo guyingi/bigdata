@@ -152,49 +152,38 @@
 
     function dosigntag(){
         var tag = $("#tag").val();
-        var obj = new Object();
-        obj.tag = tag;
-        var paramJsonStr = JSON.stringify(obj);
-        $.ajax({
-            type: "POST",
-            url: "/milk/dosigntag",
-            data: paramJsonStr,
-            dataType: 'json',
-            traditional:true,
-            contentType: 'application/json;charset=utf-8',
-            success: function (data) {
-                console.log(data);
-                if(data.result){
-                    //打标签成功
-                    $.messager.confirm('消息', '你成功为该批序列打上了'+data.tag+'的标签，数量'+data.total, function(r){});
+        if(tag.length == 0){
+            alert("tag不能为空")
+        }else{
+            var obj = new Object();
+            obj.tag = tag;
+            var paramJsonStr = JSON.stringify(obj);
+            // $('#dlg').dialog('open');
+            $.ajax({
+                type: "POST",
+                url: "/milk/dosigntag",
+                data: paramJsonStr,
+                dataType: 'json',
+                traditional:true,
+                contentType: 'application/json;charset=utf-8',
+                success: function (data) {
+                    console.log(data);
+                    if(data.result){
+                        //打标签成功
+                        $.messager.confirm('消息', '你成功为该批序列打上了'+data.tag+'的标签，数量'+data.total, function(r){});
+                    }
+                },
+                error: function () {
+                    $("#hint").html("程序运行出错！");
                 }
-            },
-            error: function () {
-                $("#hint").html("程序运行出错！");
-            }
-        });
-
+            });
+        }
     }
+
     function simulationForm(url) {
         var form = $('<form method="post" action="'+url+'"></form>');
         form.appendTo("body").submit().remove();
         return;
-    }
-    function checkall() {
-        var a = 0;
-        if (!$("#ckbid").is(":checked")) {
-            $("input[name='ckb']").each(function () {
-                if ($(this).is(":checked")) {
-                    $(this).removeAttr("checked");
-                }
-            });
-        } else {
-            $("input[name='ckb']").each(function () {
-                if (!$(this).is(":checked")) {
-                    $(this).prop("checked", true);
-                }
-            });
-        }
     }
 
     function submitForm(){
@@ -409,24 +398,6 @@
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <td>SlickThickness：</td>
-                                                                <td>
-                                                                    <table>
-                                                                        <tr>
-                                                                            <td>
-                                                                                <input class="easyui-numberspinner" name="slicethickness_min" value="0" data-options="precision:1,increment:0.1," style="width:100px;"></input>
-                                                                            </td>
-                                                                            <td>
-                                                                                <p style="margin:0;">至</p>
-                                                                            </td>
-                                                                            <td>
-                                                                                <input class="easyui-numberspinner" name="slicethickness_max" value="10" data-options="precision:1,increment:0.1," style="width:100px;"></input>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </table>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
                                                                 <td>
                                                                     <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px;height:30px;margin:0 0 0 60px" onclick="submitForm()">Search</a>
                                                                 </td>
@@ -472,14 +443,14 @@
                                 >
                                     <thead>
                                     <tr>
-                                        <th field="ck" checkbox="true"></th>
                                         <th field="id" width="0%">Item ID</th>
                                         <th field="institutionName" width="14%">医院</th>
                                         <th field="organ" width="14%" align="left">器官</th>
                                         <th field="seriesDescription" width="20%" align="left">序列描述</th>
                                         <th field="patientName" width="20%" align="left">名字</th>
-                                        <th field="seriesDate" width="15%" align="left">检查日期</th>
-                                        <th field="numberOfSlices" width="15%" align="center">张数</th>
+                                        <th field="seriesDate" width="10%" align="left">检查日期</th>
+                                        <th field="numberOfSlices" width="10%" align="center">张数</th>
+                                        <th field="tag" width="10%" align="center">Tag</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -503,6 +474,31 @@
             </div>
         </div>
 
+        <div id="dlg" class="easyui-dialog" title="冲突tag" data-options="iconCls:'icon-save'" closed="true" style="width:70%;height:70%;padding:10px">
+            <div class="easyui-layout" style="width:100%;height:100%;">
+                <div data-options="region:'south',split:true" style="height:50px;">
+                    <a class="easyui-linkbutton" style="width:80px;height:30px;margin:10px 0 0 30px" onclick="$('#dlg').dialog('close');">覆盖</a>
+                    <a class="easyui-linkbutton" style="width:80px;height:30px;margin:10px 0 0 30px" onclick="$('#dlg').dialog('close');">取消</a>
+                </div>
+                <div data-options="region:'center',title:'Main Title',iconCls:'icon-ok'">
+                    <table class="easyui-datagrid"
+                           data-options="url:'/milk/image/datagrid_data1.json',method:'get',border:false,singleSelect:true,fit:true,fitColumns:true">
+                        <thead>
+                        <tr>
+                            <th field="id" width="0%">Item ID</th>
+                            <th field="institutionName" width="14%">医院</th>
+                            <th field="organ" width="14%" align="left">器官</th>
+                            <th field="seriesDescription" width="20%" align="left">序列描述</th>
+                            <th field="patientName" width="20%" align="left">名字</th>
+                            <th field="seriesDate" width="10%" align="left">检查日期</th>
+                            <th field="numberOfSlices" width="10%" align="center">张数</th>
+                            <th field="tag" width="10%" align="center">Tag</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 </body>

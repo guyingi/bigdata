@@ -1,6 +1,7 @@
 package yasen.bigdata.infosupplyer.factory;
 
 import org.apache.hadoop.conf.Configuration;
+import yasen.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
 
 /**
  * @author WeiGuangWu
@@ -14,5 +15,9 @@ public class ConfigFactory {
         Configuration hdfsConf = new Configuration();
         hdfsConf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
         return hdfsConf;
+    }
+
+    public static InfosupplyerConfiguration getInfosupplyerConfiguration(){
+        return new InfosupplyerConfiguration();
     }
 }

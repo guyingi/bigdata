@@ -15,13 +15,13 @@ import java.util.List;
 
 @Service
 public class DataDownloadServiceImpl implements DataDownloadService {
-    public static void main(String[] args) {
-        String projectPath = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\milk\\target\\milk\\temp";
-        String tempDir = projectPath+MilkTool.getDelimiter()+"a.zip";
-        String id = "128401136192363104997433902406223511521416862616";
-
-        boolean b = new DataDownloadServiceImpl().doCallAndWriteToDisk(id, "/data/downloadDicomNail", tempDir);
-    }
+//    public static void main(String[] args) {
+//        String projectPath = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\milk\\target\\milk\\temp";
+//        String tempDir = projectPath+MilkTool.getDelimiter()+"a.zip";
+//        String id = "128401136192363104997433902406223511521416862616";
+//
+//        boolean b = new DataDownloadServiceImpl().doCallAndWriteToDisk(id, "/data/downloadDicomNail", tempDir);
+//    }
 
 
     /**
@@ -69,7 +69,7 @@ public class DataDownloadServiceImpl implements DataDownloadService {
         return zipFilePath;
     }
 
-    public boolean doCallAndWriteToDisk(String id,String interfaceStr,String filepath){
+    public static boolean doCallAndWriteToDisk(String id,String interfaceStr,String filepath){
         MilkConfiguration conf = new MilkConfiguration();
         boolean isSuccess = false;
         try {
@@ -114,6 +114,14 @@ public class DataDownloadServiceImpl implements DataDownloadService {
         return isSuccess;
     }
 
-
+    public static void main(String[] args) {
+        String temp = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\milk\\target\\milk\\temp";
+        String tag = "NB";
+        String zipFilePath = temp+MilkTool.getDelimiter()+tag+".zip";
+        //infosupplyer提供的下载接口
+        String interfaceStr = "/data/downloadDesensitizeDdicomByTag";
+        //调用下载方法，做具体下载工作
+        doCallAndWriteToDisk(tag,interfaceStr,zipFilePath);
+    }
 
 }

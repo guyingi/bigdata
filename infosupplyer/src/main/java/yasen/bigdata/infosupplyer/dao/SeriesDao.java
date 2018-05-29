@@ -14,28 +14,9 @@ import java.sql.SQLException;
  * @Description: ${todo}
  * @date 2018/5/23 11:04
  */
-public class SeriesDao {
+public interface SeriesDao {
 
-    public String searchSingleFieldBySeriessop(String seriessop,String field){
-        Connection connection = DBFactory.getConnection();
-        String sql = "select +"+field+" from series where series_sop=?";
-        PreparedStatement ps = null;
-        ResultSet resultSet = null;
-        try {
-            ps = connection.prepareStatement(sql);
-            ps.setString(1,seriessop);
-            resultSet = ps.executeQuery();
-            if(resultSet != null){
-                if(resultSet.next()){
-                    String series_uid = resultSet.getString(field);
-                    return series_uid;
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+    public String searchSingleFieldBySeriessop(String seriessop,String field);
 
 
 

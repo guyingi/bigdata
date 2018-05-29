@@ -33,4 +33,15 @@ public interface TagService {
     JSONObject searchTags(String tag);
 
 
+    /**
+     *
+     */
+    JSONObject listTags();
+
+    /**
+     * 判断该tag是否已经做过脱敏
+     * @param tag
+     * @return
+     */
+    boolean isTagDisensitized(String tag);
 }

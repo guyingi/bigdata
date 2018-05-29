@@ -29,8 +29,9 @@ public class Demo {
 
     public static void main(String[] args) {
 //        readSequenceFileTest();
-        downloadJson();
+//        downloadJson();
     }
+
     private static void downloadJson(){
         JSONArray backfields = new JSONArray();
         backfields.add(ESConstants.HDFSPATH);

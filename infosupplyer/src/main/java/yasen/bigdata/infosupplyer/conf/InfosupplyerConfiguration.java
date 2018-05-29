@@ -12,7 +12,9 @@ package yasen.bigdata.infosupplyer.conf;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
+import yasen.bigdata.infosupplyer.util.InfoSupplyerTool;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
@@ -43,6 +45,18 @@ public class InfosupplyerConfiguration {
     private String dicomDisensitizationCf = null;
     private String dicomTablename = null;
     private String dicomCf = null;
+
+
+    private String pythoncmd = null;
+    private String pythonscript = null;
+
+
+    /**********华丽丽的分割线：各种临时目录***********************/
+    String thumbnailTempPath = null;
+    String desensitizeBeforeTempPath = null;  //脱敏操作之前临时存放dicom的目录
+    String desensitizeAfterTempPath = null;  //脱敏操作之后临时存放.mhd,.raw的目录
+    String desensitizeDownloadTempPath = null;  //下载脱敏数据临时存放.mhd,.raw,.csv文件的目录
+
 
     public InfosupplyerConfiguration(){
         init();
@@ -79,11 +93,43 @@ public class InfosupplyerConfiguration {
         dicomDisensitizationTablename = props.getProperty(SysConstants.DICOM_DESENSITIZATION_TABLENAME);
         dicomDisensitizationCf = props.getProperty(SysConstants.DICOM_DESENSITIZATION_CF);
 
+        pythoncmd = props.getProperty(SysConstants.PYTHON_CMD);
+        pythonscript = props.getProperty(SysConstants.PYTHON_SCRIPT);
+
         if((typeDicom==null || indexDicom==null || escluster==null) ||(esip==null && eshost==null)){
             logger.log(Level.ERROR,"必要配置加载失败，系统启动失败,退出系统");
 //            System.out.println("必要配置加载失败，系统启动失败,退出系统");
             System.exit(0);
         }
+
+        /**************获取jar文件目录，创建临时文件需要在这创建临时目录*******************/
+        //缩略图的目录,/temp/thumbnailtemp
+        thumbnailTempPath = InfoSupplyerTool.getRunnerPath()+ File.separator+SysConstants.TEMP_DIRNAME+File.separator
+                +SysConstants.THUMBNAIL_TEMP_DIRNAME;
+        //做脱敏操作的两个个目录,脱敏之前dicom存放目录，/temp/desensitizetemp/desensitizebeforetemp
+        desensitizeBeforeTempPath = InfoSupplyerTool.getRunnerPath()+ File.separator+SysConstants.TEMP_DIRNAME+File.separator+
+                SysConstants.DESENSITIZE_TEMP_DIRNAME+File.separator+SysConstants.DESENSITIZE_BEFORE_TEMP_DIRNAME;
+
+        // 脱敏之后文件存放目录/temp/desensitizetemp/desensitizeaftertemp
+        desensitizeAfterTempPath = InfoSupplyerTool.getRunnerPath()+ File.separator+SysConstants.TEMP_DIRNAME+File.separator+
+                SysConstants.DESENSITIZE_TEMP_DIRNAME+File.separator+SysConstants.DESENSITIZE_AFTER_TEMP_DIRNAME;
+
+        //下载脱敏数据的临时目录//temp/desensitizetemp/desensitizedownloadtemp
+        desensitizeDownloadTempPath = InfoSupplyerTool.getRunnerPath()+ File.separator+SysConstants.TEMP_DIRNAME+File.separator+
+                SysConstants.DESENSITIZE_TEMP_DIRNAME+File.separator+SysConstants.DESENSITIZE_TDOWNLOAD_TEMP_DIRNAME;
+        if(! new File(thumbnailTempPath).exists()){
+            new File(thumbnailTempPath).mkdirs();
+        }
+        if(! new File(desensitizeBeforeTempPath).exists()){
+            new File(desensitizeBeforeTempPath).mkdirs();
+        }
+        if(! new File(desensitizeAfterTempPath).exists()){
+            new File(desensitizeAfterTempPath).mkdirs();
+        }
+        if(! new File(desensitizeDownloadTempPath).exists()){
+            new File(desensitizeDownloadTempPath).mkdirs();
+        }
+
     }
     public String getEscluster() {
         return escluster;
@@ -136,10 +182,6 @@ public class InfosupplyerConfiguration {
         return zookeeperClientPort;
     }
 
-    public String getDirPrefixDicom() {
-        return dirPrefixDicom;
-    }
-
     public String getDirPrefixDesensitization() {
         return dirPrefixDesensitization;
     }
@@ -158,6 +200,31 @@ public class InfosupplyerConfiguration {
 
     public String getDicomDisensitizationCf() {
         return dicomDisensitizationCf;
+    }
+
+    public String getPythoncmd() {
+        return pythoncmd;
+    }
+
+    public String getPythonscript() {
+        return pythonscript;
+    }
+
+
+    public String getThumbnailTempPath() {
+        return thumbnailTempPath;
+    }
+
+    public String getDesensitizeBeforeTempPath() {
+        return desensitizeBeforeTempPath;
+    }
+
+    public String getDesensitizeAfterTempPath() {
+        return desensitizeAfterTempPath;
+    }
+
+    public String getDesensitizeDownloadTempPath() {
+        return desensitizeDownloadTempPath;
     }
 
     @Override

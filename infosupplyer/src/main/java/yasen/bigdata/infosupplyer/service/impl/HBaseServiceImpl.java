@@ -58,22 +58,29 @@ public class HBaseServiceImpl implements HBaseService {
         scan.setStartRow(Bytes.toBytes(rowkey+"0"));
         scan.setStopRow(Bytes.toBytes(rowkey+"9"));
 
-        File tempDir = new File(path+rowkey.substring(0,10));
+        //该rowkey缩略图特有临时目录，生成zip文件后会被删除
+        String thumbnailTemp = path+File.separator+rowkey.substring(0,10);
+        File tempDir = new File(thumbnailTemp);
         if(!tempDir.exists()){
             tempDir.mkdir();
         }
+        System.out.println("thumbnailTemp:"+thumbnailTemp);
         FileOutputStream fout = null;
 
         ResultScanner scanner = table.getScanner(scan);
+        System.out.println("A");
         for(Result result : scanner){
+            System.out.println("B");
             Cell[] cells = result.rawCells();
             for(Cell cell : cells){
                 String tempRowkey = Bytes.toString(CellUtil.cloneRow(cell));
                 String qualify = Bytes.toString(CellUtil.cloneQualifier(cell));
                 if(qualify.equals(SysConstants.THUMBNAIL)){
                     byte[] temp = CellUtil.cloneValue(cell);
+                    System.out.println("C:"+temp.length);
                     String filename = tempRowkey.substring(tempRowkey.length()-6,tempRowkey.length());
-                    fout = new FileOutputStream(new File(tempDir.getAbsolutePath()+InfoSupplyerTool.getDelimiter()+filename+".jpg"));
+                    System.out.println(thumbnailTemp+File.separator+filename+".jpg");
+                    fout = new FileOutputStream(new File(thumbnailTemp+File.separator+filename+".jpg"));
                     fout.write(temp);
                     fout.close();
                 }
@@ -85,7 +92,7 @@ public class HBaseServiceImpl implements HBaseService {
          * filename：zip文件名称
          */
         ZipUtil.zip(tempDir.getAbsolutePath(),path,filename);
-        tempDir.deleteOnExit();
+        InfoSupplyerTool.delFolder(thumbnailTemp);
         return path+File.separator+filename;
     }
 

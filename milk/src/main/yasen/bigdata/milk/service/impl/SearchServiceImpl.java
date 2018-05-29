@@ -26,6 +26,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONReader;
 
+import yasen.bigdata.milk.consts.DataTypeEnum;
 import yasen.bigdata.milk.consts.ESConstants;
 import yasen.bigdata.milk.conf.MilkConfiguration;
 import yasen.bigdata.milk.consts.SysConstants;
@@ -99,8 +100,14 @@ public class SearchServiceImpl implements SearchService {
             json.put(SysConstants.PAGE_SIZE, pagesize);
         }
 		String interfaceStr = "/info/_searchpaging";
-        JSONObject searchPagingResult = doCallAndGetResult(json,interfaceStr);
-		return searchPagingResult;
+        DataTypeEnum dataTypeEnum = DataTypeEnum.DICOM;
+        JSONObject searchPagingResult = null;
+        try {
+            searchPagingResult = MilkTool.doCallAndGetResult(json,interfaceStr,dataTypeEnum);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return searchPagingResult;
 	}
 
 	@Override
@@ -162,13 +169,21 @@ public class SearchServiceImpl implements SearchService {
         backfields.add(ESConstants.PatientName_ES);
         backfields.add(ESConstants.SeriesDescription_ES);
         backfields.add(ESConstants.SeriesDate_ES);
+        backfields.add(ESConstants.TAG_ES);
         backfields.add(ESConstants.NumberOfSlices_ES);
 
         JSONObject json = new JSONObject();
         json.put(SysConstants.SEARCH_CONDITION,searchcondition);
         json.put(SysConstants.BACKFIELDS,backfields);
         String interfaceStr = "/info/_searchpaging";
-        JSONObject searchPagingResult = doCallAndGetResult(json,interfaceStr);
+        DataTypeEnum dataTypeEnum = DataTypeEnum.DICOM;
+        JSONObject searchPagingResult = null;
+        try {
+            searchPagingResult = MilkTool.doCallAndGetResult(json,interfaceStr,dataTypeEnum);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
         System.out.println(searchPagingResult.toJSONString());
         if(createExcelTempFile(searchPagingResult,filepath)){
             return filepath;
@@ -199,8 +214,14 @@ public class SearchServiceImpl implements SearchService {
         json.put(SysConstants.IDS,ids);
         json.put(SysConstants.BACKFIELDS,backfields);
         String interfaceStr = "/info/_searchByIds";
-
-        JSONObject result = doCallAndGetResult(json, interfaceStr);
+        DataTypeEnum dataTypeEnum = DataTypeEnum.DICOM;
+        JSONObject result = null;
+        try {
+            result = MilkTool.doCallAndGetResult(json, interfaceStr,dataTypeEnum);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
         System.out.println("查询的结果："+result.toJSONString());
 
         List<String> hdfspaths = new ArrayList<String>();
@@ -285,79 +306,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
 
-	private JSONObject doCallAndGetResult(JSONObject parameter,String interfaceStr){
-        MilkConfiguration conf = new MilkConfiguration();
-        JSONObject result = new JSONObject();
-        JSONArray data = new JSONArray();
-        List<Dicom> dicomList = new ArrayList<Dicom>();
-        StringBuilder builder = new StringBuilder();
-        boolean isSuccess = false;
-        System.out.println(parameter.toJSONString());
-        try {
-            byte[] param = parameter.toString().getBytes("UTF-8");
-            String url = SysConstants.HTTP_HEAD+conf.getInfosupplyerip()+":"+conf.getInfosupplyerport()+interfaceStr;
-            URL restServiceURL = new URL(url);
 
-            HttpURLConnection httpConnection = (HttpURLConnection) restServiceURL.openConnection();
-            httpConnection.setRequestMethod("POST");
-            httpConnection.setRequestProperty("Accept", "application/json");
-            httpConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-            //httpConnection.setRequestProperty("Connection", "Keep-Alive");
-            httpConnection.setRequestProperty("Charset", "UTF-8");
-            httpConnection.setDoOutput(true);
-            httpConnection.setDoInput(true);
-
-            //传递参数
-            httpConnection.setRequestProperty("Content-Length", String.valueOf(param));
-            OutputStream outputStream = httpConnection.getOutputStream();
-            outputStream.write(param);
-            outputStream.flush();
-            outputStream.close();
-            System.out.println("返回码："+httpConnection.getResponseCode());
-
-            if (httpConnection.getResponseCode() == 200) {
-                InputStream inputStream = httpConnection.getInputStream();
-                BufferedReader tBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                String tempStr = null;
-                while ((tempStr = tBufferedReader.readLine()) != null) {
-                    builder.append(tempStr);
-                }
-                inputStream.close();
-                isSuccess = true;
-            } else {
-                System.out.println("从infosupplyer获取文件失败");
-            }
-//		    System.out.println("接收到的数据："+builder.toString());
-            httpConnection.disconnect();
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-
-        if(isSuccess) {
-            JSONReader reader = new JSONReader(new StringReader(builder.toString()));
-            reader.startObject();
-            while (reader.hasNext()){
-                String key = reader.readString();
-                if(key.equals("code")){
-                    result.put("code",reader.readObject(String.class));
-                }else if(key.equals("pagecount")){
-                    result.put("pagecount",reader.readObject(Long.class));
-                }else if(key.equals("total")){
-                    result.put("total",reader.readObject(Long.class));
-                }else if(key.equals("data")){
-                    reader.startArray();
-                    while(reader.hasNext()){
-                        Dicom dicom = JSON.parseObject(reader.readObject().toString(), Dicom.class);
-                        dicomList.add(dicom);
-                    }
-                    reader.endArray();
-                    result.put("data",dicomList);
-                }
-            }
-            reader.endObject();
-        }
-        return result;
-    }
 
     private boolean createExcelTempFile(JSONObject parameter,String filepath){
         String code = parameter.getString("code");
@@ -405,5 +354,7 @@ public class SearchServiceImpl implements SearchService {
     private boolean createDicomZipTempFile(String srcDir,String zipPath,String zipName){
         return MilkTool.zipCompress(srcDir,zipPath,zipName);
     }
+
+
 
 }

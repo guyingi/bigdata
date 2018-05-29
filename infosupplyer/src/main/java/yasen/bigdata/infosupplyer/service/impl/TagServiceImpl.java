@@ -9,7 +9,9 @@ import yasen.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
 import yasen.bigdata.infosupplyer.controller.TagController;
+import yasen.bigdata.infosupplyer.dao.DicomTagDao;
 import yasen.bigdata.infosupplyer.pojo.PageSearchParamBean;
+import yasen.bigdata.infosupplyer.pojo.db.DicomTag;
 import yasen.bigdata.infosupplyer.service.*;
 
 import java.io.File;
@@ -39,17 +41,21 @@ public class TagServiceImpl implements TagService {
     @Autowired
     HdfsService hdfsService;
 
+    @Autowired
+    DicomTagDao dicomTagDao;
+
     public TagServiceImpl(){
         infosupplyerConfiguration = new InfosupplyerConfiguration();
     }
 
     @Override
     public Integer signForDicom(JSONObject param) {
-        //得到tag,searchcondition
+        long total = 0;
+        //1.得到tag,searchcondition
         String tag = param.getString(SysConstants.TAG_PARAM);
         JSONObject searchcondition = param.getJSONObject(SysConstants.SEARCH_CONDITION);
 
-        //下面两段是构造新查询条件，以及返回值给分页查询接口，获得所有序列的SeriesUID,rowkey.
+        //2.下面两段是构造新查询条件，以及返回值给分页查询接口，获得所有序列的SeriesUID,rowkey.
         JSONArray backfields = new JSONArray();
         backfields.add(ESConstant.SeriesUID_ES);
         backfields.add(ESConstant.ROWKEY);
@@ -65,8 +71,8 @@ public class TagServiceImpl implements TagService {
         String code = result.getString(SysConstants.CODE);
         if(SysConstants.CODE_000.equals(code)){
             JSONArray data = result.getJSONArray(SysConstants.DATA);
-            int size = data.size();
-            for(int i = 0; i < size; i++){
+            total = data.size();
+            for(int i = 0; i < total; i++){
                 JSONObject one = data.getJSONObject(i);
                 String seriesUID = one.getString(ESConstant.SeriesUID_ES);
                 seriesids.add(seriesUID);
@@ -74,7 +80,7 @@ public class TagServiceImpl implements TagService {
                 rowkeys.add(rowkey);
             }
         }
-        //修改hbase
+        //3.修改hbase
         try {
             hBaseService.updateTagForDicom(infosupplyerConfiguration.getDicomTablename(),rowkeys,
                     infosupplyerConfiguration.getDicomCf(),SysConstants.TAG,tag);
@@ -85,6 +91,15 @@ public class TagServiceImpl implements TagService {
             elasticSearchService.updateField(infosupplyerConfiguration.getIndexDicom(),
                     infosupplyerConfiguration.getTypeDicom(),id,ESConstant.TAG_ES,tag);
         }
+
+        //4.该tag，以及旗下序列数量需要记录到关系型数据库
+        DicomTag dicomTag = new DicomTag();
+        dicomTag.setTagname(tag);
+        dicomTag.setCount(total);
+        dicomTag.setDesensitize(0);
+        dicomTag.setDescribe("未脱敏");
+        dicomTagDao.insert(dicomTag);
+
         return seriesids.size();
     }
 
@@ -94,11 +109,11 @@ public class TagServiceImpl implements TagService {
         if(tag != null && tag.length() != 0){
             Map<String,String> map = new HashMap<String,String>();
             map.put(SysConstants.TAG,tag);
-            result = elasticSearchService.searchAggregation(infosupplyerConfiguration.getIndexDicom(),
-                    infosupplyerConfiguration.getTypeDicom(), map, SysConstants.TAG);
+            result = elasticSearchService.searchAggregation(infosupplyerConfiguration.getIndexDicomDisensitization(),
+                    infosupplyerConfiguration.getTypeDicomDisensitization(), map, SysConstants.TAG);
         }else{
-            result = elasticSearchService.searchAggregation(infosupplyerConfiguration.getIndexDicom(),
-                    infosupplyerConfiguration.getTypeDicom(), null, SysConstants.TAG);
+            result = elasticSearchService.searchAggregation(infosupplyerConfiguration.getIndexDicomDisensitization(),
+                    infosupplyerConfiguration.getTypeDicomDisensitization(), null, SysConstants.TAG);
         }
         return result;
     }

@@ -12,6 +12,7 @@ public interface HBaseService {
     /**
      *将下载的一个序列的所有缩略图打成zip压缩文件，放置在临时目录，当使用完之后删除即可。
      * @param rowkey
+     * @param path 存放缩略图的总临时目录，/temp/thumbnailtemp，jar文件与temp同一个目录
      * @return  返回存放缩略图的压缩文件绝对路径
      */
     String downloadThumbnailByRowkey(String rowkey,String path) throws Exception;

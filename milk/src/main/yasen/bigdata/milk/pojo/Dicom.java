@@ -17,21 +17,28 @@ public class Dicom {
 	String PatientName;
 	String SeriesDate;
 	Integer NumberOfSlices;
+	String tag;
 	String hdfspath;
 
 	public Dicom() {
 	}
 
-    public Dicom(String id, String institutionName, String organ, String seriesDescription, String patientName, String seriesDate, Integer numberOfSlices, String hdfspath) {
+    public Dicom(String id, String institutionName, String organ, String seriesDescription, String patientName,
+				 String seriesDate, Integer numberOfSlices, String tag,String hdfspath) {
         this.id = id;
-        InstitutionName = institutionName;
+		this.InstitutionName = institutionName;
         this.organ = organ;
-        SeriesDescription = seriesDescription;
-        PatientName = patientName;
-        SeriesDate = seriesDate;
-        NumberOfSlices = numberOfSlices;
+		this.SeriesDescription = seriesDescription;
+		this.PatientName = patientName;
+		this.SeriesDate = seriesDate;
+		this.NumberOfSlices = numberOfSlices;
+		this.tag = tag;
         this.hdfspath = hdfspath;
     }
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
     public void setInstitutionName(String institutionName) {
 		InstitutionName = institutionName;
@@ -55,6 +62,19 @@ public class Dicom {
 
 	public void setNumberOfSlices(Integer numberOfSlices) {
 		NumberOfSlices = numberOfSlices;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
+
+	public void setHdfspath(String hdfspath) {
+		this.hdfspath = hdfspath;
+	}
+
+
+	public String getId() {
+		return id;
 	}
 
 	public String getInstitutionName() {
@@ -81,18 +101,11 @@ public class Dicom {
 		return NumberOfSlices;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public String getTag() {
+		return tag;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-    public void setHdfspath(String hdfspath) {
-        this.hdfspath = hdfspath;
-    }
-    public String getHdfspath() {
+	public String getHdfspath() {
         return hdfspath;
     }
 }

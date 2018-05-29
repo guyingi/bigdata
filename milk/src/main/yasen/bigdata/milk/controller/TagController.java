@@ -18,6 +18,7 @@ import yasen.bigdata.milk.tool.MilkTool;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.File;
 import java.util.Map;
 
 @Controller
@@ -91,15 +92,19 @@ public class TagController {
     @RequestMapping(value = "desensitize", method = RequestMethod.POST)
     public JSONObject desensitize(HttpServletRequest request, HttpServletResponse response, @RequestBody Map<String, String> parametr) {
         System.out.println("desensitize is called");
-        String tag = parametr.get("tag");
-
-        long count = tagService.doDesensitize(tag);
         JSONObject result = new JSONObject();
-        if(count>0){
-            result.put("result",true);
-        }else{
-            result.put("result",false);
+        String tag = parametr.get("tag");
+        System.out.println(tagService.isTagDisensitized(tag));
+        if(tagService.isTagDisensitized(tag)){
+            result.put("result",1);         //已做脱敏，无需再做
+            return result;
         }
+//        long count = tagService.doDesensitize(tag);
+//        if(count>0){
+//            result.put("result",0);         //脱敏操作成功
+//        }else{
+//            result.put("result",2);       //失败
+//        }
         return result;
     }
 
@@ -111,14 +116,24 @@ public class TagController {
         System.out.println("searchTag is called");
         String tag = parametr.get("tag");
         JSONObject result = tagService.searchTags(tag);
-        System.out.println(result);
+        System.out.println(result.toJSONString());
+        return result;
+    }
+
+    //根据tag查询脱敏数据
+    @ResponseBody
+    @RequestMapping(value = "listtags", method = RequestMethod.POST)
+    public JSONObject listTags() {
+        System.out.println("listTags is called");
+        JSONObject result = tagService.listTags();
+        System.out.println(result.toJSONString());
         return result;
     }
 
     //根据tag下载脱敏数据
     @ResponseBody
-    @RequestMapping(value = "downloadDesensitizeByTag", method = RequestMethod.GET)
-    public void downloadDesensitizeByTag(HttpServletRequest request, HttpServletResponse response, @RequestBody Map<String, String> parametr) {
+    @RequestMapping(value = "downloadDesensitizeByTag", method = RequestMethod.POST)
+    public void downloadDesensitizeByTag(HttpServletRequest request, HttpServletResponse response) {
         System.out.println("downloadDesensitizeByTag is called");
         String tag = request.getParameter("tag");
         //projectPath是工程绝对路径 C://.../../milk
@@ -126,7 +141,10 @@ public class TagController {
         //工程下面temp目录绝对路径，用于存放临时文件，操作需要
         String tempRealPath = projectRealPath+SysConstants.TEMP_STRING;
         String zipFilePath = dataDownloadService.downloadDesensitizeDdicomByTag(tag, tempRealPath);
+//        String zipFilePath = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\milk\\web\\temp\\0001.zip";
         MilkTool.doDownload(response,zipFilePath,"zip");
+
+        new File(zipFilePath).delete();
         System.out.println(tag);
     }
 }
