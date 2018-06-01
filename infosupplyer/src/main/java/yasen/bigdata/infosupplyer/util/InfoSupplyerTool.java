@@ -9,7 +9,6 @@ import yasen.bigdata.infosupplyer.consts.SysConstants;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -164,12 +163,12 @@ public class InfoSupplyerTool {
     public static JSONObject formatParameter(Map<String, Object> parameter) {
         JSONObject param = new JSONObject();
         for (Map.Entry<String, Object> entry : parameter.entrySet()) {
-            if (entry.getKey().equals(SysConstants.SEARCH_CONDITION)) {
+            if (entry.getKey().equals(SysConstants.SEARCH_CRITERIA)) {
                 HashMap<String, Object> hashmap = (HashMap<String, Object>) entry.getValue();
                 JSONObject obj = new JSONObject();
                 for (Map.Entry<String, Object> e : hashmap.entrySet()) {
                     if (e.getKey().equals(SysConstants.DEVICE_PARAM)) {
-                        obj.put(ESConstant.ManufacturersModelName_ES, e.getValue().toString());
+                        obj.put(ESConstant.ManufacturersModelName_ES_DCM, e.getValue().toString());
                     } else if (e.getKey().equals(SysConstants.AGE_START_PARAM)) {
                         obj.put(SysConstants.AGE_START_PARAM, Integer.parseInt(e.getValue().toString()));
                     } else if (e.getKey().equals(SysConstants.AGE_END_PARAM)) {
@@ -186,7 +185,7 @@ public class InfoSupplyerTool {
                         obj.put(e.getKey(), e.getValue().toString());
                     }
                 }
-                param.put(SysConstants.SEARCH_CONDITION, obj);
+                param.put(SysConstants.SEARCH_CRITERIA, obj);
             } else if (entry.getKey().equals(SysConstants.BACKFIELDS)) {
                 List<String> list = (List<String>) entry.getValue();
                 JSONArray arr = new JSONArray();

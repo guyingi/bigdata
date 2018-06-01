@@ -75,31 +75,31 @@
 //        //医院
 //        if(pageSearchParamBean.isInstitutionAvailable()){
 //            //此处使用termsQuery(String name,String value)精确匹配单个值
-//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.InstitutionName_ES, pageSearchParamBean.getInstitution()));
+//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.InstitutionName_ES_DCM, pageSearchParamBean.getInstitution()));
 //        }
 //        //器官精确查询
 //        if(pageSearchParamBean.isOrganAvailable()){
-//            matchQueryList.add(QueryBuilders.termQuery(ESConstant.ORGAN_ES,pageSearchParamBean.getOrgan()));
+//            matchQueryList.add(QueryBuilders.termQuery(ESConstant.ORGAN_ES_DCM,pageSearchParamBean.getOrgan()));
 //        }
 //        //序列描述
 //        if(pageSearchParamBean.isSeriesdescriptionAvailable()){
-//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.SeriesDescription_ES,pageSearchParamBean.getSeriesdescription()));
+//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.SeriesDescription_ES_DCM,pageSearchParamBean.getSeriesdescription()));
 //        }
 //        //设备
 //        if(pageSearchParamBean.isDeviceAvailable()){
 //            if(pageSearchParamBean.isdevicePhrase()){
-//                matchQueryList.add(QueryBuilders.matchPhraseQuery(ESConstant.ManufacturersModelName_ES,pageSearchParamBean.getDevice()));
+//                matchQueryList.add(QueryBuilders.matchPhraseQuery(ESConstant.ManufacturersModelName_ES_DCM,pageSearchParamBean.getDevice()));
 //            }
-//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.ManufacturersModelName_ES,pageSearchParamBean.getDevice()));
+//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.ManufacturersModelName_ES_DCM,pageSearchParamBean.getDevice()));
 //        }
 //        //性别
 //        if(pageSearchParamBean.isSexAvailable()){
-//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.PatientsSex_ES,pageSearchParamBean.getSex()));
+//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.PatientsSex_ES_DCM,pageSearchParamBean.getSex()));
 //        }
 //
 //        //年龄段
 //        if(pageSearchParamBean.isAgeStartAvailable() || pageSearchParamBean.isAgeEndAvailable()){
-//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.PatientsAge_ES);
+//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.PatientsAge_ES_DCM);
 //            if(pageSearchParamBean.isAgeStartAvailable()){
 //                rangbuilder.gte(pageSearchParamBean.getAgeStart());
 //            }
@@ -111,7 +111,7 @@
 //
 //        //检查日期段20170811-20180201
 //        if(pageSearchParamBean.isStudydateStartAvailable() || pageSearchParamBean.isStudydateEndAvailable()){
-//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.SeriesDate_ES);
+//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.SeriesDate_ES_DCM);
 //            if(pageSearchParamBean.isStudydateStartAvailable()){
 //                rangbuilder.gte(pageSearchParamBean.getStudydateStart());
 //            }
@@ -123,7 +123,7 @@
 //
 //        //数据收入日期段
 //        if(pageSearchParamBean.isEntrydateStartAvailable() || pageSearchParamBean.isEntrydateEndAvailable()){
-//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.ENTRYDATE_ES);
+//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.ENTRYDATE_ES_DCM);
 //            if(pageSearchParamBean.isEntrydateStartAvailable()){
 //                rangbuilder.gte(pageSearchParamBean.getEntrydateStart());
 //            }
@@ -134,7 +134,7 @@
 //        }
 //
 //        if(pageSearchParamBean.isImagecountMinAvailable() || pageSearchParamBean.isImagecountMaxAvailable()){
-//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.NumberOfSlices_ES);
+//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.NumberOfSlices_ES_DCM);
 //            if(pageSearchParamBean.isImagecountMinAvailable()){
 //                rangbuilder.gte(pageSearchParamBean.getImagecountMin());
 //            }
@@ -145,7 +145,7 @@
 //        }
 //        //层厚
 //        if(pageSearchParamBean.isSlicethicknessMinAvailable() || pageSearchParamBean.isSlicethicknessMaxAvailable()){
-//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.SliceThickness_ES);
+//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.SliceThickness_ES_DCM);
 //            if(pageSearchParamBean.isSlicethicknessMinAvailable()){
 //                rangbuilder.gte(pageSearchParamBean.getSlicethicknessMin());
 //            }

@@ -15,6 +15,8 @@ public class SysConstants {
     public static String DESENSITIZE_AFTER_TEMP_DIRNAME = "desensitizeaftertemp"; //脱敏操作临时存放脱敏后的数据的目录
     public static String DESENSITIZE_TDOWNLOAD_TEMP_DIRNAME = "desensitizedownloadtemp"; //下载脱敏数据，临时存放脱敏数据的目录，因为以tag为单位下载
     public static String THUMBNAIL_TEMP_DIRNAME = "thumbnailtemp"; //下载脱敏数据，临时存放脱敏数据的目录，因为以tag为单位下载
+    public static String ELECTRIC_TEMP_DIRNAME = "electrictemp"; //下载脱敏数据，临时存放脱敏数据的目录，因为以tag为单位下载
+
 
 
     public static Integer SUCCESS = 0;
@@ -22,9 +24,10 @@ public class SysConstants {
     public static Integer FAILED = -1;
 
     /***************字段名称常量******************/
-    public static String SEARCH_CONDITION = "searchcondition";
+    public static String SEARCH_CRITERIA = "criteria";
     public static String BACKFIELDS = "backfields";
     public static String SORTFIELDS = "sortfields";
+
     public static String CODE = "code";
     public static String PAGECONTENT = "pagecount";
     public static String TOTAL = "total";
@@ -33,6 +36,12 @@ public class SysConstants {
     public static String INTERFACE = "interface";
     public static String MSG = "msg";
     public static String COUNT = "count";
+
+    public static String DATATYPE = "datatype";
+    public static String TYPE_DICOM = "dicom";
+    public static String TYPE_ELECTRIC = "electric";
+    public static String TYPE_GUAGE = "guage";
+    public static String TYPE_KFB = "kfb";
 
 
 
@@ -61,7 +70,18 @@ public class SysConstants {
     public static String IMAGECOUNT_MAX_PARAM = "imagecount_max";
     public static String SLICE_THICKNESS_MIN_PARAM = "slicethickness_min";
     public static String SLICE_THICKNESS_MAX_PARAM = "slicethickness_max";
+    public static String PatientName_DCM_PARAM = "patientname";
     public static String TAG_PARAM = "tag";
+
+    public static String PatientUID_ELECTRIC_PARAM = "patientuid";
+    public static String PatientName_ELECTRIC_PARAM = "patientname";
+    public static String AGE_START_ELECTRIC_PARAM = "age_tart";
+    public static String AGE_END_ELECTRIC_PARAM = "age_end";
+    public static String CREATEDATE_START_ELECTRIC_PARAM = "createdate_start";
+    public static String CREATEDATE_END_ELECTRIC_PARAM = "createdate_end";
+    public static String ENTRYDATE_START_ELECTRIC_PARAM = "entrydate_start";
+    public static String ENTRYDATE_END_ELECTRIC_PARAM = "entrydate_end";
+    public static String InstitutionName_ELECTRIC_PARAM = "hospital";
 
 
     public static String PAGE_ID = "pageid";
@@ -79,8 +99,10 @@ public class SysConstants {
     public static String ES_HTTPPORT = "es.httpport";
     public static String ES_DICOM_INDEX = "es.dicom.index";
     public static String ES_DESENSITIZATION_INDEX = "es.disensitization.index";
+    public static String ES_ELECTRIC_INDEX = "es.electric.index";
     public static String ES_DICOM_TYPE = "es.dicom.type";
     public static String ES_DESENSITIZATION_TYPE = "es.disensitization.type";
+    public static String ES_ELECTRIC_TYPE = "es.electric.type";
 
     public static String DICOM_THUMBNAIL_TABLENAME = "dicom.thumbnail.tablename";
     public static String DICOM_THUMBNAIL_CF = "dicom.thumbnail.cf";

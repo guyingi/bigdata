@@ -4,7 +4,7 @@ package yasen.bigdata.infosupplyer.pojo.db;
  * @author WeiGuangWu
  * @version V1.0
  * @Package yasen.bigdata.infosupplyer.pojo
- * @Description: ${todo}
+ * @Description: bigdata库中dicomtag表
  * @date 2018/5/28 13:49
  */
 public class DicomTag {

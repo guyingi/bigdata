@@ -10,7 +10,7 @@ import yasen.bigdata.infosupplyer.consts.SysConstants;
  * @Description: ${todo}
  * @date 2018/5/17 16:27
  */
-public class SearchconditionBean {
+public class DicomSearchCriteriaBean {
     private String device;
     private String organ;
     private String seriesdescription;
@@ -27,9 +27,10 @@ public class SearchconditionBean {
     private Double slicethicknessMin;
     private Double slicethicknessMax;
     private String tag;
+    private String patientname;
     private boolean devicephrase = false;//设备是否整个串匹配，拆分,默认模糊匹配
 
-    public SearchconditionBean(JSONObject searchcondition){
+    public DicomSearchCriteriaBean(JSONObject searchcondition){
         parseSearchcondition(searchcondition);
     }
 
@@ -100,6 +101,10 @@ public class SearchconditionBean {
         if(tagParam != null){
             tag = tagParam;
         }
+        String patientnameParam = param.getString(SysConstants.PatientName_DCM_PARAM);
+        if(patientnameParam != null){
+            patientname = patientnameParam;
+        }
 
     }
 
@@ -153,6 +158,7 @@ public class SearchconditionBean {
     public boolean isdevicePhrase(){
         return devicephrase;
     }
+    public boolean isPatientnameAvailable(){return patientname != null;}
     public boolean isTagAvailable(){
         return tag != null;
     }
@@ -217,11 +223,15 @@ public class SearchconditionBean {
         return slicethicknessMax;
     }
 
+    public String getPatientname() {
+        return patientname;
+    }
+
     public String getTag(){ return tag; }
 
     @Override
     public String toString() {
-        return "SearchconditionBean{" +
+        return "DicomSearchCriteriaBean{" +
                 "device='" + device + '\'' +
                 ", organ='" + organ + '\'' +
                 ", seriesdescription='" + seriesdescription + '\'' +

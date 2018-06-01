@@ -18,6 +18,13 @@
 </head>
 <script type="text/javascript">
     $(function(){
+
+        $("#datatypetable").datagrid('hideColumn', "patientname");
+
+        $("#detailtable").datagrid('hideColumn', "id");
+        $("#detailtable").datagrid('hideColumn', "datatype");
+        $("#detailtable").datagrid('hideColumn', "patientname");
+
         $('#tree').tree({
             onClick: function(node){
                 if("查询dicom" == node.text){
@@ -38,21 +45,162 @@
         });
     });
 
-    function add() {
-        $('#acc').accordion('add', {
-            title: 'A',
-            content: 'New Content',
-            selected: false
-        });
-        // $('#acc').accordion('add', {
-        //     title : "A",
-        //     iconCls : 'icon-ok',
-        //     selected : true,
-        //     content : '<div style="padding:10px"><ul name="'+dd+'">操</ul></div>',
-        // });
+    function simulationForm(url) {
+        var form = $('<form method="post" action="'+url+'"></form>');
+        form.appendTo("body").submit().remove();
+        return;
     }
     function submitForm() {
-        
+        var patientname = $("#patientname").val();
+        if(patientname.length==0){
+            $.messager.confirm("友情提示","查询内容不能为空");
+        }else{
+            var obj = new Object()
+            obj.patientname=patientname;
+            var paramJsonStr = JSON.stringify(obj)
+            $.ajax({
+                type: "POST",
+                url: "/milk/getpatient",
+                data: paramJsonStr,
+                dataType: 'json',
+                traditional:true,
+                contentType: 'application/json;charset=utf-8',
+                success: function (data) {
+                    console.log(data);
+                    if(data!=null){
+                        $("#patienttable").datagrid("loadData",data);
+                    }else{
+                        $("#hint").html("查询失败");
+                    }
+                },
+                error: function () {
+                    $("#hint").html("程序运行出错！");
+                }
+            });
+        }
+    }
+    function showdatatype(index,record) {
+        var patientname = record.patientname;
+        if(patientname.length==0){
+            $.messager.confirm("友情提示","患者名不能为空");
+        }else{
+            var obj = new Object()
+            obj.patientname=patientname;
+            var paramJsonStr = JSON.stringify(obj)
+            $.ajax({
+                type: "POST",
+                url: "/milk/getpatientdatatype",
+                data: paramJsonStr,
+                dataType: 'json',
+                traditional:true,
+                contentType: 'application/json;charset=utf-8',
+                success: function (data) {
+                    console.log(data);
+                    if(data!=null){
+                        $("#datatypetable").datagrid("loadData",data);
+                    }else{
+                        $("#hint").html("查询失败");
+                    }
+                },
+                error: function () {
+                    $("#hint").html("程序运行出错！");
+                }
+            });
+        }
+    }
+    function showdetail(index,record) {
+        var patientname = record.patientname;
+        var datatype = record.datatype;
+        var obj = new Object()
+        obj.patientname=patientname;
+        obj.datatype=datatype;
+        var paramJsonStr = JSON.stringify(obj)
+        $.ajax({
+            type: "POST",
+            url: "/milk/getdetail",
+            data: paramJsonStr,
+            dataType: 'json',
+            traditional:true,
+            contentType: 'application/json;charset=utf-8',
+            success: function (data) {
+                console.log(data);
+                if(data!=null){
+                    $("#detailtable").datagrid("loadData",data);
+                }else{
+                    $("#hint").html("查询失败");
+                }
+            },
+            error: function () {
+                $("#hint").html("程序运行出错！");
+            }
+        });
+    }
+    function downloadpatient() {
+        var arr = new Array();
+        var rows = $('#patienttable').datagrid('getSelections');
+        for(var i=0;i<rows.length;i++){
+            arr.push(rows[i].patientname);
+        }
+        if(arr.length == 0){
+            $.messager.confirm("友情提示","您未选中任何人");
+        }else{
+            var param = "";
+            for(var j=0; j<arr.length; j++){
+                param += encodeURI(arr[j])+"-";
+            }
+            var url = "/milk/downloadbypatient?patientname="+param;
+            simulationForm(url);
+        }
+
+    }
+
+    function downloadtype(){
+        var patientname = "";
+        var typearr = new Array();
+        var rows = $('#datatypetable').datagrid('getSelections');
+        for(var i=0;i<rows.length;i++){
+            patientname = rows[i].patientname;
+            typearr.push(rows[i].datatype);
+        }
+
+        if(typearr.length == 0){
+            $.messager.confirm("提示","您未选择任何类别");
+        }else{
+            var typeStr = ""
+            for(var j=0; j<typearr.length; j++){
+                typeStr += typearr[j]+"-";
+            }
+            var paramStr = "patientname="+encodeURI(patientname)+"&datatype="+typeStr;
+            var url = "/milk/downloadbytype?"+paramStr;
+            simulationForm(url);
+
+        }
+
+    }
+
+    function downloaddetail(){
+        var rows = $('#detailtable').datagrid('getSelections');
+        var idarr = new Array();
+        var patientname = "";
+        var datatype = "";
+        for(var i=0;i<rows.length;i++){
+            patientname = rows[i].patientname;
+            datatype = rows[i].datatype;
+            idarr.push(rows[i].id);
+        }
+        alert(idarr.length);
+        if(idarr.length == 0){
+            $.messager.confirm("提示","您未选择任何类别");
+        }else{
+            var idStr = ""
+            for(var j=0; j<idarr.length; j++){
+                idStr += idarr[j]+"-";
+            }
+            var paramStr = "patientname="+encodeURI(patientname)+"&datatype="+datatype+"&ids="+idStr;
+            var url = "/milk/downloaddetail?"+paramStr;
+            simulationForm(url);
+
+        }
     }
 </script>
 <body style="padding:0;">
@@ -68,7 +216,7 @@
     </div>
 </div>
 
-<div class="easyui-panel" title="" style="width:auto;height:750px;padding:10px;">
+<div class="easyui-panel" title="" style="width:auto;height:95%;padding:10px;">
     <div class="easyui-layout" data-options="fit:true">
         <div data-options="region:'west',border:true" style="width:150px;height:auto;">
             <div class="easyui-panel" style="height:100%;padding:5px;">
@@ -108,7 +256,7 @@
                                 <table cellpadding="5">
                                     <tr>
                                         <td>Name:</td>
-                                        <td><input class="easyui-textbox" type="text" name="name" data-options="required:true"></input></td>
+                                        <td><input id="patientname" class="easyui-textbox" type="text" name="name" data-options="required:true"></input></td>
                                         <td>
                                             <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px;height:30px;" onclick="submitForm()">Search</a>
                                         </td>
@@ -119,47 +267,57 @@
                     </div>
                 </div>
                 <div data-options="region:'center',title:'查询结果',iconCls:'icon-ok'">
-                    <div class="easyui-panel"  style="width:auto;height:100%;">
-                        <div class="easyui-accordion" style="width:70%;height:auto;overflow:auto;">
+                    <div class="easyui-layout" style="width:100%;height:100%;">
+                        <div data-options="region:'west',split:true" title="患者" style="width:30%;height:100%">
+                            <table id="patienttable" class="easyui-datagrid"
+                                   data-options="url:'',method:'get',border:false,singleSelect:true,fit:true,fitColumns:true,toolbar:[{ text: '下载', iconCls: 'icon-save', handler: downloadpatient}],onClickRow:showdatatype">
+                                <thead>
+                                <tr>
+                                    <th field="ck" checkbox="true"></th>
+                                    <th data-options="field:'patientname'" width="80">name</th>
+                                    <th data-options="field:'age'" width="80">age</th>
+                                    <th data-options="field:'sex'" width="80">sex</th>
+                                    <th data-options="field:'hospital'" width="80">hospital</th>
+                                </tr>
+                                </thead>
+                            </table>
 
-                            <%--<div title="Help" data-options="iconCls:'icon-help'" style="width:60%;height:300px;overflow:auto;padding:10px;">--%>
-                                <%--<div style="height:100px"></div>--%>
-                                <%--<div class="easyui-accordion" style="height:auto">--%>
-                                    <%--<div title="A" data-options="iconCls:'icon-ok'" style="overflow:auto;height:100px;padding:20px;">--%>
-                                        <%--<h3 style="color:#0099FF;">Accordion for jQuery</h3>--%>
-                                        <%--<p>Accordion is a part of easyui framework for jQuery. It lets you define your accordion component on web page more easily.</p>--%>
-                                    <%--</div>--%>
-                                    <%--<div title="B" data-options="iconCls:'icon-help'" style="padding:10px;height:auto;">--%>
-                                        <%--<p>The accordion allows you to provide multiple panels and display one or more at a time. Each panel has built-in support for expanding and collapsing. Clicking on a panel header to expand or collapse that panel body. The panel content can be loaded via ajax by specifying a 'href' property. Users can define a panel to be selected. If it is not specified, then the first panel is taken by default.</p>--%>
-                                    <%--</div>--%>
-                                    <%--<div title="C" data-options="iconCls:'icon-search'" style="padding:10px;">--%>
-                                    <%--</div>--%>
-                                <%--</div>--%>
-                            <%--</div>--%>
-                            <%--<div title="Help" data-options="iconCls:'icon-help'" style="overflow:auto;padding:10px;">--%>
-                                <%--<div class="easyui-accordion" style="width:100%;height:auto">--%>
-                                    <%--<div title="A" data-options="iconCls:'icon-ok'" style="overflow:auto;height:auto;padding:20px;">--%>
-                                        <%--<h3 style="color:#0099FF;">Accordion for jQuery</h3>--%>
-                                        <%--<p>Accordion is a part of easyui framework for jQuery. It lets you define your accordion component on web page more easily.</p>--%>
-                                    <%--</div>--%>
-                                    <%--<div title="B" data-options="iconCls:'icon-help'" style="padding:10px;height:auto;">--%>
-                                        <%--<p>The accordion allows you to provide multiple panels and display one or more at a time. Each panel has built-in support for expanding and collapsing. Clicking on a panel header to expand or collapse that panel body. The panel content can be loaded via ajax by specifying a 'href' property. Users can define a panel to be selected. If it is not specified, then the first panel is taken by default.</p>--%>
-                                    <%--</div>--%>
-                                    <%--<div title="C" data-options="iconCls:'icon-search'" style="padding:10px;">--%>
-                                    <%--</div>--%>
-                                <%--</div>--%>
-                            <%--</div>--%>
-
-
-
+                        </div>
+                        <div data-options="region:'center',title:'数据类别',iconCls:'icon-ok'" style="height:100%;">
+                            <table id="datatypetable"class="easyui-datagrid"
+                                   data-options="url:'',method:'get',border:false,singleSelect:false,fit:true,fitColumns:true,onClickRow:showdetail,toolbar:[{text:'下载',iconCls:'icon-save',handler:downloadtype}]">
+                                <thead>
+                                <tr>
+                                    <th field="ck" checkbox="true"></th>
+                                    <th data-options="field:'patientname'" width="80"></th>
+                                    <th data-options="field:'datatype'" width="80">类别</th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div data-options="region:'east',split:true" title="数据详情" style="width:60%;height:100%;">
+                            <table  id="detailtable" class="easyui-datagrid"
+                                   data-options="url:'',method:'get',border:false,singleSelect:false,fit:true,fitColumns:true,toolbar:[{text:'下载',iconCls:'icon-save',handler:downloaddetail}]">
+                                <thead>
+                                <tr>
+                                    <th field="ck" checkbox="true"></th>
+                                    <th data-options="field:'id'" width="80"></th>
+                                    <th data-options="field:'patientname'" width="80"></th>
+                                    <th data-options="field:'datatype'" width="80"></th>
+                                    <th data-options="field:'describe'" width="80">序列描述</th>
+                                    <th data-options="field:'organ'" width="100">器官</th>
+                                    <th data-options="field:'count',align:'right'" width="80">数量</th>
+                                </tr>
+                                </thead>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div data-options="region:'south',border:true" style="height:20px;background:#f1f8ff;">
-            <a href="#" onclick="add()">点我</a>
         </div>
+
     </div>
 </div>
 </body>

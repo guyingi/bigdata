@@ -6,15 +6,13 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yasen.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
+import yasen.bigdata.infosupplyer.consts.DataTypeEnum;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
-import yasen.bigdata.infosupplyer.controller.TagController;
 import yasen.bigdata.infosupplyer.dao.DicomTagDao;
-import yasen.bigdata.infosupplyer.pojo.PageSearchParamBean;
 import yasen.bigdata.infosupplyer.pojo.db.DicomTag;
 import yasen.bigdata.infosupplyer.service.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -53,17 +51,18 @@ public class TagServiceImpl implements TagService {
         long total = 0;
         //1.得到tag,searchcondition
         String tag = param.getString(SysConstants.TAG_PARAM);
-        JSONObject searchcondition = param.getJSONObject(SysConstants.SEARCH_CONDITION);
+        JSONObject searchcondition = param.getJSONObject(SysConstants.SEARCH_CRITERIA);
 
         //2.下面两段是构造新查询条件，以及返回值给分页查询接口，获得所有序列的SeriesUID,rowkey.
         JSONArray backfields = new JSONArray();
-        backfields.add(ESConstant.SeriesUID_ES);
-        backfields.add(ESConstant.ROWKEY);
+        backfields.add(ESConstant.SeriesUID_ES_DCM);
+        backfields.add(ESConstant.ROWKEY_ES_DCM);
 
         JSONObject json = new JSONObject();
-        json.put(SysConstants.SEARCH_CONDITION,searchcondition);
+        json.put(SysConstants.SEARCH_CRITERIA,searchcondition);
         json.put(SysConstants.BACKFIELDS,backfields);
-        JSONObject result = elasticSearchService.searchByPaging(json);
+        DataTypeEnum type=  DataTypeEnum.DICOM;
+        JSONObject result = elasticSearchService.searchByPaging(json,type);
 
         //遍历序列，每个序列做修改打上标签
         List<String>  seriesids = new LinkedList<String>();
@@ -74,9 +73,9 @@ public class TagServiceImpl implements TagService {
             total = data.size();
             for(int i = 0; i < total; i++){
                 JSONObject one = data.getJSONObject(i);
-                String seriesUID = one.getString(ESConstant.SeriesUID_ES);
+                String seriesUID = one.getString(ESConstant.SeriesUID_ES_DCM);
                 seriesids.add(seriesUID);
-                String rowkey = one.getString(ESConstant.ROWKEY);
+                String rowkey = one.getString(ESConstant.ROWKEY_ES_DCM);
                 rowkeys.add(rowkey);
             }
         }
@@ -89,7 +88,7 @@ public class TagServiceImpl implements TagService {
         }
         for(String id : seriesids){
             elasticSearchService.updateField(infosupplyerConfiguration.getIndexDicom(),
-                    infosupplyerConfiguration.getTypeDicom(),id,ESConstant.TAG_ES,tag);
+                    infosupplyerConfiguration.getTypeDicom(),id,ESConstant.TAG_ES_DCM,tag);
         }
 
         //4.该tag，以及旗下序列数量需要记录到关系型数据库

@@ -30,20 +30,20 @@ public class HBaseServiceImpl implements HBaseService {
     static List<String> DoubleFieldList = new ArrayList<String>();
 
     static{
-        IntegerFieldList.add(ESConstant.PatientsAge_ES);
-        IntegerFieldList.add(ESConstant.SeriesNumber_ES);
-        IntegerFieldList.add(ESConstant.NumberOfSlices_ES);
+        IntegerFieldList.add(ESConstant.PatientsAge_ES_DCM);
+        IntegerFieldList.add(ESConstant.SeriesNumber_ES_DCM);
+        IntegerFieldList.add(ESConstant.NumberOfSlices_ES_DCM);
 
-        LongFieldList.add(ESConstant.StudyTime_ES);
-        LongFieldList.add(ESConstant.SeriesTime_ES);
-        LongFieldList.add(ESConstant.AcquisitionTime_ES);
-        LongFieldList.add(ESConstant.ImageTime_ES);
+        LongFieldList.add(ESConstant.StudyTime_ES_DCM);
+        LongFieldList.add(ESConstant.SeriesTime_ES_DCM);
+        LongFieldList.add(ESConstant.AcquisitionTime_ES_DCM);
+        LongFieldList.add(ESConstant.ImageTime_ES_DCM);
 
-        DoubleFieldList.add(ESConstant.PatientsSize_ES);
-        DoubleFieldList.add(ESConstant.PatientsWeight_ES);
-        DoubleFieldList.add(ESConstant.SliceThickness_ES);
-        DoubleFieldList.add(ESConstant.ReconstructionDiameter_ES);
-        DoubleFieldList.add(ESConstant.SliceLocation_ES);
+        DoubleFieldList.add(ESConstant.PatientsSize_ES_DCM);
+        DoubleFieldList.add(ESConstant.PatientsWeight_ES_DCM);
+        DoubleFieldList.add(ESConstant.SliceThickness_ES_DCM);
+        DoubleFieldList.add(ESConstant.ReconstructionDiameter_ES_DCM);
+        DoubleFieldList.add(ESConstant.SliceLocation_ES_DCM);
     }
 
     public HBaseServiceImpl(){
@@ -127,7 +127,7 @@ public class HBaseServiceImpl implements HBaseService {
 
     @Override
     public int putOne(String tableName, String cf, JSONObject metaJson) throws IOException {
-        String rowkey = metaJson.getString(ESConstant.ROWKEY);
+        String rowkey = metaJson.getString(ESConstant.ROWKEY_ES_DCM);
         if(isExists(tableName,rowkey)){
             return SysConstants.EXISTS;
         }

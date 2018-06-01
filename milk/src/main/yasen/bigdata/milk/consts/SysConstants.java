@@ -45,9 +45,13 @@ public class SysConstants {
     public static String IMAGECOUNT_MAX_PAGEPARAMNAME = "imagecount_max";
     public static String SLICE_THICKNESS_MIN_PAGEPARAMNAME = "slicethickness_min";
     public static String SLICE_THICKNESS_MAX_PAGEPARAMNAME= "slicethickness_max";
-
     public static String PAGEID_PAGEPARAMNAME = "pageid";
     public static String PAGESIZE_PAGEPARAMNAME = "pagesize";
+
+    /***************页面datagrid字段************************/
+//    public static String DESCRIBE = "describe";
+//    public static String ORGAN = "organ";
+//    public static String COUNT = "count";
 
     /***************查询条件中的字段******************/
     public static String DEVICE_PARAM = "device";
@@ -65,13 +69,20 @@ public class SysConstants {
     public static String IMAGECOUNT_MAX_PARAM = "imagecount_max";
     public static String SLICE_THICKNESS_MIN_PARAM = "slicethickness_min";
     public static String SLICE_THICKNESS_MAX_PARAM = "slicethickness_max";
+    public static String PATIENTNAME_PARAM = "patientname";
 
     /***************参数与返回值中的一些key名称******************/
-    public static String SEARCH_CONDITION = "searchcondition";
+    public static String SEARCH_CONDITION = "criteria";
     public static String PAGE_ID = "pageid";
     public static String PAGE_SIZE = "pagesize";
     public static String BACKFIELDS = "backfields";
     public static String SORTFIELDS = "sortfields";
+    public static String DATATYPE = "datatype";
+    public static String TYPE_DICOM = "dicom";
+    public static String TYPE_ELECTRIC = "electric";
+    public static String TYPE_GUAGE = "guage";
+    public static String TYPE_KFB = "kfb";
+
     public static String IDS = "ids";
     public static String DATA = "data";
     public static String CODE = "code";

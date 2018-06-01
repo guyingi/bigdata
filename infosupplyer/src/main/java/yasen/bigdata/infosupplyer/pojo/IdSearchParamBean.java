@@ -17,7 +17,9 @@ package yasen.bigdata.infosupplyer.pojo;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import yasen.bigdata.infosupplyer.consts.DataTypeEnum;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
+import yasen.bigdata.infosupplyer.consts.SysConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,7 @@ import java.util.List;
 public class IdSearchParamBean {
     private List<String> ids = null;
     private List<String> backfields = null;
+    private DataTypeEnum type = null;
     private boolean parseError = false;
 
     public IdSearchParamBean(JSONObject param){
@@ -56,6 +59,16 @@ public class IdSearchParamBean {
         }else{
             ids = null;
         }
+
+        String datatype = param.getString("datatype");
+        if(SysConstants.TYPE_DICOM.equals(datatype)){
+            type = DataTypeEnum.DICOM;
+        }else if(SysConstants.TYPE_ELECTRIC.equals(datatype)){
+            type = DataTypeEnum.ELECTRIC;
+        }else if(SysConstants.TYPE_GUAGE.equals(datatype)){
+            type = DataTypeEnum.GUAGE;
+        }
+
         JSONArray backfieldsParam = param.getJSONArray("backfields");
         //下面这两段if语句逻辑：如果backfields为空则使用默认返回字段，如果不为空，取backfields，sortfields交集为排序字段
         if(backfieldsParam!=null){
@@ -66,13 +79,13 @@ public class IdSearchParamBean {
             }else {
                 for (int i=0;i<size;i++) {
                     String field = backfieldsParam.getString(i);
-                    if (ESConstant.ESFIELD.contains(field)) {
+                    if (ESConstant.ES_DCM_FIELD.contains(field)) {
                         backfields.add(field);
                     }
                 }
             }
         }else{
-            backfields.addAll(ESConstant.DEFAULT_BACK_FIELD);
+            backfields.addAll(ESConstant.DCM_DEFAULT_BACK_FIELD);
         }
     }
 
@@ -89,4 +102,7 @@ public class IdSearchParamBean {
         return parseError;
     }
 
+    public DataTypeEnum getType() {
+        return type;
+    }
 }

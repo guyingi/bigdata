@@ -10,6 +10,15 @@ package yasen.bigdata.milk.consts;
 
 public class ESConstants {
 
+    /*********************ES中edf类型存储的字段***************************/
+    public static String PatientUID_ES_ELECTRIC = "PatientUID"; //医院8位PatientID+姓名拼音+出生日期+性别(F/M)最后求MD5,需要在多医院中唯一
+    public static String PatientName_ES_ELECTRIC = "PatientName";
+    public static String PatientsAge_ES_ELECTRIC = "PatientsAge";
+    public static String CreateDate_ES_ELECTRIC = "createdate";
+    public static String InstitutionName_ES_ELECTRIC = "InstitutionName";
+    public static String ENTRYDATE_ES_ELECTRIC = "entrydate";//录入日期
+    public static String HDFSPATH_ES_ELECTRIC = "hdfspath";//hdfs文件路径
+
     /*********************ES中存储的字段***************************/
     public static String MediaStorageSOPClassUID_ES	  = "MediaStorageSOPClassUID";
     public static String MediaStorageSOPInstUID_ES       = "MediaStorageSOPInstUID";

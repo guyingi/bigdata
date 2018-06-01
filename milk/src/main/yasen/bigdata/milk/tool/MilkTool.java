@@ -111,7 +111,7 @@ public class MilkTool {
             else
                 ;
             response.setHeader("Content-Disposition", "attachment;fileName="
-                    + tempFilePath.substring(tempFilePath.lastIndexOf(MilkTool.getDelimiter())+1, tempFilePath.length()));
+                    + tempFilePath.substring(tempFilePath.lastIndexOf(File.separator)+1, tempFilePath.length()));
             long downloadedLength = 0l;
             long available = 0l;
             try {
@@ -151,7 +151,7 @@ public class MilkTool {
         JSONObject result = new JSONObject();
         StringBuilder builder = new StringBuilder();
         boolean isSuccess = false;
-        System.out.println(parameter.toJSONString());
+//        System.out.println(parameter.toJSONString());
         try {
             byte[] param = parameter.toString().getBytes("UTF-8");
             String url = SysConstants.HTTP_HEAD+conf.getInfosupplyerip()+":"+conf.getInfosupplyerport()+interfaceStr;
@@ -176,7 +176,7 @@ public class MilkTool {
 
             if (httpConnection.getResponseCode() == 200) {
                 InputStream inputStream = httpConnection.getInputStream();
-                BufferedReader tBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                BufferedReader tBufferedReader = new BufferedReader(new InputStreamReader(inputStream,"utf-8"));
                 String tempStr = null;
                 while ((tempStr = tBufferedReader.readLine()) != null) {
                     builder.append(tempStr);
@@ -195,6 +195,8 @@ public class MilkTool {
         if(isSuccess) {
             if(dataTypeEnum == DataTypeEnum.DICOM){
                 result = parseResultDicomType(builder);
+            }else if(dataTypeEnum == DataTypeEnum.ELECTRIC){
+                result = parseResultOtherType(builder);
             }else if(dataTypeEnum == DataTypeEnum.OTHER){
                 result = parseResultOtherType(builder);
             }
@@ -254,4 +256,53 @@ public class MilkTool {
         reader.endObject();
         return result;
     }
+
+    /**
+     * 清空文件夹，只是删除子文件，传入的目录不做删除
+     */
+    public static boolean delAllFile(String path) {
+        boolean flag = false;
+        File file = new File(path);
+        if (!file.exists()) {
+            return flag;
+        }
+        if (!file.isDirectory()) {
+            return flag;
+        }
+        String[] tempList = file.list();
+        File temp = null;
+        for (int i = 0; i < tempList.length; i++) {
+            if (path.endsWith(File.separator)) {
+                temp = new File(path + tempList[i]);
+            } else {
+                temp = new File(path + File.separator + tempList[i]);
+            }
+            if (temp.isFile()) {
+                temp.delete();
+            }
+            if (temp.isDirectory()) {
+                delAllFile(path + "/" + tempList[i]);//先删除文件夹里面的文件
+                delFolder(path + "/" + tempList[i]);//再删除空文件夹
+                flag = true;
+            }
+        }
+        return flag;
+    }
+    /*********删除整个文件夹，包括所有子文件和本文件夹************/
+    public static void delFolder(String folderPath) {
+        try {
+            delAllFile(folderPath); //删除完里面所有内容
+            String filePath = folderPath;
+            filePath = filePath.toString();
+            java.io.File myFilePath = new java.io.File(filePath);
+            myFilePath.delete(); //删除空文件夹
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void delFile(String file){
+        new File(file).delete();
+    }
+
 }

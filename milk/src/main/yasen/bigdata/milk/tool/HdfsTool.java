@@ -9,7 +9,9 @@ package yasen.bigdata.milk.tool;
  * @version V1.0
  */
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
@@ -37,7 +39,7 @@ public class HdfsTool {
      * @return: boolean
      * @Date: 2018/4/23 17:23
      */
-    public static boolean download(List<String> paths,String localPath){
+    public static boolean downloadDicom(List<String> paths,String localPath){
         if(paths==null || paths.size()==0)
             return false;
         boolean isSuccess = false;
@@ -51,6 +53,7 @@ public class HdfsTool {
         return isSuccess;
     }
 
+
     /**
      * @Author:weiguangwu
      * @Description:下载单个序列到本地目录,路径末尾自带分隔符
@@ -58,14 +61,15 @@ public class HdfsTool {
      * @return: boolean
      * @Date: 2018/4/23 17:24
      */
-    private static boolean downloadSingleSeries(String hdfsPath,String localPath){
+    private static boolean downloadSingleSeries(String hdfsPath,String tempDir){
         boolean isSuccess = true;
         String dirname = hdfsPath.substring(hdfsPath.lastIndexOf("/")+1,hdfsPath.length());
 
-        File localSeriaDir = new File(localPath+dirname);
-        if(!localSeriaDir.exists()) {
-            localSeriaDir.mkdirs();
+        String seriesDir = tempDir+File.separator+dirname;
+        if(!new File(seriesDir).exists()) {
+            new File(seriesDir).mkdirs();
         }
+
         Configuration conf = new Configuration();
         MilkConfiguration milkConfiguration = new MilkConfiguration();
         Path path = new Path(milkConfiguration.getDefaultFs()+hdfsPath);
@@ -81,11 +85,10 @@ public class HdfsTool {
             int count = 0;
             while (reader.next(key, value)) {
 
-                String filepath = localPath+dirname+MilkTool.getDelimiter()+key.toString();
-                File file = new File(filepath);
-                if(!file.exists())
-                    file.createNewFile();
-                fout = new FileOutputStream(file);
+                String filepath = seriesDir+File.separator+key.toString();
+                if(!new File(filepath).exists())
+                    new File(filepath).createNewFile();
+                fout = new FileOutputStream(new File(filepath));
                 logger.log(Level.INFO,"本地dicom路径："+filepath);
                 System.out.println("本地路径dicom："+filepath);
 
@@ -107,4 +110,35 @@ public class HdfsTool {
         return isSuccess;
     }
 
+
+    public static boolean downloadElectric(List<String> paths,String localPath){
+        if(StringUtils.isBlank(localPath) || paths==null || paths.size()==0)
+            return false;
+        boolean isSuccess = true;
+        Configuration hdfsconf = new Configuration();
+        hdfsconf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
+        FileSystem fs = null;
+        try {
+            fs = FileSystem.get(hdfsconf);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        if(!new File(localPath).exists()){
+            new File(localPath).mkdirs();
+        }
+        for(String path : paths){
+            //有一个下载成功就判定为成功
+            String dirname = path.substring(path.lastIndexOf("/")+1,path.length());
+            String des = localPath + File.separator + dirname;
+            try {
+                fs.copyToLocalFile(new Path(path),new Path(des));
+            } catch (IOException e) {
+                e.printStackTrace();
+                isSuccess = false;
+            }
+        }
+        return isSuccess;
+    }
 }

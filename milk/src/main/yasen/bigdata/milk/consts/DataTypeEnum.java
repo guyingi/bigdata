@@ -8,5 +8,5 @@ package yasen.bigdata.milk.consts;
  * @date 2018/5/25 14:08
  */
 public enum DataTypeEnum {
-    DICOM,OTHER;
+    DICOM,OTHER,ELECTRIC;
 }

@@ -14,7 +14,10 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import yasen.bigdata.infosupplyer.consts.DataTypeEnum;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
+import yasen.bigdata.infosupplyer.dao.PatientDao;
+import yasen.bigdata.infosupplyer.pojo.db.Patient;
 import yasen.bigdata.infosupplyer.service.ElasticSearchService;
 import yasen.bigdata.infosupplyer.service.SearchService;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
@@ -33,6 +36,9 @@ public class SearchController {
     @Autowired
     ElasticSearchService elasticSearchService;
 
+    @Autowired
+    PatientDao patientDao;
+
     /**
      * @Author:weiguangwu
      * @Description:分页查询接口_searchpaging
@@ -44,10 +50,18 @@ public class SearchController {
     public JSONObject searchPaging(@RequestBody Map<String, Object> parameter) {
         logger.info("_searchpaging is called");
         System.out.println("_searchpaging is called");
+        JSONObject reuslt = new JSONObject();
         JSONObject param = InfoSupplyerTool.formatParameter(parameter);
-        System.out.println(param.toJSONString());
-        JSONObject jsonObject = elasticSearchService.searchByPaging(param);
-        return jsonObject;
+        if(SysConstants.TYPE_DICOM.equals(param.getString(SysConstants.DATATYPE))){
+            System.out.println(param.toJSONString());
+            DataTypeEnum type = DataTypeEnum.DICOM;
+            reuslt = elasticSearchService.searchByPaging(param,type);
+        }else if(SysConstants.TYPE_ELECTRIC.equals(param.getString(SysConstants.DATATYPE))){
+            DataTypeEnum type = DataTypeEnum.ELECTRIC;
+            reuslt = elasticSearchService.searchByPaging(param,type);
+        }
+
+        return reuslt;
     }
 
     /**
@@ -63,6 +77,7 @@ public class SearchController {
         System.out.println("_searchByIds is called");
         JSONObject param = new JSONObject();
         List<String> idsList = (List<String>) parameter.get("ids");
+        String datatype = (String)parameter.get("datatype");
         List<String> backfields = (List<String>) parameter.get("backfields");
         if (idsList != null && idsList.size() != 0) {
             JSONArray tempArr = new JSONArray();
@@ -73,6 +88,7 @@ public class SearchController {
         } else {
             return new JSONObject();
         }
+        param.put("datatype",datatype);
         if (backfields != null) {
             JSONArray tempArr = new JSONArray();
             for (String e : backfields) {
@@ -96,7 +112,8 @@ public class SearchController {
         logger.info("_searchtotal is called");
         System.out.println("_searchtotal is called");
         JSONObject param = InfoSupplyerTool.formatParameter(parameter);
-        JSONObject jsonObject = elasticSearchService.searchTotalRecord(param);
+        DataTypeEnum type = DataTypeEnum.DICOM;
+        JSONObject jsonObject = elasticSearchService.searchTotalRecord(param,type);
         return jsonObject;
     }
 
@@ -112,5 +129,25 @@ public class SearchController {
         elasticSearchService.searchAll();
         return "this is _searchall";
     }
+
+
+    //一定要查询数据库，因为这个人可能只有电信号或者量表，没有dicom
+    @PostMapping("/getpatients")
+    public JSONObject searchPatients(@RequestBody Map<String, Object> parameter){
+        String patientname = (String)parameter.get("patientname");
+        System.out.println("getpatients 接收到的参数："+patientname);
+        List<Patient> patients = patientDao.getPatientByName(patientname);
+        System.out.println(patients.size());
+        JSONObject result = new JSONObject();
+        result.put(SysConstants.CODE,SysConstants.CODE_000);
+        result.put(SysConstants.TOTAL,patients.size());
+        result.put(SysConstants.DATA,patients);
+        System.out.println("getpatients返回的数据："+result.toJSONString());
+        return result;
+    }
+
+
+
+
 
 }

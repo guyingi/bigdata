@@ -23,8 +23,8 @@ package yasen.bigdata.infosupplyer.pojo;
  *  },
  *  "pagesize": 200,
  *  "pageid": 1,
- *  "backfields": ["InstitutionName_ES","organ","PatientName_ES","PatientsSex_ES","PatientsAge_ES","SeriesDescription_ES","SeriesDate_ES","NumberOfSlices_ES","id"],
- *  "sortfields": ["SeriesDate_ES","PatientName_ES"]
+ *  "backfields": ["InstitutionName_ES_DCM","organ","PatientName_ES_DCM","PatientsSex_ES_DCM","PatientsAge_ES_DCM","SeriesDescription_ES_DCM","SeriesDate_ES_DCM","NumberOfSlices_ES_DCM","id"],
+ *  "sortfields": ["SeriesDate_ES_DCM","PatientName_ES_DCM"]
  * }
  * @author weiguangwu
  * @date  2018/4/23 14:13
@@ -33,6 +33,7 @@ package yasen.bigdata.infosupplyer.pojo;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import yasen.bigdata.infosupplyer.consts.DataTypeEnum;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
 
@@ -42,8 +43,9 @@ import java.util.List;
 
 public class PageSearchParamBean {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    private JSONObject searchcondition = null;
-    private SearchconditionBean searchconditionBean;
+    private JSONObject searchcriteria = null;
+    private DicomSearchCriteriaBean dicomSearchCriteriaBean;
+    private ElectricSignalSearchCriteriaBean electricSignalSearchCriteriaBean;
     private Integer pageid = 1;
     private Integer pagesize = 0;
     private List<String> backfields = null;
@@ -55,10 +57,18 @@ public class PageSearchParamBean {
     private boolean parseError = false;
 
 
-    public PageSearchParamBean(JSONObject param){
+    public PageSearchParamBean(JSONObject param,DataTypeEnum type){
         init();
         try {
-            parseParameter(param);
+            if(type == DataTypeEnum.DICOM) {
+                parseDicomParameter(param);
+            }else if(type == DataTypeEnum.ELECTRIC){
+                parseElectricSignalParameter(param);
+            }else if(type == DataTypeEnum.KFB){
+//                parsKfbParameter(param);
+            }else if(type == DataTypeEnum.GUAGE){
+//                parsGuageParameter(param);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             parseError = true;
@@ -69,10 +79,10 @@ public class PageSearchParamBean {
         backfields = new ArrayList<String>();
         sortfields = new ArrayList<String>();
     }
-    private void parseParameter(JSONObject param)throws Exception{
-        searchcondition = param.getJSONObject("searchcondition");
-        if(searchcondition!=null) {
-            searchconditionBean = new SearchconditionBean(searchcondition);
+    private void parseDicomParameter(JSONObject param)throws Exception{
+        searchcriteria = param.getJSONObject(SysConstants.SEARCH_CRITERIA);
+        if(searchcriteria!=null) {
+            dicomSearchCriteriaBean = new DicomSearchCriteriaBean(searchcriteria);
         }
         Integer pageidParam = param.getInteger("pageid");
         Integer pagesizeParam = param.getInteger("pagesize");
@@ -87,14 +97,15 @@ public class PageSearchParamBean {
                 backfields = null;
             }else {
                 for (String e : backfieldsList) {
-                    if (ESConstant.ESFIELD.contains(e)) {
+                    if (ESConstant.ES_DCM_FIELD.contains(e)) {
                         backfields.add(e);
                     }
                 }
             }
         }else{
-            backfields.addAll(ESConstant.DEFAULT_BACK_FIELD);
+            backfields.addAll(ESConstant.DCM_DEFAULT_BACK_FIELD);
         }
+
         JSONArray sortfieldsParam = param.getJSONArray("sortfields");
         if(sortfieldsParam!=null && sortfieldsParam.size()!=0){
             List<String> sortfieldsList = sortfieldsParam.toJavaList(String.class);
@@ -102,7 +113,7 @@ public class PageSearchParamBean {
                 if(backfields.contains(e)){
                     //解释：这里拼接.keyword，是因为es mapping中将keyword作为子field.添加之后会根据多单词文本的第一个单词字母表排序
                     //如果不添加，则会乱序
-                    if(ESConstant.ESTEXT_SORT_CHILD_FIELD.contains(e)) {
+                    if(ESConstant.DCM_ES_TEXT_SORT_CHILD_FIELD.contains(e)) {
                         sortfields.add(e + ".keyword");
                     }else{
                         sortfields.add(e);
@@ -111,6 +122,32 @@ public class PageSearchParamBean {
             }
         }else{
             sortfields = null;
+        }
+
+    }
+
+    private void parseElectricSignalParameter(JSONObject param){
+        searchcriteria = param.getJSONObject(SysConstants.SEARCH_CRITERIA);
+        if(searchcriteria!=null) {
+            electricSignalSearchCriteriaBean = new ElectricSignalSearchCriteriaBean(searchcriteria);
+        }
+        Integer pageidParam = param.getInteger("pageid");
+        Integer pagesizeParam = param.getInteger("pagesize");
+        parsePageParam(pageidParam,pagesizeParam);
+
+        JSONArray backfieldsParam = param.getJSONArray(SysConstants.BACKFIELDS);
+
+        if(backfieldsParam!=null){
+            List<String> backfieldsList = backfieldsParam.toJavaList(String.class);
+            if(backfieldsList.size()==1 && backfieldsList.get(0).equals("all")){
+                backfields = null;
+            }else {
+                for (String e : backfieldsList) {
+                    if (ESConstant.ES_ELECTRIC_FIELD.contains(e)) {
+                        backfields.add(e);
+                    }
+                }
+            }
         }
     }
 
@@ -128,8 +165,12 @@ public class PageSearchParamBean {
         }
 
     }
-    public boolean isSearchconditionAvailable(){
-        return searchcondition!=null;
+    public boolean isDicomSearchCriteriaAvailable(){
+        return dicomSearchCriteriaBean != null;
+    }
+
+    public boolean isElectricSignalSearchCriteriaAvailable(){
+        return electricSignalSearchCriteriaBean != null;
     }
 
     public boolean isPageIdAvailable(){
@@ -137,16 +178,6 @@ public class PageSearchParamBean {
     }
     public boolean isPageSizeAvailable(){
         return pagesize!=null && pagesize>0;
-    }
-    public boolean isDeviceAvailable(){
-        return searchconditionBean.isDeviceAvailable();
-    }
-    public boolean isOrganAvailable(){ return searchconditionBean.isOrganAvailable(); }
-    public boolean isSeriesdescriptionAvailable(){
-        return searchconditionBean.isSeriesdescriptionAvailable();
-    }
-    public boolean isInstitutionAvailable(){
-        return searchconditionBean.isInstitutionAvailable();
     }
 
     public boolean isBackfieldsAvailable(){
@@ -163,45 +194,7 @@ public class PageSearchParamBean {
         return parseError;
     }
 
-    public boolean isSexAvailable(){
-        return searchconditionBean.isSexAvailable();
-    }
-    public boolean isAgeStartAvailable(){
-        return searchconditionBean.isAgeStartAvailable();
-    }
-    public boolean isAgeEndAvailable(){
-        return searchconditionBean.isAgeEndAvailable();
-    }
-    public boolean isStudydateStartAvailable(){
-        return searchconditionBean.isStudydateStartAvailable();
-    }
-    public boolean isStudydateEndAvailable(){
-        return searchconditionBean.isStudydateEndAvailable();
-    }
-    public boolean isEntrydateStartAvailable(){
-        return searchconditionBean.isEntrydateStartAvailable();
-    }
-    public boolean isEntrydateEndAvailable(){
-        return searchconditionBean.isEntrydateEndAvailable();
-    }
-    public boolean isImagecountMinAvailable(){
-        return searchconditionBean.isImagecountMinAvailable();
-    }
-    public boolean isImagecountMaxAvailable(){
-        return searchconditionBean.isImagecountMaxAvailable();
-    }
-    public boolean isSlicethicknessMinAvailable(){
-        return searchconditionBean.isSlicethicknessMinAvailable();
-    }
-    public boolean isSlicethicknessMaxAvailable(){
-        return searchconditionBean.isSlicethicknessMaxAvailable();
-    }
-    public boolean isdevicePhrase(){
-        return searchconditionBean.isdevicePhrase();
-    }
-    public boolean isTagAvailable(){
-        return searchconditionBean.isTagAvailable();
-    }
+
 
     public Integer getPageid() {
         return pageid;
@@ -219,80 +212,11 @@ public class PageSearchParamBean {
         return sortfields;
     }
 
-    public String getDevice() {
-        return searchconditionBean.getDevice();
+    public DicomSearchCriteriaBean getDicomSearchCriteriaBean() {
+        return dicomSearchCriteriaBean;
     }
 
-    public String getOrgan() {
-        return searchconditionBean.getOrgan();
-    }
-
-    public String getSeriesdescription() {
-        return searchconditionBean.getSeriesdescription();
-    }
-
-    public String getInstitution() {
-        return searchconditionBean.getInstitution();
-    }
-
-    public String getSex() {
-        return searchconditionBean.getSex();
-    }
-
-    public Integer getAgeStart() {
-        return searchconditionBean.getAgeStart();
-    }
-
-    public Integer getAgeEnd() {
-        return searchconditionBean.getAgeEnd();
-    }
-
-    public String getStudydateStart() {
-        return searchconditionBean.getStudydateStart();
-    }
-
-    public String getStudydateEnd() {
-        return searchconditionBean.getStudydateEnd();
-    }
-
-    public String getEntrydateStart() {
-        return searchconditionBean.getEntrydateStart();
-    }
-
-    public String getEntrydateEnd() {
-        return searchconditionBean.getEntrydateEnd();
-    }
-
-    public Integer getImagecountMin() {
-        return searchconditionBean.getImagecountMin();
-    }
-
-    public Integer getImagecountMax() {
-        return searchconditionBean.getImagecountMax();
-    }
-
-    public Double getSlicethicknessMin() {
-        return searchconditionBean.getSlicethicknessMin();
-    }
-
-    public Double getSlicethicknessMax() {
-        return searchconditionBean.getSlicethicknessMax();
-    }
-
-    public String getTag(){ return searchconditionBean.getTag(); }
-
-    @Override
-    public String toString() {
-        return "PageSearchParamBean{" +
-                "sdf=" + sdf +
-                ", searchconditionBean=" + searchconditionBean.toString() +
-                ", searchcondition=" + searchcondition +
-                ", pageid=" + pageid +
-                ", pagesize=" + pagesize +
-                ", backfields=" + backfields +
-                ", sortfields=" + sortfields +
-                ", paging=" + paging +
-                ", parseError=" + parseError +
-                '}';
+    public ElectricSignalSearchCriteriaBean getElectricSignalSearchCriteriaBean() {
+        return electricSignalSearchCriteriaBean;
     }
 }

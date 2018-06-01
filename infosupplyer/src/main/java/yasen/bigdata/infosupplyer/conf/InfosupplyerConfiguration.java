@@ -32,8 +32,10 @@ public class InfosupplyerConfiguration {
     private String eshttpport = null;
     private String indexDicom = null;
     private String indexDicomDisensitization = null;
+    private String indexElectric = null;
     private String typeDicom = null;
     private String typeDicomDisensitization = null;
+    private String typeElectric = null;
 
 
     private String zookeeperQuorum = null;
@@ -56,6 +58,7 @@ public class InfosupplyerConfiguration {
     String desensitizeBeforeTempPath = null;  //脱敏操作之前临时存放dicom的目录
     String desensitizeAfterTempPath = null;  //脱敏操作之后临时存放.mhd,.raw的目录
     String desensitizeDownloadTempPath = null;  //下载脱敏数据临时存放.mhd,.raw,.csv文件的目录
+    String electrictempPath = null; //下载电信号edf文件临时目录。
 
 
     public InfosupplyerConfiguration(){
@@ -80,8 +83,10 @@ public class InfosupplyerConfiguration {
         eshttpport = props.getProperty(SysConstants.ES_HTTPPORT);
         indexDicom = props.getProperty(SysConstants.ES_DICOM_INDEX);
         indexDicomDisensitization = props.getProperty(SysConstants.ES_DESENSITIZATION_INDEX);
+        indexElectric = props.getProperty(SysConstants.ES_ELECTRIC_INDEX);
         typeDicom = props.getProperty(SysConstants.ES_DICOM_TYPE);
         typeDicomDisensitization = props.getProperty(SysConstants.ES_DESENSITIZATION_TYPE);
+        typeElectric = props.getProperty(SysConstants.ES_ELECTRIC_TYPE);
 
         zookeeperQuorum = props.getProperty("hbase.zookeeper.quorum");
         zookeeperClientPort = props.getProperty("hbase.zookeeper.property.clientPort");
@@ -117,6 +122,10 @@ public class InfosupplyerConfiguration {
         //下载脱敏数据的临时目录//temp/desensitizetemp/desensitizedownloadtemp
         desensitizeDownloadTempPath = InfoSupplyerTool.getRunnerPath()+ File.separator+SysConstants.TEMP_DIRNAME+File.separator+
                 SysConstants.DESENSITIZE_TEMP_DIRNAME+File.separator+SysConstants.DESENSITIZE_TDOWNLOAD_TEMP_DIRNAME;
+
+        //下载电信号edf文件临时目录//temp/electrictemp
+        electrictempPath = InfoSupplyerTool.getRunnerPath()+ File.separator+SysConstants.TEMP_DIRNAME+File.separator+
+                SysConstants.ELECTRIC_TEMP_DIRNAME;
         if(! new File(thumbnailTempPath).exists()){
             new File(thumbnailTempPath).mkdirs();
         }
@@ -129,6 +138,10 @@ public class InfosupplyerConfiguration {
         if(! new File(desensitizeDownloadTempPath).exists()){
             new File(desensitizeDownloadTempPath).mkdirs();
         }
+        if(! new File(electrictempPath).exists()){
+            new File(electrictempPath).mkdirs();
+        }
+
 
     }
     public String getEscluster() {
@@ -225,6 +238,18 @@ public class InfosupplyerConfiguration {
 
     public String getDesensitizeDownloadTempPath() {
         return desensitizeDownloadTempPath;
+    }
+
+    public String getElectrictempPath() {
+        return electrictempPath;
+    }
+
+    public String getIndexElectric() {
+        return indexElectric;
+    }
+
+    public String getTypeElectric() {
+        return typeElectric;
     }
 
     @Override

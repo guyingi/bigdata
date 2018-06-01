@@ -126,12 +126,12 @@ public class Demo {
         InfosupplyerConfiguration infosupplyerConf = new InfosupplyerConfiguration();
         TransportClient transportClient = EsClientFactory.getTransportClient();
 
-        SortBuilder sortBuilder1 = new FieldSortBuilder(ESConstant.InstitutionName_ES).order(SortOrder.DESC);
-        SortBuilder sortBuilder2 = new FieldSortBuilder(ESConstant.ORGAN_ES).order(SortOrder.DESC);
-        SortBuilder sortBuilder3 = new FieldSortBuilder(ESConstant.PatientName_ES).order(SortOrder.DESC);
-        SortBuilder sortBuilder4 = new FieldSortBuilder(ESConstant.SeriesDate_ES).order(SortOrder.DESC);
-        SortBuilder sortBuilder5 = new FieldSortBuilder(ESConstant.SeriesDescription_ES).order(SortOrder.DESC);
-        SortBuilder sortBuilder6 = new FieldSortBuilder(ESConstant.NumberOfSlices_ES).order(SortOrder.DESC);
+        SortBuilder sortBuilder1 = new FieldSortBuilder(ESConstant.InstitutionName_ES_DCM).order(SortOrder.DESC);
+        SortBuilder sortBuilder2 = new FieldSortBuilder(ESConstant.ORGAN_ES_DCM).order(SortOrder.DESC);
+        SortBuilder sortBuilder3 = new FieldSortBuilder(ESConstant.PatientName_ES_DCM).order(SortOrder.DESC);
+        SortBuilder sortBuilder4 = new FieldSortBuilder(ESConstant.SeriesDate_ES_DCM).order(SortOrder.DESC);
+        SortBuilder sortBuilder5 = new FieldSortBuilder(ESConstant.SeriesDescription_ES_DCM).order(SortOrder.DESC);
+        SortBuilder sortBuilder6 = new FieldSortBuilder(ESConstant.NumberOfSlices_ES_DCM).order(SortOrder.DESC);
 
 
 
@@ -189,12 +189,12 @@ public class Demo {
     private static JSONObject parseHit(SearchHit searchHit){
         JSONObject json = new JSONObject();
         Map<String, Object> sourceAsMap = searchHit.getSourceAsMap();
-        json.put(ESConstant.InstitutionName_ES,sourceAsMap.get(ESConstant.InstitutionName_ES));
-        json.put(ESConstant.ORGAN_ES,sourceAsMap.get(ESConstant.ORGAN_ES));
-        json.put(ESConstant.PatientName_ES,sourceAsMap.get(ESConstant.PatientName_ES));
-        json.put(ESConstant.SeriesDescription_ES,sourceAsMap.get(ESConstant.SeriesDescription_ES));
-        json.put(ESConstant.SeriesDate_ES,sourceAsMap.get(ESConstant.SeriesDate_ES));
-        json.put(ESConstant.NumberOfSlices_ES,sourceAsMap.get(ESConstant.NumberOfSlices_ES));
+        json.put(ESConstant.InstitutionName_ES_DCM,sourceAsMap.get(ESConstant.InstitutionName_ES_DCM));
+        json.put(ESConstant.ORGAN_ES_DCM,sourceAsMap.get(ESConstant.ORGAN_ES_DCM));
+        json.put(ESConstant.PatientName_ES_DCM,sourceAsMap.get(ESConstant.PatientName_ES_DCM));
+        json.put(ESConstant.SeriesDescription_ES_DCM,sourceAsMap.get(ESConstant.SeriesDescription_ES_DCM));
+        json.put(ESConstant.SeriesDate_ES_DCM,sourceAsMap.get(ESConstant.SeriesDate_ES_DCM));
+        json.put(ESConstant.NumberOfSlices_ES_DCM,sourceAsMap.get(ESConstant.NumberOfSlices_ES_DCM));
         return json;
     }
 

@@ -23,9 +23,12 @@ import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
 import yasen.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
+import yasen.bigdata.infosupplyer.consts.DataTypeEnum;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
 import yasen.bigdata.infosupplyer.factory.EsClientFactory;
+import yasen.bigdata.infosupplyer.pojo.DicomSearchCriteriaBean;
+import yasen.bigdata.infosupplyer.pojo.ElectricSignalSearchCriteriaBean;
 import yasen.bigdata.infosupplyer.pojo.IdSearchParamBean;
 import yasen.bigdata.infosupplyer.pojo.PageSearchParamBean;
 import yasen.bigdata.infosupplyer.service.ElasticSearchService;
@@ -42,125 +45,157 @@ import java.util.*;
 @Service("ElasticSearchService")
 public class ElasticSearchServiceImpl implements ElasticSearchService {
 
+    InfosupplyerConfiguration conf = null;
+
+    public ElasticSearchServiceImpl(){
+        conf = new InfosupplyerConfiguration();
+    }
 
     @Override
-    public JSONObject searchByPaging(JSONObject param) {
-        PageSearchParamBean pageSearchParamBean = new PageSearchParamBean(param);
-        if(!pageSearchParamBean.isSearchconditionAvailable()){
-            return createErrorMsg(SysConstants.CODE_010,"searchByPaging","查询条件参数为空");
-        }else if(pageSearchParamBean.isParseError()){
-            return createErrorMsg(SysConstants.CODE_011,"searchByPaging","参数解析错误");
-        }
-
-        InfosupplyerConfiguration conf = new InfosupplyerConfiguration();
+    public JSONObject searchByPaging(JSONObject param, DataTypeEnum type) {
+        PageSearchParamBean pageSearchParamBean = new PageSearchParamBean(param,type);
+        JSONObject result = null;
         TransportClient transportClient = EsClientFactory.getTransportClient();
 
-        //创建查询条件
-        QueryBuilder queryBuilder = createQueryBuilder(pageSearchParamBean);
-        //封装请求
-        SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(transportClient, pageSearchParamBean,
-                conf, queryBuilder);
-        //拿取结果
-        JSONObject result = createResult(transportClient,searchRequestBuilder,
-                pageSearchParamBean.getBackfields(),pageSearchParamBean.isPaging(),pageSearchParamBean.getPagesize());
+        if(type == DataTypeEnum.DICOM){
+            if(!pageSearchParamBean.isDicomSearchCriteriaAvailable()){
+                return createErrorMsg(SysConstants.CODE_010,"searchByPaging","查询条件参数为空");
+            }else if(pageSearchParamBean.isParseError()){
+                return createErrorMsg(SysConstants.CODE_011,"searchByPaging","参数解析错误");
+            }
+
+
+
+            //创建查询条件
+            QueryBuilder queryBuilder = createQueryBuilderForDicom(pageSearchParamBean);
+            //封装请求
+            SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(transportClient, pageSearchParamBean,
+                    conf.getIndexDicom(),conf.getTypeDicom(), queryBuilder);
+            //拿取结果
+            result = createResult(transportClient,searchRequestBuilder,
+                    pageSearchParamBean.getBackfields(),pageSearchParamBean.isPaging(),pageSearchParamBean.getPagesize());
+        }else if(type == DataTypeEnum.ELECTRIC){
+            if(!pageSearchParamBean.isElectricSignalSearchCriteriaAvailable()){
+                return createErrorMsg(SysConstants.CODE_010,"searchByPaging","查询条件参数为空");
+            }else if(pageSearchParamBean.isParseError()){
+                return createErrorMsg(SysConstants.CODE_011,"searchByPaging","参数解析错误");
+            }
+            //创建查询条件
+            QueryBuilder queryBuilder = createQueryBuilderForElectric(pageSearchParamBean);
+            //封装请求
+            SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(transportClient, pageSearchParamBean,
+                    conf.getIndexElectric(),conf.getTypeElectric(), queryBuilder);
+            //拿取结果
+            result = createResult(transportClient,searchRequestBuilder,
+                    pageSearchParamBean.getBackfields(),pageSearchParamBean.isPaging(),pageSearchParamBean.getPagesize());
+        }
+
+
 
         return result;
     }
 
-    private QueryBuilder createQueryBuilder(PageSearchParamBean pageSearchParamBean){
-        if(!pageSearchParamBean.isSearchconditionAvailable()){
+    private QueryBuilder createQueryBuilderForDicom(PageSearchParamBean pageSearchParamBean){
+        if(!pageSearchParamBean.isDicomSearchCriteriaAvailable()){
             return QueryBuilders.matchAllQuery();
         }
 
         List<QueryBuilder> matchQueryList = new ArrayList<QueryBuilder>();
+        DicomSearchCriteriaBean dicomSearchCriteriaBean = pageSearchParamBean.getDicomSearchCriteriaBean();
         //创建查询条件
         //精确值的字段：MRI序列，性别
         //如果有该查询条件则加到querybuilder中，否则则不加
 
         //标签
-        if(pageSearchParamBean.isTagAvailable()){
-            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.TAG_ES, pageSearchParamBean.getTag()));
+        if(dicomSearchCriteriaBean.isTagAvailable()){
+            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.TAG_ES_DCM, dicomSearchCriteriaBean.getTag()));
         }
 
+        //名字
+        if(dicomSearchCriteriaBean.isPatientnameAvailable()){
+            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.PatientName_ES_DCM, dicomSearchCriteriaBean.getPatientname()));
+        }
+
+
         //医院
-        if(pageSearchParamBean.isInstitutionAvailable()){
+        if(dicomSearchCriteriaBean.isInstitutionAvailable()){
             //此处使用termsQuery(String name,String value)精确匹配单个值
-            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.InstitutionName_ES, pageSearchParamBean.getInstitution()));
+            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.InstitutionName_ES_DCM, dicomSearchCriteriaBean.getInstitution()));
         }
         //器官精确查询
-        if(pageSearchParamBean.isOrganAvailable()){
-            matchQueryList.add(QueryBuilders.termQuery(ESConstant.ORGAN_ES,pageSearchParamBean.getOrgan()));
+        if(dicomSearchCriteriaBean.isOrganAvailable()){
+            matchQueryList.add(QueryBuilders.termQuery(ESConstant.ORGAN_ES_DCM,dicomSearchCriteriaBean.getOrgan()));
         }
         //序列描述
-        if(pageSearchParamBean.isSeriesdescriptionAvailable()){
-            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.SeriesDescription_ES,pageSearchParamBean.getSeriesdescription()));
+        if(dicomSearchCriteriaBean.isSeriesdescriptionAvailable()){
+            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.SeriesDescription_ES_DCM,dicomSearchCriteriaBean.getSeriesdescription()));
         }
         //设备
-        if(pageSearchParamBean.isDeviceAvailable()){
-            if(pageSearchParamBean.isdevicePhrase()){
-                matchQueryList.add(QueryBuilders.matchPhraseQuery(ESConstant.ManufacturersModelName_ES,pageSearchParamBean.getDevice()));
+        if(dicomSearchCriteriaBean.isDeviceAvailable()){
+            if(dicomSearchCriteriaBean.isdevicePhrase()){
+                matchQueryList.add(QueryBuilders.matchPhraseQuery(ESConstant.ManufacturersModelName_ES_DCM,dicomSearchCriteriaBean.getDevice()));
             }
-            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.ManufacturersModelName_ES,pageSearchParamBean.getDevice()));
+            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.ManufacturersModelName_ES_DCM,dicomSearchCriteriaBean.getDevice()));
         }
         //性别
-        if(pageSearchParamBean.isSexAvailable()){
-            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.PatientsSex_ES,pageSearchParamBean.getSex()));
+        if(dicomSearchCriteriaBean.isSexAvailable()){
+            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.PatientsSex_ES_DCM,dicomSearchCriteriaBean.getSex()));
         }
 
         //年龄段
-        if(pageSearchParamBean.isAgeStartAvailable() || pageSearchParamBean.isAgeEndAvailable()){
-            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.PatientsAge_ES);
-            if(pageSearchParamBean.isAgeStartAvailable()){
-                rangbuilder.gte(pageSearchParamBean.getAgeStart());
+        if(dicomSearchCriteriaBean.isAgeStartAvailable() || dicomSearchCriteriaBean.isAgeEndAvailable()){
+            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.PatientsAge_ES_DCM);
+            if(dicomSearchCriteriaBean.isAgeStartAvailable()){
+                rangbuilder.gte(dicomSearchCriteriaBean.getAgeStart());
             }
-            if(pageSearchParamBean.isAgeEndAvailable()){
-                rangbuilder.lte(pageSearchParamBean.getAgeEnd());
+            if(dicomSearchCriteriaBean.isAgeEndAvailable()){
+                rangbuilder.lte(dicomSearchCriteriaBean.getAgeEnd());
             }
             matchQueryList.add(rangbuilder);
         }
 
         //检查日期段20170811-20180201
-        if(pageSearchParamBean.isStudydateStartAvailable() || pageSearchParamBean.isStudydateEndAvailable()){
-            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.SeriesDate_ES);
-            if(pageSearchParamBean.isStudydateStartAvailable()){
-                rangbuilder.gte(pageSearchParamBean.getStudydateStart());
+        if(dicomSearchCriteriaBean.isStudydateStartAvailable() || dicomSearchCriteriaBean.isStudydateEndAvailable()){
+            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.SeriesDate_ES_DCM);
+            if(dicomSearchCriteriaBean.isStudydateStartAvailable()){
+                rangbuilder.gte(dicomSearchCriteriaBean.getStudydateStart());
             }
-            if(pageSearchParamBean.isStudydateEndAvailable()){
-                rangbuilder.lte(pageSearchParamBean.getStudydateEnd());
+            if(dicomSearchCriteriaBean.isStudydateEndAvailable()){
+                rangbuilder.lte(dicomSearchCriteriaBean.getStudydateEnd());
             }
             matchQueryList.add(rangbuilder);
         }
 
         //数据收入日期段
-        if(pageSearchParamBean.isEntrydateStartAvailable() || pageSearchParamBean.isEntrydateEndAvailable()){
-            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.ENTRYDATE_ES);
-            if(pageSearchParamBean.isEntrydateStartAvailable()){
-                rangbuilder.gte(pageSearchParamBean.getEntrydateStart());
+        if(dicomSearchCriteriaBean.isEntrydateStartAvailable() || dicomSearchCriteriaBean.isEntrydateEndAvailable()){
+            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.ENTRYDATE_ES_DCM);
+            if(dicomSearchCriteriaBean.isEntrydateStartAvailable()){
+                rangbuilder.gte(dicomSearchCriteriaBean.getEntrydateStart());
             }
-            if(pageSearchParamBean.isEntrydateEndAvailable()){
-                rangbuilder.lte(pageSearchParamBean.getEntrydateEnd());
+            if(dicomSearchCriteriaBean.isEntrydateEndAvailable()){
+                rangbuilder.lte(dicomSearchCriteriaBean.getEntrydateEnd());
             }
             matchQueryList.add(rangbuilder);
         }
 
-        if(pageSearchParamBean.isImagecountMinAvailable() || pageSearchParamBean.isImagecountMaxAvailable()){
-            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.NumberOfSlices_ES);
-            if(pageSearchParamBean.isImagecountMinAvailable()){
-                rangbuilder.gte(pageSearchParamBean.getImagecountMin());
+        if(dicomSearchCriteriaBean.isImagecountMinAvailable() || dicomSearchCriteriaBean.isImagecountMaxAvailable()){
+            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.NumberOfSlices_ES_DCM);
+            if(dicomSearchCriteriaBean.isImagecountMinAvailable()){
+                rangbuilder.gte(dicomSearchCriteriaBean.getImagecountMin());
             }
-            if(pageSearchParamBean.isImagecountMaxAvailable()){
-                rangbuilder.lte(pageSearchParamBean.getImagecountMax());
+            if(dicomSearchCriteriaBean.isImagecountMaxAvailable()){
+                rangbuilder.lte(dicomSearchCriteriaBean.getImagecountMax());
             }
             matchQueryList.add(rangbuilder);
         }
         //层厚
-        if(pageSearchParamBean.isSlicethicknessMinAvailable() || pageSearchParamBean.isSlicethicknessMaxAvailable()){
-            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.SliceThickness_ES);
-            if(pageSearchParamBean.isSlicethicknessMinAvailable()){
-                rangbuilder.gte(pageSearchParamBean.getSlicethicknessMin());
+        if(dicomSearchCriteriaBean.isSlicethicknessMinAvailable() || dicomSearchCriteriaBean.isSlicethicknessMaxAvailable()){
+            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.SliceThickness_ES_DCM);
+            if(dicomSearchCriteriaBean.isSlicethicknessMinAvailable()){
+                rangbuilder.gte(dicomSearchCriteriaBean.getSlicethicknessMin());
             }
-            if(pageSearchParamBean.isSlicethicknessMaxAvailable()){
-                rangbuilder.lte(pageSearchParamBean.getSlicethicknessMax());
+            if(dicomSearchCriteriaBean.isSlicethicknessMaxAvailable()){
+                rangbuilder.lte(dicomSearchCriteriaBean.getSlicethicknessMax());
             }
             matchQueryList.add(rangbuilder);
         }
@@ -174,11 +209,72 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         return boolBuilder;
     }
 
+    private QueryBuilder createQueryBuilderForElectric(PageSearchParamBean pageSearchParamBean){
+        if(!pageSearchParamBean.isElectricSignalSearchCriteriaAvailable()){
+            return QueryBuilders.matchAllQuery();
+        }
+
+        List<QueryBuilder> matchQueryList = new ArrayList<QueryBuilder>();
+        ElectricSignalSearchCriteriaBean electricSignalSearchCriteriaBean = pageSearchParamBean.getElectricSignalSearchCriteriaBean();
+        //PatientUID精确查询
+        if(electricSignalSearchCriteriaBean.isPatientUIDAvailable()){
+            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.PatientUID_ES_ELECTRIC, electricSignalSearchCriteriaBean.getPatientUID()));
+        }
+        //PatientName精确查询
+        if(electricSignalSearchCriteriaBean.isPatientNameAvailable()){
+            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.PatientName_ES_ELECTRIC, electricSignalSearchCriteriaBean.getPatientName()));
+        }
+        //PatientsAge范围查询
+        if(electricSignalSearchCriteriaBean.isAgeStartAvailable() || electricSignalSearchCriteriaBean.isAgeEndAvailable()){
+            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.PatientsAge_ES_ELECTRIC);
+            if(electricSignalSearchCriteriaBean.isAgeStartAvailable()){
+                rangbuilder.gte(electricSignalSearchCriteriaBean.getAgeStart());
+            }
+            if(electricSignalSearchCriteriaBean.isAgeEndAvailable()){
+                rangbuilder.lte(electricSignalSearchCriteriaBean.getAgeEnd());
+            }
+            matchQueryList.add(rangbuilder);
+        }
+
+        //createdate范围查询
+        if(electricSignalSearchCriteriaBean.isCreatedateStartAvailable() || electricSignalSearchCriteriaBean.isCreatedateEndAvailable()){
+            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.CreateDate_ES_ELECTRIC);
+            if(electricSignalSearchCriteriaBean.isCreatedateStartAvailable()){
+                rangbuilder.gte(electricSignalSearchCriteriaBean.getCreatedateStart());
+            }
+            if(electricSignalSearchCriteriaBean.isCreatedateEndAvailable()){
+                rangbuilder.lte(electricSignalSearchCriteriaBean.getCreatedateEnd());
+            }
+            matchQueryList.add(rangbuilder);
+        }
+        //InstitutionName精确查询
+        if(electricSignalSearchCriteriaBean.isInstitutionNameAvailable()){
+            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.InstitutionName_ES_ELECTRIC, electricSignalSearchCriteriaBean.getInstitutionName()));
+        }
+        //entrydate范围查询
+        if(electricSignalSearchCriteriaBean.isEntrydateStartAvailable() || electricSignalSearchCriteriaBean.isEntrydateEndAvailable()){
+            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.ENTRYDATE_ES_ELECTRIC);
+            if(electricSignalSearchCriteriaBean.isEntrydateStartAvailable()){
+                rangbuilder.gte(electricSignalSearchCriteriaBean.getEntrydateStart());
+            }
+            if(electricSignalSearchCriteriaBean.isEntrydateEndAvailable()){
+                rangbuilder.lte(electricSignalSearchCriteriaBean.getEntrydateEnd());
+            }
+            matchQueryList.add(rangbuilder);
+        }
+        // 等同于bool，将两个查询合并
+        BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
+        for(QueryBuilder e : matchQueryList) {
+            boolBuilder.must(e);
+        }
+        return boolBuilder;
+    }
+
     private SearchRequestBuilder createSearchRequestBuilder(
-            TransportClient transportClient,PageSearchParamBean pageSearchParamBean,InfosupplyerConfiguration conf,
+            TransportClient transportClient,PageSearchParamBean pageSearchParamBean,String index,String type,
             QueryBuilder queryBuilder){
-        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(conf.getIndexDicom())
-                .setTypes(conf.getTypeDicom())
+        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(index)
+                .setTypes(type)
                 // 设置查询类型
                 .setSearchType(SearchType.DEFAULT)
                 // 设置查询关键词
@@ -277,24 +373,40 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 
 
     @Override
-    public JSONObject searchTotalRecord(JSONObject param) {
-        PageSearchParamBean pageSearchParamBean = new PageSearchParamBean(param);
-        if(!pageSearchParamBean.isSearchconditionAvailable()){
-            return createErrorMsg(SysConstants.CODE_010,"searchTotalRecord","查询条件参数为空");
-        }else if(pageSearchParamBean.isParseError()){
-            return createErrorMsg(SysConstants.CODE_011,"searchTotalRecord","参数解析错误");
-        }
-
-        InfosupplyerConfiguration conf = new InfosupplyerConfiguration();
+    public JSONObject searchTotalRecord(JSONObject param, DataTypeEnum type) {
+        PageSearchParamBean pageSearchParamBean = new PageSearchParamBean(param,type);
         TransportClient transportClient = EsClientFactory.getTransportClient();
-        //创建查询条件
-        QueryBuilder queryBuilder = createQueryBuilder(pageSearchParamBean);
-        //封装请求
-        SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(
-                transportClient, pageSearchParamBean, conf, queryBuilder);
-        long totalHits = searchRequestBuilder.execute().actionGet().getHits().getTotalHits();
         JSONObject result = new JSONObject();
-        result.put(SysConstants.TOTAL,totalHits);
+        if(type == DataTypeEnum.DICOM){
+            if(!pageSearchParamBean.isDicomSearchCriteriaAvailable()){
+                return createErrorMsg(SysConstants.CODE_010,"searchTotalRecord","查询条件参数为空");
+            }else if(pageSearchParamBean.isParseError()){
+                return createErrorMsg(SysConstants.CODE_011,"searchTotalRecord","参数解析错误");
+            }
+
+            //创建查询条件
+            QueryBuilder queryBuilder = createQueryBuilderForDicom(pageSearchParamBean);
+            //封装请求
+            SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(
+                    transportClient, pageSearchParamBean, conf.getIndexDicom(),conf.getTypeDicom(), queryBuilder);
+            long totalHits = searchRequestBuilder.execute().actionGet().getHits().getTotalHits();
+            result = new JSONObject();
+            result.put(SysConstants.TOTAL,totalHits);
+        }else if(type == DataTypeEnum.ELECTRIC){
+            if(!pageSearchParamBean.isElectricSignalSearchCriteriaAvailable()){
+                return createErrorMsg(SysConstants.CODE_010,"searchTotalRecord","查询条件参数为空");
+            }else if(pageSearchParamBean.isParseError()){
+                return createErrorMsg(SysConstants.CODE_011,"searchTotalRecord","参数解析错误");
+            }
+            //创建查询条件
+            QueryBuilder queryBuilder = createQueryBuilderForElectric(pageSearchParamBean);
+            //封装请求
+            SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(
+                    transportClient, pageSearchParamBean, conf.getIndexDicom(),conf.getTypeDicom(), queryBuilder);
+            long totalHits = searchRequestBuilder.execute().actionGet().getHits().getTotalHits();
+            result.put(SysConstants.CODE,SysConstants.CODE_000);
+            result.put(SysConstants.TOTAL,totalHits);
+        }
         return result;
     }
 
@@ -306,27 +418,38 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         }else if(idSearchParamBean.isParseError()){
             return createErrorMsg(SysConstants.CODE_011,"searchByIds","参数解析错误");
         }
+
+        JSONObject result = null;
+
         InfosupplyerConfiguration conf = new InfosupplyerConfiguration();
         TransportClient transportClient = EsClientFactory.getTransportClient();
-        SearchRequestBuilder searchRequestBuilderForIds = createSearchRequestBuilderForIds(
-                transportClient, idSearchParamBean, conf);
-        JSONObject result = createResult(transportClient, searchRequestBuilderForIds, idSearchParamBean.getBackfields(),
-                false,SysConstants.DEFAULT_PAGESIZE);
+        if(DataTypeEnum.DICOM == idSearchParamBean.getType()){
+            SearchRequestBuilder searchRequestBuilderForIds = createSearchRequestBuilderForIds(
+                    transportClient, idSearchParamBean, conf.getIndexDicom(),conf.getTypeDicom());
+            result = createResult(transportClient, searchRequestBuilderForIds, idSearchParamBean.getBackfields(),
+                    false,SysConstants.DEFAULT_PAGESIZE);
+        }else if(DataTypeEnum.ELECTRIC == idSearchParamBean.getType()){
+            SearchRequestBuilder searchRequestBuilderForIds = createSearchRequestBuilderForIds(
+                    transportClient, idSearchParamBean, conf.getIndexElectric(),conf.getTypeElectric());
+            result = createResult(transportClient, searchRequestBuilderForIds, idSearchParamBean.getBackfields(),
+                    false,SysConstants.DEFAULT_PAGESIZE);
+        }
+
         return result;
     }
 
     @Override
     public JSONObject searchAll() {
-        PageSearchParamBean pageSearchParamBean = new PageSearchParamBean(new JSONObject());
+        PageSearchParamBean pageSearchParamBean = new PageSearchParamBean(new JSONObject(),DataTypeEnum.DICOM);
 
         InfosupplyerConfiguration conf = new InfosupplyerConfiguration();
         TransportClient transportClient = EsClientFactory.getTransportClient();
 
         //创建查询条件
-        QueryBuilder queryBuilder = createQueryBuilder(pageSearchParamBean);
+        QueryBuilder queryBuilder = createQueryBuilderForDicom(pageSearchParamBean);
         //封装请求
         SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(
-                transportClient, pageSearchParamBean, conf, queryBuilder);
+                transportClient, pageSearchParamBean, conf.getIndexDicom(),conf.getTypeDicom(), queryBuilder);
         //拿取结果
         JSONObject result = createResult(transportClient,searchRequestBuilder,
                 pageSearchParamBean.getBackfields(),pageSearchParamBean.isPaging(),pageSearchParamBean.getPagesize());
@@ -369,14 +492,14 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
     }
 
     private SearchRequestBuilder createSearchRequestBuilderForIds(
-            TransportClient transportClient,IdSearchParamBean idSearchParamBean,InfosupplyerConfiguration conf){
+            TransportClient transportClient,IdSearchParamBean idSearchParamBean,String index,String type){
         String[] params = new String[idSearchParamBean.getIds().size()];
         idSearchParamBean.getIds().toArray(params);
-        QueryBuilder queryBuilder = QueryBuilders.idsQuery(conf.getTypeDicom());
+        QueryBuilder queryBuilder = QueryBuilders.idsQuery(type);
         ((IdsQueryBuilder) queryBuilder).addIds(params);
 
-        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(conf.getIndexDicom())
-                .setTypes(conf.getTypeDicom())
+        SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(index)
+                .setTypes(type)
                 .setQuery(queryBuilder)
                 .setSearchType(SearchType.DEFAULT)
                 .setScroll(new TimeValue(100000))

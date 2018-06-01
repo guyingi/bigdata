@@ -10,6 +10,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yasen.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
+import yasen.bigdata.infosupplyer.consts.DataTypeEnum;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
 import yasen.bigdata.infosupplyer.consts.SysConstants;
 import yasen.bigdata.infosupplyer.dao.BreastRoiDao;
@@ -89,17 +90,18 @@ public class DesensitizationServiceImpl implements DesensitizationService {
             JSONObject searchcondition = new JSONObject();
             searchcondition.put("tag", tag);
             JSONArray backfields = new JSONArray();
-            backfields.add(ESConstant.SeriesUID_ES);
-            backfields.add(ESConstant.HDFSPATH);
-            param.put(SysConstants.SEARCH_CONDITION, searchcondition);
+            backfields.add(ESConstant.SeriesUID_ES_DCM);
+            backfields.add(ESConstant.HDFSPATH_ES_DCM);
+            param.put(SysConstants.SEARCH_CRITERIA, searchcondition);
             param.put(SysConstants.BACKFIELDS, backfields);
-            JSONObject metaMsg = elasticSearchService.searchByPaging(param);
+            DataTypeEnum type = DataTypeEnum.DICOM;
+            JSONObject metaMsg = elasticSearchService.searchByPaging(param,type);
             if (SysConstants.CODE_000.equals(metaMsg.getString(SysConstants.CODE))) {
                 total = metaMsg.getLong("total");
                 JSONArray data = metaMsg.getJSONArray("data");
                 for (int i = 0; i < total; i++) {
                     JSONObject jsonObject = data.getJSONObject(i);
-                    hdfspaths.add(jsonObject.getString(ESConstant.HDFSPATH));
+                    hdfspaths.add(jsonObject.getString(ESConstant.HDFSPATH_ES_DCM));
                 }
             }
             success = success;
@@ -191,9 +193,9 @@ public class DesensitizationServiceImpl implements DesensitizationService {
         /**步骤2：查询ES，获取必要数据:【PatientUID】,【StudyID】【rowkey】,
          * 沿用dicom序列rowkey：rowkey:3位盐值+4位检查+MD5(seriesUID).sub(0,16)+CRC32(时间戳)
          **/
-        String patientUID = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicom(), infosupplyerConfiguration.getTypeDicom(), seriesUID, ESConstant.PatientUID_ES);
-        String studyID = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicom(), infosupplyerConfiguration.getTypeDicom(), seriesUID, ESConstant.StudyID_ES);
-        String rowkey = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicom(), infosupplyerConfiguration.getTypeDicom(), seriesUID, ESConstant.ROWKEY);
+        String patientUID = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicom(), infosupplyerConfiguration.getTypeDicom(), seriesUID, ESConstant.PatientUID_ES_DCM);
+        String studyID = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicom(), infosupplyerConfiguration.getTypeDicom(), seriesUID, ESConstant.StudyID_ES_DCM);
+        String rowkey = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicom(), infosupplyerConfiguration.getTypeDicom(), seriesUID, ESConstant.ROWKEY_ES_DCM);
         System.out.println("步骤2:patientUID"+patientUID+",studyID:"+studyID+",rowkey:"+rowkey);
         if(rowkey == null){
             System.out.println("文件名为："+seriesDir.getAbsolutePath()+"的脱敏数据在es中无数据，该次上传失败");
@@ -209,13 +211,13 @@ public class DesensitizationServiceImpl implements DesensitizationService {
         String hdfspath = dirPrefixDesensitization+SysConstants.LEFT_SLASH+tag+datePath+SysConstants.LEFT_SLASH+seriesUID;
 
         Map<String,String> metaData = new HashMap<String,String>();
-        metaData.put(ESConstant.ROWKEY,rowkey);
-        metaData.put(ESConstant.PatientUID_ES,patientUID);
-        metaData.put(ESConstant.SeriesUID_ES,seriesUID);
-        metaData.put(ESConstant.StudyID_ES,studyID);
-        metaData.put(ESConstant.HDFSPATH,hdfspath);
-        metaData.put(ESConstant.ENTRYDATE_ES,entryDate);
-        metaData.put(ESConstant.TAG_ES,tag);
+        metaData.put(ESConstant.ROWKEY_ES_DCM,rowkey);
+        metaData.put(ESConstant.PatientUID_ES_DCM,patientUID);
+        metaData.put(ESConstant.SeriesUID_ES_DCM,seriesUID);
+        metaData.put(ESConstant.StudyID_ES_DCM,studyID);
+        metaData.put(ESConstant.HDFSPATH_ES_DCM,hdfspath);
+        metaData.put(ESConstant.ENTRYDATE_ES_DCM,entryDate);
+        metaData.put(ESConstant.TAG_ES_DCM,tag);
 
         for(Map.Entry<String,String> entry : metaData.entrySet()){
             System.out.println(entry.getKey()+":"+entry.getValue());
@@ -270,14 +272,15 @@ public class DesensitizationServiceImpl implements DesensitizationService {
             JSONObject searchcondition = new JSONObject();
             searchcondition.put(SysConstants.TAG_PARAM, tag);
             JSONArray backfields = new JSONArray();
-            backfields.add(ESConstant.StudyInstanceUID_ES);
-            backfields.add(ESConstant.SeriesInstanceUID_ES);
-            backfields.add(ESConstant.SeriesUID_ES);
-            backfields.add(ESConstant.ORGAN_ES);
+            backfields.add(ESConstant.StudyInstanceUID_ES_DCM);
+            backfields.add(ESConstant.SeriesInstanceUID_ES_DCM);
+            backfields.add(ESConstant.SeriesUID_ES_DCM);
+            backfields.add(ESConstant.ORGAN_ES_DCM);
             JSONObject param = new JSONObject();
-            param.put(SysConstants.SEARCH_CONDITION, searchcondition);
+            param.put(SysConstants.SEARCH_CRITERIA, searchcondition);
             param.put(SysConstants.BACKFIELDS, backfields);
-            result = elasticSearchService.searchByPaging(param);
+            DataTypeEnum type = DataTypeEnum.DICOM;
+            result = elasticSearchService.searchByPaging(param,type);
             if(result == null || !SysConstants.CODE_000.equals(result.getString(SysConstants.CODE))){
                 success = false;
             }
@@ -289,7 +292,7 @@ public class DesensitizationServiceImpl implements DesensitizationService {
             int size = jsonArray.size();
             for(int i = 0; i < size; i++){
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                String studyInstanceUID = jsonObject.getString(ESConstant.StudyInstanceUID_ES);
+                String studyInstanceUID = jsonObject.getString(ESConstant.StudyInstanceUID_ES_DCM);
                 if(studies.containsKey(studyInstanceUID)){
                     List<JSONObject> jsonObjects = studies.get(studyInstanceUID);
                     jsonObjects.add(jsonObject);
@@ -300,7 +303,7 @@ public class DesensitizationServiceImpl implements DesensitizationService {
                     studies.put(studyInstanceUID,jsonObjects);
                 }
             }
-            organ = jsonArray.getJSONObject(0).getString(ESConstant.ORGAN_ES);
+            organ = jsonArray.getJSONObject(0).getString(ESConstant.ORGAN_ES_DCM);
             if(studies.size() == 0){
                 success = false;
             }
@@ -382,7 +385,7 @@ public class DesensitizationServiceImpl implements DesensitizationService {
             List<String> seriesList = new ArrayList<>();
             List<JSONObject> value = entry.getValue();
             for(JSONObject jsonObject : value){
-                seriesList.add(jsonObject.getString(ESConstant.SeriesInstanceUID_ES));
+                seriesList.add(jsonObject.getString(ESConstant.SeriesInstanceUID_ES_DCM));
             }
             //2.访问数据库，查询info.csv需要的数据
             List<String> seriesuids = new ArrayList<String>();
@@ -455,8 +458,8 @@ public class DesensitizationServiceImpl implements DesensitizationService {
             //5.循环处理series，查询series对应部位，创建.mhd，.raw文件名,从hdfs拷贝数据到本地
             for(JSONObject jsonObject : value){
                 //es中的seriesinstanceuid与数据库表series中seriessop对应
-                String seriessop = jsonObject.getString(ESConstant.SeriesInstanceUID_ES);
-                String seriesUID = jsonObject.getString(ESConstant.SeriesUID_ES);
+                String seriessop = jsonObject.getString(ESConstant.SeriesInstanceUID_ES_DCM);
+                String seriesUID = jsonObject.getString(ESConstant.SeriesUID_ES_DCM);
                 String series_des = seriesDao.searchSingleFieldBySeriessop(seriessop,SysConstants.SERIES_DES);
                 series_des = series_des.replace(SysConstants.SPACE,"").trim();
 
@@ -468,7 +471,7 @@ public class DesensitizationServiceImpl implements DesensitizationService {
                 }
 
                 String hdfspath = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicomDisensitization(),
-                        infosupplyerConfiguration.getTypeDicomDisensitization(),seriesUID,ESConstant.HDFSPATH);
+                        infosupplyerConfiguration.getTypeDicomDisensitization(),seriesUID,ESConstant.HDFSPATH_ES_DCM);
                 String[] desensitizedFileLocal = hdfsService.downDicomDesensitization(tagtemp,hdfspath,hdfsConf);
                 String mhdFilePath = desensitizedFileLocal[0];
                 String rawFilePath = desensitizedFileLocal[1];
@@ -511,9 +514,9 @@ public class DesensitizationServiceImpl implements DesensitizationService {
             List<String> hdfs = new ArrayList<>();
             List<JSONObject> values = entry.getValue();
             for(JSONObject value : values){
-                String seriesUID = value.getString(ESConstant.SeriesUID_ES);
+                String seriesUID = value.getString(ESConstant.SeriesUID_ES_DCM);
                 String hdfspath = (String)elasticSearchService.getField(infosupplyerConfiguration.getIndexDicomDisensitization(),
-                        infosupplyerConfiguration.getTypeDicomDisensitization(),seriesUID,ESConstant.HDFSPATH);
+                        infosupplyerConfiguration.getTypeDicomDisensitization(),seriesUID,ESConstant.HDFSPATH_ES_DCM);
                 hdfs.add(hdfspath);
             }
             /**步骤四：从hdfs下载.mhd,.raw数据到本地临时目录*/

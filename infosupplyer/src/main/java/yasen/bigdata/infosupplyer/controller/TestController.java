@@ -171,19 +171,19 @@ public class TestController {
 //        JSONObject json = new JSONObject();
 //        String deviceType = (String)param.get(ESConstant.DEVICE_PARAM);
 //        if(deviceType !=null && deviceType.length()!=0)
-//            json.put(ESConstant.ManufacturersModelName_ES,deviceType);
-//        String organ = (String)param.get(ESConstant.ORGAN_ES);
+//            json.put(ESConstant.ManufacturersModelName_ES_DCM,deviceType);
+//        String organ = (String)param.get(ESConstant.ORGAN_ES_DCM);
 //        if(organ !=null && organ.length()!=0)
-//            json.put(ESConstant.ORGAN_ES,organ);
+//            json.put(ESConstant.ORGAN_ES_DCM,organ);
 //        String hospital =(String)param.get(ESConstant.INSTITUTION_PARAM);
 //        if(hospital !=null && hospital.length()!=0)
-//            json.put(ESConstant.InstitutionName_ES,hospital);
+//            json.put(ESConstant.InstitutionName_ES_DCM,hospital);
 //        String mrisequence =(String)param.get(ESConstant.SERIES_DESCRIPTION_PARAM);
 //        if(mrisequence !=null && mrisequence.length()!=0)
-//            json.put(ESConstant.SeriesDescription_ES,mrisequence);
+//            json.put(ESConstant.SeriesDescription_ES_DCM,mrisequence);
 //        String sex =(String)param.get(ESConstant.SEX_PARAM);
 //        if(sex !=null && sex.length()!=0)
-//            json.put(ESConstant.PatientsSex_ES,sex);
+//            json.put(ESConstant.PatientsSex_ES_DCM,sex);
 //        String ageStartParam=(String)param.get(ESConstant.AGE_START_PARAM);
 //        if(ageStartParam !=null && ageStartParam.length()!=0)
 //            json.put(ESConstant.AGE_START_PARAM,ageStartParam);

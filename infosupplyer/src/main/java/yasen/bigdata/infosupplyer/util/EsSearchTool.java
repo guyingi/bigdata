@@ -212,7 +212,7 @@
 //        //数据收入日期段
 //        String entryDateSection = searchFieldJson.getString(ESConstant.ENTRYDATE_SECTION);
 //        if(entryDateSection !=null && entryDateSection.length()!=0){
-//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.ENTRYDATE_ES);
+//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.ENTRYDATE_ES_DCM);
 //            String section[] = entryDateSection.split("\\-");
 //            rangbuilder.gte(section[0]);
 //            rangbuilder.lte(section[1]);
@@ -230,10 +230,10 @@
 //            //此处使用termsQuery(String name,String ...values)同时匹配多个值
 //            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.HOSPITAL, hospital));
 //        }
-//        String organ = searchFieldJson.getString(ESConstant.ORGAN_ES);
+//        String organ = searchFieldJson.getString(ESConstant.ORGAN_ES_DCM);
 //        if(organ != null && organ.length()!=0){
 //            //此处使用termsQuery(String name,String ...values)同时匹配多个值
-//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.ORGAN_ES, organ));
+//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.ORGAN_ES_DCM, organ));
 //        }
 //
 //        // 等同于bool，将两个查询合并
@@ -295,7 +295,7 @@
 //        //数据收入日期段
 //        String entryDateSection = searchFieldJson.getString(ESConstant.ENTRYDATE_SECTION);
 //        if(entryDateSection !=null && entryDateSection.length()!=0){
-//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.ENTRYDATE_ES);
+//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstant.ENTRYDATE_ES_DCM);
 //            String section[] = entryDateSection.split("\\-");
 //            rangbuilder.gte(section[0]);
 //            rangbuilder.lte(section[1]);
@@ -314,10 +314,10 @@
 //            //此处使用termsQuery(String name,String ...values)同时匹配多个值
 //            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.HOSPITAL, hospital));
 //        }
-//        String organ = searchFieldJson.getString(ESConstant.ORGAN_ES);
+//        String organ = searchFieldJson.getString(ESConstant.ORGAN_ES_DCM);
 //        if(organ != null && organ.length()!=0){
 //            //此处使用termsQuery(String name,String ...values)同时匹配多个值
-//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.ORGAN_ES, organ));
+//            matchQueryList.add(QueryBuilders.matchQuery(ESConstant.ORGAN_ES_DCM, organ));
 //        }
 //
 //        // 等同于bool，将两个查询合并
@@ -366,7 +366,7 @@
 //
 //    public static boolean isExists(String id){
 ////        JsonObject json = new JsonObject();
-////        json.addProperty(ESConstant.ID_ES,id);
+////        json.addProperty(ESConstant.ID_ES_DCM,id);
 ////        List<JSONObject> results = esSearch(json);
 ////        return results.size()!=0;
 //        return true;

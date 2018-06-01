@@ -1,9 +1,6 @@
 package yasen.bigdata.milk.controller;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -71,7 +68,7 @@ public class DicomSearchController {
         sortfields.add(ESConstants.TAG_ES);
         sortfields.add(ESConstants.NumberOfSlices_ES);
 
-        JSONObject tempResult = searchService.searchByPaging(param, backfields,sortfields,1, SysConstants.DEFAULT_PAGE_SIZE);
+        JSONObject tempResult = searchService.searchDicomByPaging(param, backfields,sortfields,1, SysConstants.DEFAULT_PAGE_SIZE);
         result.put("total",tempResult.getLong("total"));
         result.put("rows",tempResult.getJSONArray("data"));
         System.out.println("total:"+tempResult.getLong("total"));
@@ -108,7 +105,7 @@ public class DicomSearchController {
         sortfields.add(ESConstants.TAG_ES);
         sortfields.add(ESConstants.NumberOfSlices_ES);
 
-        JSONObject tempResult = searchService.searchByPaging(param, backfields,sortfields,pageid, SysConstants.DEFAULT_PAGE_SIZE);
+        JSONObject tempResult = searchService.searchDicomByPaging(param, backfields,sortfields,pageid, SysConstants.DEFAULT_PAGE_SIZE);
         System.out.println(tempResult.toJSONString());
         result.put("total",tempResult.getLong("total"));
         result.put("rows",tempResult.getJSONArray("data"));
@@ -193,11 +190,13 @@ public class DicomSearchController {
     }
 
     @RequestMapping(value="downloaddicom")
-    public void downloadDicom(HttpServletRequest request, HttpServletResponse response) {
+    public void downloadDicom(HttpServletRequest request, HttpServletResponse response) throws Exception {
         System.out.println("downloadDicom is called");
         int times = 10;
         String projectPath = request.getSession().getServletContext().getRealPath("/");
-        String tempDir = projectPath+"temp"+MilkTool.getDelimiter();
+        String tempDir = projectPath+"temp";
+        String name = "dicom"+MilkTool.getRandonNumber(3);
+        String dicomTempDir = tempDir + File.separator + name;
         HttpSession session = request.getSession();
         List<String> ids = ( List<String>)session.getAttribute("idsForDicomFileDownload");
         while(ids==null && times-->0){
@@ -208,11 +207,19 @@ public class DicomSearchController {
             }
             ids = ( List<String>)session.getAttribute("idsForDicomFileDownload");
         }
-        String tempFilePath = null;
+        String zipSrcDir = null;
         if(ids!=null && ids.size()!=0) {
-            tempFilePath = searchService.getDicomZipByIds(ids, tempDir);
+            zipSrcDir = dataDownloadService.downloadDicomByIds(ids, dicomTempDir);
         }
-        MilkTool.doDownload(response,tempFilePath,"zip");
+
+        MilkTool.zipCompress(zipSrcDir,tempDir,name+".zip");
+        String zipFilePath = tempDir+name+".zip";
+        MilkTool.doDownload(response,zipFilePath,"zip");
+
+        //删除临时目录，zip文件
+        MilkTool.delFolder(zipSrcDir);
+        MilkTool.delFile(zipFilePath);
+
     }
 
     @RequestMapping(value = "downloaddicomhelp", method = RequestMethod.POST)

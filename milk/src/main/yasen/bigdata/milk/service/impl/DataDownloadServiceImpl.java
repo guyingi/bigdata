@@ -1,9 +1,16 @@
 package yasen.bigdata.milk.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yasen.bigdata.milk.conf.MilkConfiguration;
+import yasen.bigdata.milk.consts.DataTypeEnum;
+import yasen.bigdata.milk.consts.ESConstants;
 import yasen.bigdata.milk.consts.SysConstants;
 import yasen.bigdata.milk.service.DataDownloadService;
+import yasen.bigdata.milk.service.SearchService;
+import yasen.bigdata.milk.tool.HdfsTool;
 import yasen.bigdata.milk.tool.MilkTool;
 import yasen.bigdata.milk.tool.ZipUtil;
 
@@ -15,13 +22,9 @@ import java.util.List;
 
 @Service
 public class DataDownloadServiceImpl implements DataDownloadService {
-//    public static void main(String[] args) {
-//        String projectPath = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\milk\\target\\milk\\temp";
-//        String tempDir = projectPath+MilkTool.getDelimiter()+"a.zip";
-//        String id = "128401136192363104997433902406223511521416862616";
-//
-//        boolean b = new DataDownloadServiceImpl().doCallAndWriteToDisk(id, "/data/downloadDicomNail", tempDir);
-//    }
+
+    @Autowired
+    SearchService searchService;
 
 
     /**
@@ -60,9 +63,9 @@ public class DataDownloadServiceImpl implements DataDownloadService {
 
     @Override
     public String downloadDesensitizeDdicomByTag(String tag,String tempRealDir) {
-        String zipFilePath = tempRealDir+MilkTool.getDelimiter()+tag+".zip";
+        String zipFilePath = tempRealDir+File.separator+tag+".zip";
         //infosupplyer提供的下载接口
-        String interfaceStr = "/data/downloadDesensitizeDdicomByTag";
+        String interfaceStr = "/data/downloadDesensitizeDicomByTag";
         //调用下载方法，做具体下载工作
         doCallAndWriteToDisk(tag,interfaceStr,zipFilePath);
 
@@ -113,6 +116,188 @@ public class DataDownloadServiceImpl implements DataDownloadService {
         }
         return isSuccess;
     }
+
+
+    public String downloadMutilTypeDataForPatient(String patientname,List<String> datatypes,String tempPath) throws Exception {
+        //downloadPath中存放下载下来的各种类型数据的zip文件
+        String downloadPath = tempPath+File.separator+patientname;
+
+        /********依次下载每种类型的数据，下载完打包，给出到前端***********/
+        for(String type : datatypes){
+            if(SysConstants.TYPE_DICOM.equals(type)){
+                //下载该患者所有的dicom文件到本地的一个以该患者名字命名的文件夹里面。从milk直接访问hdfs
+                List<String> paths = new ArrayList<>();
+                JSONObject criteria = new JSONObject();
+                criteria.put(SysConstants.PATIENTNAME_PARAM,patientname);
+                JSONArray backfields = new JSONArray();
+                backfields.add(ESConstants.HDFSPATH);
+                JSONObject jsonObject = searchService.searchDicomByPaging(criteria, backfields, null, 0, 0);
+                if(SysConstants.CODE_000.equals(jsonObject.getString(SysConstants.CODE))) {
+                    JSONArray data = jsonObject.getJSONArray(SysConstants.DATA);
+                    for (int i = 0; i < data.size(); i++) {
+                        String hdfspath = data.getJSONObject(i).getString(ESConstants.HDFSPATH);
+                        paths.add(hdfspath);
+                    }
+                }
+
+                //temp/小明/dicom
+                String dicomPath = downloadPath+File.separator+"dicom";
+                HdfsTool.downloadDicom(paths,dicomPath);
+
+            }
+            if(SysConstants.TYPE_ELECTRIC.equals(type)){
+                //下载该患者所有电信号数据到本地的一个以该患者名i在命名的文件夹里面。
+                //从milk直接访问hdfs，符合设计思想
+                List<String> paths = new ArrayList<>();
+
+                JSONObject criteria = new JSONObject();
+                criteria.put(SysConstants.PATIENTNAME_PARAM,patientname);
+                JSONArray backfields = new JSONArray();
+                backfields.add(ESConstants.HDFSPATH_ES_ELECTRIC);
+                JSONObject jsonObject = searchService.searchElectricByPaging(criteria, backfields, null, 0, 0);
+                if(SysConstants.CODE_000.equals(jsonObject.getString(SysConstants.CODE))) {
+                    JSONArray data = jsonObject.getJSONArray(SysConstants.DATA);
+                    for (int i = 0; i < data.size(); i++) {
+                        String hdfspath = data.getJSONObject(i).getString(ESConstants.HDFSPATH_ES_ELECTRIC);
+                        paths.add(hdfspath);
+                    }
+                }
+                //temp/小明/electric
+                String electricPath = downloadPath+File.separator+"electric";
+                HdfsTool.downloadElectric(paths,electricPath);
+                //删除crc校验文件
+                for(File file : new File(electricPath).listFiles()){
+                    if(file.getName().endsWith("crc"))
+                        file.delete();
+                }
+            }
+            if(SysConstants.TYPE_KFB.equals(type)){
+
+            }
+            if(SysConstants.TYPE_GUAGE.equals(type)){
+
+            }
+        }
+
+        //将以患者命名的本地临时文件压缩。
+        String zipFileName = patientname+"_"+MilkTool.getRandonNumber(3)+".zip";
+        ZipUtil.zip(downloadPath,tempPath,zipFileName);
+        String zipFilePath = tempPath+File.separator+zipFileName;
+
+        //删除临时目录，删除压缩文件
+        MilkTool.delFolder(downloadPath);
+
+        return zipFilePath;
+    }
+
+    /**
+     *
+     * @param list
+     * @param tempDir  将下载的edf文件放到tempDir就可以了，不需要压缩，上层调用方法压缩
+     * @return
+     */
+    @Override
+    public String downloadElectricByIds(List<String> list,String tempDir) throws Exception {
+        if(list==null || list.size()==0){
+            return null;
+        }
+        if(tempDir.endsWith(SysConstants.LEFT_SLASH)){
+            tempDir = tempDir.substring(0,tempDir.length()-1);
+        }
+
+        //tempDir结尾自带斜线,
+        JSONArray backfields = new JSONArray();
+        backfields.add(ESConstants.HDFSPATH);
+        JSONArray ids = new JSONArray();
+        for(String e : list){
+            ids.add(e);
+        }
+        JSONObject json = new JSONObject();
+        json.put(SysConstants.IDS,ids);
+        json.put(SysConstants.DATATYPE,SysConstants.TYPE_ELECTRIC);
+        json.put(SysConstants.BACKFIELDS,backfields);
+        String interfaceStr = "/info/_searchByIds";
+        DataTypeEnum dataTypeEnum = DataTypeEnum.OTHER;
+        JSONObject result = null;
+        try {
+            result = MilkTool.doCallAndGetResult(json, interfaceStr,dataTypeEnum);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        System.out.println("查询的结果："+result.toJSONString());
+
+        List<String> hdfspaths = new ArrayList<String>();
+        if(SysConstants.CODE_000.equals(result.getString(SysConstants.CODE))){
+            JSONArray data = result.getJSONArray(SysConstants.DATA);
+            int size = data.size();
+            for(int i=0;i<size;i++){
+                JSONObject jsonObject = data.getJSONObject(i);
+                hdfspaths.add(jsonObject.getString(ESConstants.HDFSPATH));
+            }
+        }
+        boolean isSuccess = false;
+
+
+        if(hdfspaths.size()!=0)
+            isSuccess = HdfsTool.downloadElectric(hdfspaths, tempDir);
+        //删除crc校验文件
+        for(File file : new File(tempDir).listFiles()){
+            if(file.getName().endsWith("crc"))
+                file.delete();
+        }
+
+        return tempDir;
+    }
+
+    @Override
+    public String downloadDicomByIds(List<String> list, String tempDir) throws Exception {
+        if(list==null || list.size()==0){
+            return null;
+        }
+        if(tempDir.endsWith(SysConstants.LEFT_SLASH)){
+            tempDir = tempDir.substring(0,tempDir.length()-1);
+        }
+
+
+        JSONArray backfields = new JSONArray();
+        backfields.add(ESConstants.HDFSPATH);
+        JSONArray ids = new JSONArray();
+        for(String e : list){
+            ids.add(e);
+        }
+        JSONObject json = new JSONObject();
+        json.put(SysConstants.IDS,ids);
+        json.put(SysConstants.DATATYPE,SysConstants.TYPE_DICOM);
+        json.put(SysConstants.BACKFIELDS,backfields);
+        String interfaceStr = "/info/_searchByIds";
+        DataTypeEnum dataTypeEnum = DataTypeEnum.DICOM;
+        JSONObject result = null;
+        try {
+            result = MilkTool.doCallAndGetResult(json, interfaceStr,dataTypeEnum);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        System.out.println("查询的结果："+result.toJSONString());
+
+        List<String> hdfspaths = new ArrayList<String>();
+        String code = result.getString(SysConstants.CODE);
+        if(code!=null && code.equals(SysConstants.CODE_000)){
+            JSONArray data = result.getJSONArray(SysConstants.DATA);
+            int size = data.size();
+            for(int i=0;i<size;i++){
+                JSONObject jsonObject = data.getJSONObject(i);
+                hdfspaths.add(jsonObject.getString(ESConstants.HDFSPATH));
+            }
+        }
+        boolean isSuccess = false;
+        if(hdfspaths.size()!=0)
+            isSuccess = HdfsTool.downloadDicom(hdfspaths, tempDir);
+
+        return tempDir;
+    }
+
 
     public static void main(String[] args) {
         String temp = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\milk\\target\\milk\\temp";

@@ -7,6 +7,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
 import yasen.bigdata.milk.pojo.Dicom;
 
+/**
+ *
+ */
 public interface SearchService {
 
 	
@@ -24,7 +27,19 @@ public interface SearchService {
 	* @return:
 	* @Date: 2018/4/24 15:11
 	*/
-	JSONObject searchByPaging(JSONObject searchcondition, JSONArray backfields, JSONArray sortfields, Integer pageid, Integer pagesize);
+	JSONObject searchDicomByPaging(JSONObject searchcondition, JSONArray backfields, JSONArray sortfields, Integer pageid, Integer pagesize);
+
+	/**该方法是从infosupplyer微服务获取，分页查询**/
+	/**
+	 * @Author:weiguangwu
+	 * @Description:
+	 * @params: searchcondition是查询条件，由页面采集
+	 * pageid：需要返回的页码,传数字或者不传，不要传null
+	 * pagesize：页面大小，如果大于零才分页，否则部分也，页码如果有问题自动默认为0
+	 * @return:
+	 * @Date: 2018/4/24 15:11
+	 */
+	JSONObject searchElectricByPaging(JSONObject searchcondition, JSONArray backfields, JSONArray sortfields, Integer pageid, Integer pagesize);
 
 	/**
 	* @Author:weiguangwu
@@ -54,13 +69,4 @@ public interface SearchService {
 	*/
 	String exportExcel(JSONObject searchcondition,String tempDir);
 
-	/**
-	* @Author:weiguangwu
-	* @Description:该接口根据序列id下载该序列的dicom文件到本地，并压缩为zip文件，返回zip文件绝对路径
-	* @params:
-	* @return:返回zip文件绝对路径
-	* @Date: 2018/4/24 15:17
-	*/
-	String getDicomZipByIds(List<String> list,String tempDir);
-	
 }

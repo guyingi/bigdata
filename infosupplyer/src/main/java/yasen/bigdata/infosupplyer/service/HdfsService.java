@@ -16,6 +16,8 @@ public interface HdfsService {
 
     boolean downloadDicom(List<String> paths, String localPath);
 
+    boolean downloadElectric(List<String> paths,String localPath,Configuration hdfsconf) throws IOException;
+
     int upDicomDesensitization(String localDir,String remoteDir,Configuration hdfsconf) throws IOException;
 
     /**

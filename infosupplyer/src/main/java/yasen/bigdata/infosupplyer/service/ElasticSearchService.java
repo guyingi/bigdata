@@ -1,6 +1,7 @@
 package yasen.bigdata.infosupplyer.service;
 
 import com.alibaba.fastjson.JSONObject;
+import yasen.bigdata.infosupplyer.consts.DataTypeEnum;
 
 import java.util.Map;
 
@@ -32,14 +33,14 @@ public interface ElasticSearchService {
      * data:[{},{},{}}]
      * }
      */
-    JSONObject searchByPaging(JSONObject param);
+    JSONObject searchByPaging(JSONObject param, DataTypeEnum type);
 
     /**
      * 介绍：传入查询条件参数，返回结果总数据
      * @param  param
      * @return ES中查询的结果总数量
      */
-    JSONObject searchTotalRecord(JSONObject param);
+    JSONObject searchTotalRecord(JSONObject param, DataTypeEnum type);
 
 
     /**
@@ -106,5 +107,7 @@ public interface ElasticSearchService {
      * @return
      */
     JSONObject searchAggregation(String index,String type,Map<String,String> searchcondition,String aggrfield);
+
+//    JSONObject searchElectricSignal()
 
 }

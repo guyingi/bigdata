@@ -8,25 +8,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import yasen.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
+import yasen.bigdata.infosupplyer.consts.DataTypeEnum;
 import yasen.bigdata.infosupplyer.consts.ESConstant;
+import yasen.bigdata.infosupplyer.consts.SysConstants;
 import yasen.bigdata.infosupplyer.factory.ConfigFactory;
 import yasen.bigdata.infosupplyer.service.DesensitizationService;
+import yasen.bigdata.infosupplyer.service.DownloadService;
 import yasen.bigdata.infosupplyer.service.ElasticSearchService;
 import yasen.bigdata.infosupplyer.service.HBaseService;
-import yasen.bigdata.infosupplyer.service.SearchService;
-import yasen.bigdata.infosupplyer.service.impl.ElasticSearchServiceImpl;
-import yasen.bigdata.infosupplyer.service.impl.HBaseServiceImpl;
 import yasen.bigdata.infosupplyer.util.InfoSupplyerTool;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.security.AccessControlException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/data")
 public class DownloadController {
     static Logger logger = Logger.getLogger(DownloadController.class);
+
+    InfosupplyerConfiguration infosupplyerConfiguration;
 
     @Autowired
     ElasticSearchService elasticSearchService;
@@ -37,48 +40,8 @@ public class DownloadController {
     @Autowired
     DesensitizationService desensitizationService;
 
-    public static void main(String[] args) {
-        System.out.println(StringUtils.isBlank("dd  s"));
-//        ElasticSearchService searchService = new ElasticSearchServiceImpl();
-//        HBaseService hBaseService = new HBaseServiceImpl();
-//        String id = request.getParameter("id");
-//        System.out.println("id:"+id);
-//        String id = "128401136192363104997433902406223511521416862616";
-//        //访问ES获取rowkey
-//        JSONObject param = new JSONObject();
-//        JSONArray ids = new JSONArray();
-//        JSONArray back = new JSONArray();
-//        back.add(ESConstant.ROWKEY);
-//        ids.add(id);
-//        param.put(ESConstant.IDS,ids);
-//        param.put(ESConstant.BACKFIELDS,back);
-//        JSONObject result = searchService.searchByIds(param);
-//        String rowkey = null;
-//        if(result.getLong("total")>0){
-//            rowkey = result.getJSONArray(ESConstant.DATA).getJSONObject(0).getString(ESConstant.ROWKEY);
-//            System.out.println(rowkey);
-//        }else{
-//            System.out.println("结果为空");
-//        }
-//
-//
-//        //访问hbase下载文件到临时目录，并生成zip压缩文件，返回压缩文件路径
-//        String tempPath = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\infosupplyer\\target\\temp\\";
-//        String zipFilePath = null;
-//        try {
-//            zipFilePath = hBaseService.downloadThumbnailByRowkey(rowkey,tempPath);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println(zipFilePath);
-        //读取压缩文件，写出输出流
-//        writeOutZip(zipFilePath,response);
-
-        //删除压缩文件
-//        deleteTempFile(zipFilePath);
-
-    }
-
+    @Autowired
+    DownloadService downloadService;
 
     //下载dicom文件缩略图
     @RequestMapping("/downloadDicomNail")
@@ -90,14 +53,14 @@ public class DownloadController {
         JSONArray ids = new JSONArray();
         JSONArray backfields = new JSONArray();
         ids.add(id);
-        backfields.add(ESConstant.ROWKEY);
+        backfields.add(ESConstant.ROWKEY_ES_DCM);
         param.put(ESConstant.IDS,ids);
         param.put(ESConstant.BACKFIELDS,backfields);
 
         JSONObject result = elasticSearchService.searchByIds(param);
         String rowkey = null;
         if(result.getLong("total")>0){
-            rowkey = result.getJSONArray(ESConstant.DATA).getJSONObject(0).getString(ESConstant.ROWKEY);
+            rowkey = result.getJSONArray(ESConstant.DATA).getJSONObject(0).getString(ESConstant.ROWKEY_ES_DCM);
             System.out.println("rowkey:"+rowkey);
         }else{
             return null;
@@ -128,8 +91,8 @@ public class DownloadController {
 
 
 
-    @RequestMapping("/downloadDesensitizeDdicomByTag")
-    public String downloadDesensitizeDdicomByTag(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    @RequestMapping("/downloadDesensitizeDicomByTag")
+    public String downloadDesensitizeDicomByTag(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String tag = request.getParameter("id");
         System.out.println("tag:"+tag);
 
@@ -139,6 +102,24 @@ public class DownloadController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("压缩文件路径："+zipFilePath);
+        //读取压缩文件，写出输出流
+        writeOutZip(zipFilePath,response);
+
+        //删除压缩文件
+        InfoSupplyerTool.delSingleFile(zipFilePath);
+
+        return null;
+    }
+
+    @RequestMapping("/downloadElectricByName")
+    public String downloadElectricByName(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String patientname = request.getParameter("patientname");
+        System.out.println("patientname:"+patientname);
+
+        String zipFilePath = downloadService.downloadElectricByPatientname(patientname);
+
+
         System.out.println("压缩文件路径："+zipFilePath);
         //读取压缩文件，写出输出流
         writeOutZip(zipFilePath,response);
@@ -189,6 +170,49 @@ public class DownloadController {
                 }
             }
         }
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(StringUtils.isBlank("dd  s"));
+//        ElasticSearchService searchService = new ElasticSearchServiceImpl();
+//        HBaseService hBaseService = new HBaseServiceImpl();
+//        String id = request.getParameter("id");
+//        System.out.println("id:"+id);
+//        String id = "128401136192363104997433902406223511521416862616";
+//        //访问ES获取rowkey
+//        JSONObject param = new JSONObject();
+//        JSONArray ids = new JSONArray();
+//        JSONArray back = new JSONArray();
+//        back.add(ESConstant.ROWKEY_ES_DCM);
+//        ids.add(id);
+//        param.put(ESConstant.IDS,ids);
+//        param.put(ESConstant.BACKFIELDS,back);
+//        JSONObject result = searchService.searchByIds(param);
+//        String rowkey = null;
+//        if(result.getLong("total")>0){
+//            rowkey = result.getJSONArray(ESConstant.DATA).getJSONObject(0).getString(ESConstant.ROWKEY_ES_DCM);
+//            System.out.println(rowkey);
+//        }else{
+//            System.out.println("结果为空");
+//        }
+//
+//
+//        //访问hbase下载文件到临时目录，并生成zip压缩文件，返回压缩文件路径
+//        String tempPath = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\infosupplyer\\target\\temp\\";
+//        String zipFilePath = null;
+//        try {
+//            zipFilePath = hBaseService.downloadThumbnailByRowkey(rowkey,tempPath);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println(zipFilePath);
+        //读取压缩文件，写出输出流
+//        writeOutZip(zipFilePath,response);
+
+        //删除压缩文件
+//        deleteTempFile(zipFilePath);
+
     }
 
 }

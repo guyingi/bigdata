@@ -50,6 +50,30 @@ public class HdfsServiceImpl implements HdfsService {
         return isSuccess;
     }
 
+    /**
+     *
+     * @param paths
+     * @param localPath 带随机数的目录
+     * @param hdfsconf
+     * @return
+     * @throws IOException
+     */
+    @Override
+    public boolean downloadElectric(List<String> paths, String localPath,Configuration hdfsconf) throws IOException {
+        if(paths==null || paths.size()==0)
+            return false;
+        boolean isSuccess = true;
+        for(String e : paths){
+            if(downloadElectricSignal(e,localPath,hdfsconf)){
+                System.out.println("下载："+e);
+            }else{
+                isSuccess = false;
+                System.out.println("失败："+e);
+            }
+        }
+        return false;
+    }
+
     private boolean downloadSingleSeries(String hdfsPath,String localPath){
         boolean isSuccess = true;
         String seriesdirname = hdfsPath.substring(hdfsPath.lastIndexOf("/")+1,hdfsPath.length());
@@ -127,5 +151,14 @@ public class HdfsServiceImpl implements HdfsService {
         return localFilePath;
     }
 
+    private boolean downloadElectricSignal(String hdfspath,String localPath,Configuration hdfsconf) throws IOException {
+        String name = hdfspath.substring(hdfspath.lastIndexOf(SysConstants.LEFT_SLASH)+1,hdfspath.length());
+        localPath += localPath+name;
+        FileSystem fs = FileSystem.get(hdfsconf);
+        fs.copyToLocalFile(new Path(hdfspath),new Path(localPath));
+        fs.close();
+
+        return true;
+    }
 
 }

@@ -80,7 +80,7 @@ public class TagController {
         sortfields.add(ESConstants.SeriesDate_ES);
         sortfields.add(ESConstants.NumberOfSlices_ES);
 
-        JSONObject tempResult = searchService.searchByPaging(searchcondition, backfields,sortfields,1, SysConstants.DEFAULT_PAGE_SIZE);
+        JSONObject tempResult = searchService.searchDicomByPaging(searchcondition, backfields,sortfields,1, SysConstants.DEFAULT_PAGE_SIZE);
         result.put("total",tempResult.getLong("total"));
         result.put("rows",tempResult.getJSONArray("data"));
         System.out.println("total:"+tempResult.getLong("total"));

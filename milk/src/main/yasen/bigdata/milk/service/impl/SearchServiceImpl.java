@@ -80,7 +80,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
 	@Override
-	public JSONObject searchByPaging(JSONObject searchcondition,JSONArray backfields,JSONArray sortfields,Integer pageid,Integer pagesize) {
+	public JSONObject searchDicomByPaging(JSONObject searchcondition,JSONArray backfields,JSONArray sortfields,Integer pageid,Integer pagesize) {
 		JSONObject json = new JSONObject();
 		if (searchcondition == null || searchcondition.size() == 0){
 		    return new JSONObject();
@@ -99,6 +99,7 @@ public class SearchServiceImpl implements SearchService {
 		if(pagesize != null) {
             json.put(SysConstants.PAGE_SIZE, pagesize);
         }
+        json.put(SysConstants.DATATYPE,SysConstants.TYPE_DICOM);
 		String interfaceStr = "/info/_searchpaging";
         DataTypeEnum dataTypeEnum = DataTypeEnum.DICOM;
         JSONObject searchPagingResult = null;
@@ -110,11 +111,43 @@ public class SearchServiceImpl implements SearchService {
         return searchPagingResult;
 	}
 
-	@Override
+    @Override
+    public JSONObject searchElectricByPaging(JSONObject criteria, JSONArray backfields, JSONArray sortfields, Integer pageid, Integer pagesize) {
+        JSONObject json = new JSONObject();
+        if (criteria == null || criteria.size() == 0){
+            return new JSONObject();
+        } else {
+            json.put(SysConstants.SEARCH_CONDITION,criteria);
+        }
+        if(backfields != null && backfields.size() > 0) {
+            json.put(SysConstants.BACKFIELDS, backfields);
+        }
+        if(sortfields != null && sortfields.size() > 0) {
+            json.put(SysConstants.SORTFIELDS,sortfields);
+        }
+        if(pageid != null) {
+            json.put(SysConstants.PAGE_ID, pageid);
+        }
+        if(pagesize != null) {
+            json.put(SysConstants.PAGE_SIZE, pagesize);
+        }
+        json.put(SysConstants.DATATYPE,SysConstants.TYPE_ELECTRIC);
+        String interfaceStr = "/info/_searchpaging";
+        DataTypeEnum dataTypeEnum = DataTypeEnum.ELECTRIC;
+        JSONObject searchPagingResult = null;
+        try {
+            searchPagingResult = MilkTool.doCallAndGetResult(json,interfaceStr,dataTypeEnum);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return searchPagingResult;
+    }
+
+    @Override
 	public String getDownloadFile(JSONObject searchcondition,String tempDir) {
 		//service接收json参数，获取将Json结果文件写入本地临时目录，把相对路径返回，
 		MilkConfiguration conf = new MilkConfiguration();
-		String tempFileName = generateRandon()+generateRandon()+".json";
+		String tempFileName = MilkTool.getRandonNumber(6)+MilkTool.getRandonNumber(6)+".json";
 		String filepath = tempDir+tempFileName;
 
 		boolean isSuccess = false;
@@ -136,7 +169,7 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public String getDownloadFileByIds(List<String> list,String tempDir) {
         MilkConfiguration conf = new MilkConfiguration();
-        String tempFileName = generateRandon()+generateRandon()+".json";
+        String tempFileName = MilkTool.getRandonNumber(6)+MilkTool.getRandonNumber(6)+".json";
         String filepath = tempDir+tempFileName;
         boolean isSuccess = false;
         JSONArray backfields = new JSONArray();
@@ -148,6 +181,7 @@ public class SearchServiceImpl implements SearchService {
         }
         JSONObject json = new JSONObject();
         json.put(SysConstants.IDS,ids);
+        json.put(SysConstants.DATATYPE,SysConstants.TYPE_DICOM);
         json.put(SysConstants.BACKFIELDS,backfields);
 
         String interfaceStr = "/info/_searchByIds";
@@ -159,7 +193,7 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public String exportExcel(JSONObject searchcondition,String tempDir) {
-        String tempFileName = generateRandon()+generateRandon()+".xls";
+        String tempFileName = MilkTool.getRandonNumber(6)+MilkTool.getRandonNumber(6)+".xls";
         String filepath = tempDir+tempFileName;
 
         JSONArray backfields = new JSONArray();
@@ -191,68 +225,6 @@ public class SearchServiceImpl implements SearchService {
         return null;
     }
 
-    @Override
-    public String getDicomZipByIds(List<String> list, String tempDir) {
-	    if(list==null || list.size()==0){
-	        return null;
-        }
-	    //tempDir结尾自带斜线
-        String name = generateRandon()+generateRandon();
-        String zipSrcDir = tempDir+name+MilkTool.getDelimiter();
-        String zipPath = tempDir;
-        String zipName = name+".zip";
-
-        boolean isSuccess = false;
-
-        JSONArray backfields = new JSONArray();
-        backfields.add(ESConstants.HDFSPATH);
-        JSONArray ids = new JSONArray();
-        for(String e : list){
-            ids.add(e);
-        }
-        JSONObject json = new JSONObject();
-        json.put(SysConstants.IDS,ids);
-        json.put(SysConstants.BACKFIELDS,backfields);
-        String interfaceStr = "/info/_searchByIds";
-        DataTypeEnum dataTypeEnum = DataTypeEnum.DICOM;
-        JSONObject result = null;
-        try {
-            result = MilkTool.doCallAndGetResult(json, interfaceStr,dataTypeEnum);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        System.out.println("查询的结果："+result.toJSONString());
-
-        List<String> hdfspaths = new ArrayList<String>();
-        String code = result.getString(SysConstants.CODE);
-        if(code!=null && code.equals(SysConstants.CODE_000)){
-            JSONArray data = result.getJSONArray(SysConstants.DATA);
-            int size = data.size();
-            for(int i=0;i<size;i++){
-                JSONObject jsonObject = data.getJSONObject(i);
-                hdfspaths.add(jsonObject.getString(ESConstants.HDFSPATH));
-            }
-        }
-        boolean download = false;
-        if(hdfspaths.size()!=0)
-            download = HdfsTool.download(hdfspaths, zipSrcDir);
-        if(download) {
-            if (createDicomZipTempFile(zipSrcDir, zipPath,zipName)) {
-                return zipPath+zipName;
-            }
-        }
-        return null;
-    }
-
-
-    //生成6位数
-	private String generateRandon() {
-		Random rand = new Random();
-		int result = 0;
-		while(100000>=(result=rand.nextInt(1000000))) {}
-		return result+"";
-	}
 
 	public boolean doCallAndWriteToDisk(JSONObject parameter,String interfaceStr,String filepath){
         MilkConfiguration conf = new MilkConfiguration();
@@ -354,6 +326,7 @@ public class SearchServiceImpl implements SearchService {
     private boolean createDicomZipTempFile(String srcDir,String zipPath,String zipName){
         return MilkTool.zipCompress(srcDir,zipPath,zipName);
     }
+
 
 
 
