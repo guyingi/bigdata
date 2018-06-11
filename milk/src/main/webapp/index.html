@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>雅森大数据查询系统</title>
+    <link rel="shortcut icon" type="image/x-icon" href="image/favicon.ico"  media="screen"/>
+    <link rel="stylesheet" type="text/css" href="css/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="css/icon.css">
+    <link rel="stylesheet" type="text/css" href="css/demo.css">
+    <!-- <link rel="stylesheet" type="text/css" href="css/common.css" /> -->
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+</head>
+<style type="text/css">
+
+    body{
+      margin:0px;
+      padding:0px;
+    }
+    .transparent-div{ opacity:0;}
+    #Login{
+      width:400px;
+      height:320px;
+      background:#fff;
+      border-radius:3px;
+      position:absolute;
+      left:50%;
+      top:50%;
+      margin-left:-200px;
+      margin-top:-150px;
+    }
+    .Login-Text{
+      font-family:黑体;
+      text-align:justify;
+      text-justify:distribute-all-lines;/*ie6-8*/
+      text-align-last:justify;/* ie9*/
+      -moz-text-align-last:justify;/*ff*/
+      -webkit-text-align-last:justify;/*chrome 20+*/
+    }
+
+    .textbox{
+        border:0.5px solid #b7b7b7;
+    }
+
+</style>
+<script type="text/javascript">
+
+    function submitForm(){
+        // window.location="./WEB-INF/jsp/navigation.html"
+        $('#hint').html("");
+        $.ajax({
+            type: "GET",
+            url: "/milk/login",
+            data: $('#ff').serialize(),
+            dataType: 'json',
+            traditional:true,
+            contentType: 'application/json;charset=utf-8',
+            success: function (data) {
+                console.log(data)
+                if(data!=null){
+                    if(data.result){
+                        window.location="/milk/navigation?"+$('#ff').serialize();
+                    }else{
+                        $('#hint').html("密码错误");
+                    }
+                }
+            },
+            error: function () {
+                $('#hint').html("登陆失败");
+            }
+        });
+    }
+
+</script>
+<body class="easyui-layout" style="background:url(image/首页.jpg) no-repeat center center fixed;background-size:100% 100%;">
+    <div id="Login" class="easyui-layout">
+        <div style="width:320px;height:240px;margin:30px auto;">
+            <!-- 标题 -->
+            <div>
+                <p class="Login-Text" style="font-size:30px;color:#095d8b;">雅森大数据查询平台</p>
+            </div>
+            <div>
+                <form id="ff" method="post" action="">
+                    <div style="margin-bottom:15px;margin-left:12px;">
+                        <input class="easyui-textbox" name="username" value="test" testdata-options="prompt:'用户名或手机号'" style="width:96%;height:40px;border: none">
+                    </div>
+                    <div  style="margin-bottom:10px;margin-left:12px;">
+                        <input class="easyui-textbox" name="password" value="test" data-options="prompt:'密码'" style="width:96%;height:40px;border: none">
+                    </div>
+                    <div >
+                        <p id="hint" style="color:red"></p>
+                    </div>
+                    <div style="margin-bottom:15px;position:relative;">
+                        <input class="easyui-checkbox" type="checkbox" name="" value="0" style="float: left;margin-left:12px;"></input>
+                        <p style="width:140px;color:#686868;">下次自动登陆</p>
+                        <a href="#" style="position:absolute;right:20px;top:0px;color:#075e8b;text-decoration:none;">忘记密码?</a>
+                    </div>
+
+                    <div>
+                        <div style="margin-left:12px;">
+                            <a href="#" class="easyui-linkbutton" style="width:96%;height:44px;font-size:18px;border: none;background: #095d8b;color:#FFFFFF" onclick="submitForm()">登 &nbsp;&nbsp; 录</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

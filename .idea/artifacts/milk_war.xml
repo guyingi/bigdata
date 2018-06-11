@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="milk:war">
+    <output-path>$PROJECT_DIR$/milk/target</output-path>
+    <root id="archive" name="milk_war.war">
+      <element id="artifact" artifact-name="milk:war exploded" />
+      <element id="dir-copy" path="$PROJECT_DIR$/milk/src/main/webapp" />
+    </root>
+  </artifact>
+</component>
