@@ -213,7 +213,7 @@
                             <addClasspath>true</addClasspath>
                             <useUniqueVersions>false</useUniqueVersions>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>yasen.bigdata.infosupplyer.InfosupplyerApplication</mainClass>
+                            <mainClass>qed.bigdata.infosupplyer.InfosupplyerApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

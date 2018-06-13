@@ -5,11 +5,10 @@ import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
-import yasen.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
-import yasen.bigdata.infosupplyer.consts.SysConstants;
-import yasen.bigdata.infosupplyer.util.HBaseUtil;
-import yasen.bigdata.infosupplyer.util.InfoSupplyerTool;
-import yasen.bigdata.infosupplyer.util.ZipUtil;
+import qed.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
+import qed.bigdata.infosupplyer.consts.SysConsts;
+import qed.bigdata.infosupplyer.util.HBaseUtil;
+import qed.bigdata.infosupplyer.util.InfoSupplyerTool;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,7 +32,7 @@ public class HBaseServiceTest {
         scan.setStartRow(Bytes.toBytes(rowkey+"0"));
         scan.setStopRow(Bytes.toBytes(rowkey+"9"));
 
-        String path = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\milk\\target\\milk\\temp\\";
+        String path = "C:\\Users\\WeiGuangWu\\IdeaProjects\\bigdata\\es\\target\\es\\temp\\";
         File tempDir = new File(path+rowkey.substring(0,10));
         if(!tempDir.exists()){
             tempDir.mkdir();
@@ -46,7 +45,7 @@ public class HBaseServiceTest {
             for(Cell cell : cells){
                 String tempRowkey = Bytes.toString(CellUtil.cloneRow(cell));
                 String qualify = Bytes.toString(CellUtil.cloneQualifier(cell));
-                if(qualify.equals(SysConstants.THUMBNAIL)){
+                if(qualify.equals(SysConsts.THUMBNAIL)){
                     byte[] temp = CellUtil.cloneValue(cell);
                     String filename = tempRowkey.substring(tempRowkey.length()-6,tempRowkey.length());
                     fout = new FileOutputStream(new File(tempDir.getAbsolutePath()+InfoSupplyerTool.getDelimiter()+filename+".jpg"));

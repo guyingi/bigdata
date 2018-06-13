@@ -2,10 +2,9 @@ package service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import yasen.bigdata.infosupplyer.consts.DataTypeEnum;
-import yasen.bigdata.infosupplyer.consts.SysConstants;
-import yasen.bigdata.infosupplyer.service.impl.ElasticSearchServiceImpl;
-import yasen.bigdata.infosupplyer.consts.ESConstant;
+import qed.bigdata.infosupplyer.consts.SysConsts;
+import qed.bigdata.infosupplyer.service.impl.ElasticSearchServiceImpl;
+import qed.bigdata.infosupplyer.consts.EsConsts;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,61 +18,38 @@ public class SearchServiceTest {
     public static void searchByPagingTest(){
 
         JSONObject json = new JSONObject();
-//        "searchcondition":
-//        "pageid":可缺省
-//        "pagesize":可缺省
-//        "backfields":可缺省
-//        "sortfields":可缺省'
-//        JSONObject searchcondition = new JSONObject();
-//        searchcondition.put(SysConstants.DEVICE_PARAM,"PET/MR");
-//        searchcondition.put(SysConstants.SERIES_DESCRIPTION_PARAM,"Flair");
-//        searchcondition.put(SysConstants.ORGAN_PARAM,"brain");
-//        searchcondition.put(SysConstants.INSTITUTION_PARAM,"PUMCH");
-//        searchcondition.put(SysConstants.SEX_PARAM,"F");
-//        searchcondition.put(SysConstants.AGE_START_PARAM,"85");
-//        searchcondition.put(SysConstants.AGE_END_PARAM,86);
-//        searchcondition.put(SysConstants.STUDYDATE_START_PARAM,"2018-01-01");
-//        searchcondition.put(SysConstants.STUDYDATE_END_PARAM,"2018-01-26");
-//        searchcondition.put(SysConstants.ENTRYDATE_START_PARAM,"2018-04-10");
-//        searchcondition.put(SysConstants.ENTRYDATE_END_PARAM,"2018-04-20");
-//        searchcondition.put(SysConstants.IMAGECOUNT_MIN_PARAM,121);
-//        searchcondition.put(SysConstants.IMAGECOUNT_MAX_PARAM,121);
-//        searchcondition.put(SysConstants.SLICE_THICKNESS_MIN_PARAM,0.0);
-//        searchcondition.put(SysConstants.SLICE_THICKNESS_MAX_PARAM,4.0);
-//        searchcondition.put(SysConstants.TAG,"AA");
-//        json.put("searchcondition",searchcondition);
-//        json.put("pageid",1);
-//        json.put("pagesize",10);
-//        JSONArray backfields = new JSONArray();
-//        backfields.add(SysConstants.InstitutionName_ES_DCM);
-//        backfields.add(SysConstants.ORGAN_ES_DCM);
-//        backfields.add(ESConstant.PatientName_ES_DCM);
-//        backfields.add(ESConstant.PatientsSex_ES_DCM);
-//        backfields.add(ESConstant.PatientsAge_ES_DCM);
-//        backfields.add(ESConstant.SeriesDescription_ES_DCM);
-//        backfields.add(ESConstant.SeriesDate_ES_DCM);
-//        backfields.add(ESConstant.ID_ES_DCM);
-//        backfields.add(ESConstant.ID_ES_DCM);
-//        json.put("backfields",backfields);
+        JSONArray criteria = new JSONArray();
+        JSONObject obj1 = new JSONObject();
+        obj1.put("keyword","InstitutionName");
+        obj1.put("value","Ningbo No.2 Hosp");
+        obj1.put("section","no");
 
-//        JSONArray sortfields = new JSONArray();
-//        sortfields.add(ESConstant.SeriesDate_ES_DCM);
-//        sortfields.add(ESConstant.PatientName_ES_DCM);
-//        json.put("sortfields",sortfields);
-//        /******************************************/
-//        System.out.println(json.toJSONString());
-        ElasticSearchServiceImpl searchService = new ElasticSearchServiceImpl();
-//        DataTypeEnum type = DataTypeEnum.DICOM;
-//        JSONObject jsonObject = searchService.searchByPaging(json,type);
-//        printResult(jsonObject);
-
-        JSONObject criteria = new JSONObject();
-        criteria.put(SysConstants.PatientName_ELECTRIC_PARAM,"程登群");
-        json.put(SysConstants.DATATYPE,SysConstants.TYPE_ELECTRIC);
-        json.put(SysConstants.SEARCH_CRITERIA,criteria);
-        DataTypeEnum type = DataTypeEnum.ELECTRIC;
-        JSONObject jsonObject = searchService.searchByPaging(json,type);
-        System.out.println(jsonObject.toJSONString());
+        JSONObject obj2 = new JSONObject();
+        obj2.put("keyword","PatientAge");
+        obj2.put("start","10");
+        obj2.put("end","23");
+        obj2.put("section","yes");
+        criteria.add(obj1);
+        criteria.add(obj2);
+        JSONArray backfields = new JSONArray();
+        backfields.add(EsConsts.InstitutionName_ES_DCM);
+        JSONArray sortfields = new JSONArray();
+        sortfields.add(EsConsts.SeriesDate_ES_DCM);
+//		sortfields.add(ESConstants.PatientName_ES);
+        json.put("pageid",1);
+        json.put("pagesize",3);
+        json.put("backfields",backfields);
+        json.put("sortfields",sortfields);
+        json.put("criteria",criteria);
+        json.put("datatype",SysConsts.TYPE_DICOM);
+        String interfaceStr = "/info/_searchpaging";
+        JSONObject searchPagingResult = null;
+        try {
+//            searchPagingResult = MilkTool.doCallAndGetResult(json,interfaceStr,DataTypeEnum.DICOM);
+            System.out.println(searchPagingResult.toJSONString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
     public static void searchAllTest(JSONObject json){
@@ -95,14 +71,13 @@ public class SearchServiceTest {
         System.out.println("total:"+total+"\t size:"+size);
         for(int i=0;i<size;i++){
             JSONObject jsonObject1 = data.getJSONObject(i);
-            hospitalSet.add(jsonObject1.getString(ESConstant.InstitutionName_ES_DCM));
-            deviceSet.add(jsonObject1.getString(ESConstant.ManufacturersModelName_ES_DCM));
-            organSet.add(jsonObject1.getString(ESConstant.ORGAN_ES_DCM));
-            seriesDescriptionSet.add(jsonObject1.getString(ESConstant.SeriesDescription_ES_DCM));
-            sexSet.add(jsonObject1.getString(ESConstant.PatientsSex_ES_DCM));
-            ageSet.add(jsonObject1.getString(ESConstant.PatientsAge_ES_DCM));
-            studydateSet.add(jsonObject1.getString(ESConstant.SeriesDate_ES_DCM));
-            imageCountSet.add(jsonObject1.getInteger(ESConstant.NumberOfSlices_ES_DCM));
+            hospitalSet.add(jsonObject1.getString(EsConsts.InstitutionName_ES_DCM));
+            deviceSet.add(jsonObject1.getString(EsConsts.ManufacturerModelName_ES_DCM));
+            seriesDescriptionSet.add(jsonObject1.getString(EsConsts.SeriesDescription_ES_DCM));
+            sexSet.add(jsonObject1.getString(EsConsts.PatientSex_ES_DCM));
+            ageSet.add(jsonObject1.getString(EsConsts.PatientAge_ES_DCM));
+            studydateSet.add(jsonObject1.getString(EsConsts.SeriesDate_ES_DCM));
+            imageCountSet.add(jsonObject1.getInteger(EsConsts.NumberOfSlices_ES_DCM));
             System.out.println(jsonObject1);
         }
         for(String e : hospitalSet){
@@ -172,15 +147,14 @@ public class SearchServiceTest {
 //        json.put("ids",idsArr);
 
         JSONArray backfields = new JSONArray();
-        backfields.add(ESConstant.InstitutionName_ES_DCM);
-        backfields.add(ESConstant.ORGAN_ES_DCM);
-        backfields.add(ESConstant.PatientName_ES_DCM);
-        backfields.add(ESConstant.PatientsSex_ES_DCM);
-        backfields.add(ESConstant.PatientsAge_ES_DCM);
-        backfields.add(ESConstant.SeriesDescription_ES_DCM);
-        backfields.add(ESConstant.SeriesDate_ES_DCM);
-        backfields.add(ESConstant.NumberOfSlices_ES_DCM);
-        backfields.add(ESConstant.ID_ES_DCM);
+        backfields.add(EsConsts.InstitutionName_ES_DCM);
+        backfields.add(EsConsts.PatientName_ES_DCM);
+        backfields.add(EsConsts.PatientSex_ES_DCM);
+        backfields.add(EsConsts.PatientAge_ES_DCM);
+        backfields.add(EsConsts.SeriesDescription_ES_DCM);
+        backfields.add(EsConsts.SeriesDate_ES_DCM);
+        backfields.add(EsConsts.NumberOfSlices_ES_DCM);
+        backfields.add(EsConsts.ID);
         json.put("backfields",backfields);
 
         ElasticSearchServiceImpl searchService = new ElasticSearchServiceImpl();
