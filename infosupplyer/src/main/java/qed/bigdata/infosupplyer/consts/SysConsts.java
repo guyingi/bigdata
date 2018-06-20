@@ -29,6 +29,7 @@ public class SysConsts {
     public static String PAGE_SIZE = "pagesize";
     public static String BACKFIELDS = "backfields";
     public static String SORTFIELDS = "sortfields";
+    public static String IDS = "ids";
     public static String CRITERIA = "criteria";
 
     public static String SECTION = "section";
@@ -60,6 +61,7 @@ public class SysConsts {
     public static String TYPE_ELECTRIC = "electric";
     public static String TYPE_GUAGE = "guage";
     public static String TYPE_KFB = "kfb";
+    public static String TYPE_MULTIDIMENSION = "multidimension";
 
 
 
@@ -71,6 +73,7 @@ public class SysConsts {
     public static String CODE_000 = "000";  //查询成功
     public static String CODE_010 = "010";  //查询条件参数为空
     public static String CODE_011 = "011";  //参数解析错误
+    public static String CODE_999 = "999";  //查询失败
 
     /***************查询条件中的字段******************/
 
@@ -85,6 +88,8 @@ public class SysConsts {
     public static String ENTRYDATE_START_ELECTRIC_PARAM = "entrydate_start";
     public static String ENTRYDATE_END_ELECTRIC_PARAM = "entrydate_end";
     public static String InstitutionName_ELECTRIC_PARAM = "hospital";
+
+    public static String PATIENTNAME = "patientname";
 
 
 

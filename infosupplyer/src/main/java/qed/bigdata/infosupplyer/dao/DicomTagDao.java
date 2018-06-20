@@ -14,5 +14,6 @@ import java.util.List;
 public interface DicomTagDao {
     boolean insert(DicomTag dicomTag);
     boolean updateDesensitize(DicomTag dicomTag);
+    boolean deleteByTag(String tag);
     List<DicomTag> list();
 }

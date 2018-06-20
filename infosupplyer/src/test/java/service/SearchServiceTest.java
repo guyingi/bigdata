@@ -2,16 +2,27 @@ package service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.elasticsearch.action.ActionFuture;
+import org.elasticsearch.action.delete.DeleteRequestBuilder;
+import org.elasticsearch.action.update.UpdateRequestBuilder;
+import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.document.DocumentField;
+import org.elasticsearch.index.get.GetResult;
+import qed.bigdata.infosupplyer.consts.DataTypeEnum;
 import qed.bigdata.infosupplyer.consts.SysConsts;
+import qed.bigdata.infosupplyer.factory.EsClientFactory;
 import qed.bigdata.infosupplyer.service.impl.ElasticSearchServiceImpl;
 import qed.bigdata.infosupplyer.consts.EsConsts;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class SearchServiceTest {
     public static void main(String[] args) {
-        searchByPagingTest();
+        test();
     }
 
 
@@ -20,14 +31,14 @@ public class SearchServiceTest {
         JSONObject json = new JSONObject();
         JSONArray criteria = new JSONArray();
         JSONObject obj1 = new JSONObject();
-        obj1.put("keyword","InstitutionName");
-        obj1.put("value","Ningbo No.2 Hosp");
+        obj1.put("keyword","SeriesDescription");
+        obj1.put("value","L MLO");
         obj1.put("section","no");
 
         JSONObject obj2 = new JSONObject();
-        obj2.put("keyword","PatientAge");
-        obj2.put("start","10");
-        obj2.put("end","23");
+        obj2.put("keyword","SliceThickness");
+        obj2.put("start","0.0");
+        obj2.put("end","100.0");
         obj2.put("section","yes");
         criteria.add(obj1);
         criteria.add(obj2);
@@ -42,10 +53,10 @@ public class SearchServiceTest {
         json.put("sortfields",sortfields);
         json.put("criteria",criteria);
         json.put("datatype",SysConsts.TYPE_DICOM);
-        String interfaceStr = "/info/_searchpaging";
+        String interfaceStr = "/info/searchpaging";
         JSONObject searchPagingResult = null;
         try {
-//            searchPagingResult = MilkTool.doCallAndGetResult(json,interfaceStr,DataTypeEnum.DICOM);
+            searchPagingResult = new ElasticSearchServiceImpl().searchByPaging(json, DataTypeEnum.DICOM);
             System.out.println(searchPagingResult.toJSONString());
         } catch (Exception e) {
             e.printStackTrace();
@@ -167,6 +178,11 @@ public class SearchServiceTest {
         ElasticSearchServiceImpl searchService = new ElasticSearchServiceImpl();
         JSONObject jsonObject = searchService.searchAggregation("dicomindex", "dicomtype", null, "tag");
         System.out.println(jsonObject.toJSONString());
+    }
+
+    public static void test(){
+        ElasticSearchServiceImpl searchService = new ElasticSearchServiceImpl();
+        searchService.updateField("dicomindex","dicomtype","dJy-FWQB8hiI7_ZQO49k","tag",null);
     }
 
 

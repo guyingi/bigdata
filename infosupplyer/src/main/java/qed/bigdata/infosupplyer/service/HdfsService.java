@@ -1,6 +1,7 @@
 package qed.bigdata.infosupplyer.service;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,4 +30,11 @@ public interface HdfsService {
      * @throws IOException
      */
     String[] downDicomDesensitization(String localDir, String remoteDir, Configuration hdfsconf) throws IOException;
+
+
+    /**
+     * 批量删除hdfs文件
+     * @param path
+     */
+    void delFile(Path path);
 }

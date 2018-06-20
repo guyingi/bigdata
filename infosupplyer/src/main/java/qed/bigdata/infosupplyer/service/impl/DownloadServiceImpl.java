@@ -3,6 +3,8 @@ package qed.bigdata.infosupplyer.service.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import qed.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
@@ -31,6 +33,10 @@ import java.util.List;
  */
 @Service("DownloadService")
 public class DownloadServiceImpl implements DownloadService {
+    static Logger logger = Logger.getLogger(DownloadServiceImpl.class);
+
+    InfosupplyerConfiguration infosupplyerConfiguration = null;
+    Configuration hdfsconf = null;
 
     @Autowired
     ElasticSearchService elasticSearchService;
@@ -38,10 +44,15 @@ public class DownloadServiceImpl implements DownloadService {
     @Autowired
     HdfsService hdfsService;
 
+    public DownloadServiceImpl(){
+        infosupplyerConfiguration = ConfigFactory.getInfosupplyerConfiguration();
+        hdfsconf = ConfigFactory.getHdfsConfiguration();
+    }
+
     @Override
     public String downloadElectricByPatientname(String patientname) throws Exception {
-        InfosupplyerConfiguration infosupplyerConfiguration = ConfigFactory.getInfosupplyerConfiguration();
-        Configuration hdfsconf = ConfigFactory.getHdfsConfiguration();
+        logger.log(Level.INFO,"方法:downloadElectricByPatientname 被调用，参数:{patientname="+patientname+"}");
+
         boolean success = true;
 
         List<String> paths = new ArrayList<String>();
@@ -68,6 +79,8 @@ public class DownloadServiceImpl implements DownloadService {
         }else{
             success = false;
         }
+
+        logger.log(Level.INFO,"获取电信号存储路径:"+success);
         //测试代码，是否获取路径成功
         for(String e : paths){
             System.out.println(e);
@@ -89,6 +102,7 @@ public class DownloadServiceImpl implements DownloadService {
                 e.printStackTrace();
             }
         }
+        logger.log(Level.INFO,"下载电信号文件到本地:"+success+",downloadFilePath:"+downloadFilePath);
 
         //压缩下载后的文件
         String zipFilePath = null;
@@ -99,6 +113,9 @@ public class DownloadServiceImpl implements DownloadService {
         }
 
         InfoSupplyerTool.delFolder(downloadFilePath);
+        logger.log(Level.INFO,"zip压缩文件:"+zipFilePath);
+        logger.log(Level.INFO,"方法:downloadElectricByPatientname 流程结束");
+
         return zipFilePath;
     }
 }

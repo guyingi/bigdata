@@ -3,6 +3,7 @@ package qed.bigdata.infosupplyer.service;
 import com.alibaba.fastjson.JSONObject;
 import qed.bigdata.infosupplyer.consts.DataTypeEnum;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -79,6 +80,15 @@ public interface ElasticSearchService {
     Object getFieldById(String index, String type, String id, String field);
 
     /**
+     * 查询ES中指定index,type,id,field的值
+     * @param typeEnum
+     * @param field
+     * @param value
+     * @return
+     */
+    List<String> getIdByField(DataTypeEnum typeEnum ,String field,String value);
+
+    /**
      * 在ES指定index,type,id定位的doc插入或者更新某个field,参数为json
      * @param index
      * @param type
@@ -107,6 +117,24 @@ public interface ElasticSearchService {
      * @return
      */
     JSONObject searchAggregation(String index, String type, Map<String, String> searchcondition, String aggrfield);
+
+    /**
+     * 删除指定index，type，id的索引
+     * @param index
+     * @param type
+     * @param id
+     * @return
+     */
+    boolean deleteIndex(String index,String type,String id);
+
+    /**
+     * 批量删除指定index，type，id的索引
+     * @param index
+     * @param type
+     * @param ids
+     * @return
+     */
+    boolean deleteIndex(String index,String type,List<String> ids);
 
 //    JSONObject searchElectricSignal()
 

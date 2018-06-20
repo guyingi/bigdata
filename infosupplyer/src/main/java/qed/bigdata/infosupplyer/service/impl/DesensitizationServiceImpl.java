@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -35,6 +37,7 @@ import java.util.Map;
 
 @Service("DesensitizationService")
 public class DesensitizationServiceImpl implements DesensitizationService {
+    static Logger logger = Logger.getLogger(DesensitizationServiceImpl.class);
 
     InfosupplyerConfiguration infosupplyerConfiguration = null;
     Configuration hdfsConf = ConfigFactory.getHdfsConfiguration();
@@ -69,7 +72,7 @@ public class DesensitizationServiceImpl implements DesensitizationService {
 
     @Override
     public Long desensitizedicom(String tag) {
-
+        logger.log(Level.INFO,"方法:desensitizedicom 被调用，参数:{tag="+tag+"}");
         boolean success = true;
         Long total = 0L;
 
@@ -112,6 +115,8 @@ public class DesensitizationServiceImpl implements DesensitizationService {
                 success = false;
         }
 
+        logger.log(Level.INFO,"序列数量:"+hdfspaths.size());
+
         //创建本地临时目录
         if(success) {
             if(! new File(desensitizeBeforeTagPath).exists()){
@@ -150,7 +155,7 @@ public class DesensitizationServiceImpl implements DesensitizationService {
             }
         }
 
-        System.out.println("脱敏结果："+success);
+        logger.log(Level.INFO,"脱敏结果:"+success);
         //调用上传接口，上传存放脱敏数据的临时目录
         if(success){
             try {
@@ -163,6 +168,8 @@ public class DesensitizationServiceImpl implements DesensitizationService {
         /*********删除临时目录*************************/
         InfoSupplyerTool.delFolder(desensitizeBeforeTagPath);
         InfoSupplyerTool.delFolder(desensitizeAfterTagPath);
+        logger.log(Level.INFO,"删除临时目:desensitizeBeforeTagPath:"+desensitizeBeforeTagPath);
+        logger.log(Level.INFO,"删除临时目:desensitizeBeforeTagPath:"+desensitizeAfterTagPath);
 
         /**********修改tag状态为已脱敏***********************/
         if(success) {
@@ -171,13 +178,13 @@ public class DesensitizationServiceImpl implements DesensitizationService {
             dicomTag.setDesensitize(1);
             dicomTagDao.updateDesensitize(dicomTag);
         }
-
-        System.out.println("脱敏结束");
+        logger.log(Level.INFO,"脱敏结束");
         return total;
     }
 
     @Override
     public int uploadDicomDesensitization(String desensitizationDir,String tag) throws IOException {
+        logger.log(Level.INFO,"方法:uploadDicomDesensitization 被调用，参数:{desensitizationDir="+desensitizationDir+",tag="+tag+"}");
         if(!validateDir(desensitizationDir))
             return 0;
         List<File> seriesDirs = listDir(desensitizationDir);
@@ -191,11 +198,13 @@ public class DesensitizationServiceImpl implements DesensitizationService {
     }
 
     private int uploadDicomDesensitization(File seriesDir,String tag) throws IOException {
+        logger.log(Level.INFO,"help方法:uploadDicomDesensitization 被调用，参数:{seriesDir="+seriesDir.getAbsolutePath()+",tag="+tag+"}");
+
         boolean success = true;
 
         /**步骤1：先获取SeriesUID,即目录名称。*/
         String seriesUID = seriesDir.getName();
-        System.out.println("步骤1:"+seriesUID);
+        logger.log(Level.INFO,"步骤1:"+seriesUID);
 
         /**步骤2：查询ES，获取必要数据:【PatientUID】,【StudyID】【rowkey】,
          * 沿用dicom序列rowkey：rowkey:3位盐值+4位检查+MD5(seriesUID).sub(0,16)+CRC32(时间戳)
@@ -229,9 +238,10 @@ public class DesensitizationServiceImpl implements DesensitizationService {
                 rowkey = jsonObject1.getString(EsConsts.ROWKEY);
             }
         }
-        System.out.println("步骤2:patientUID"+patientUID+",studyID:"+studyID+",rowkey:"+rowkey);
+        logger.log(Level.INFO,"步骤2:查询ES获取必要信息，patientUID"+patientUID+",studyID:"+studyID+",rowkey:"+rowkey);
+
         if(rowkey == null){
-            System.out.println("文件名为："+seriesDir.getAbsolutePath()+"的脱敏数据在es中无数据，该次上传失败");
+            logger.log(Level.ERROR,"文件名为:"+seriesUID+" ,"+seriesDir.getAbsolutePath()+"的脱敏数据在es中无数据，该次上传失败");
             return SysConsts.FAILED;
         }
 
@@ -252,16 +262,15 @@ public class DesensitizationServiceImpl implements DesensitizationService {
         metaData.put(EsConsts.ENTRYDATE,entryDate);
         metaData.put(EsConsts.TAG,tag);
 
-        for(Map.Entry<String,String> entry : metaData.entrySet()){
-            System.out.println(entry.getKey()+":"+entry.getValue());
-        }
-        System.out.println("步骤3");
+        JSONObject printJson = JSONObject.parseObject(JSON.toJSONString(metaData));
+        logger.log(Level.INFO,"步骤3、生成的元数据:"+printJson.toJSONString());
 
         /**步骤4：写入hbase表格中 */
         success = SysConsts.FAILED != hBaseService.putOne(infosupplyerConfiguration.getDicomDisensitizationTablename(),
                 infosupplyerConfiguration.getDicomDisensitizationCf(), metaData);
 
-        System.out.println("步骤4："+success);
+        logger.log(Level.INFO,"步骤4、元数据写入hbase:"+success);
+
         /**步骤5：缩略图暂时不做 */
 
         /**步骤6：上传hdfs */
@@ -271,18 +280,23 @@ public class DesensitizationServiceImpl implements DesensitizationService {
             hBaseService.delete(infosupplyerConfiguration.getDicomDisensitizationTablename(),rowkey);
             return SysConsts.FAILED;
         }
-        System.out.println("步骤6："+success);
+
+        logger.log(Level.INFO,"步骤6、上传hdfs:"+success);
+
         /**步骤6：写入es索引中*/
         if(success) {
             success = SysConsts.FAILED != elasticSearchService.insertOne(infosupplyerConfiguration.getIndexDicomDisensitization(),
                     infosupplyerConfiguration.getTypeDicomDisensitization(), seriesUID, metaData);
         }
-        System.out.println("es结果："+success);
+        logger.log(Level.INFO,"步骤6、写入es:"+success);
+        logger.log(Level.INFO,"方法 uploadDicomDesensitization 流程结束");
         return SysConsts.SUCCESS;
     }
 
     @Override
     public String downloadDesensitizeDicomByTag(String tag) throws Exception {
+        logger.log(Level.INFO,"方法:downloadDesensitizeDicomByTag 被调用，参数:{tag="+tag+"}");
+
         boolean success = true;
         String organ = null;
         Map<String,List<JSONObject>> studies = new HashMap<>();
@@ -297,7 +311,7 @@ public class DesensitizationServiceImpl implements DesensitizationService {
         if(!(new File(desensitizeDownloadTagPath).exists())){
             new File(desensitizeDownloadTagPath).mkdirs();
         }
-        System.out.println("临时目录："+desensitizeDownloadTagPath);
+        logger.log(Level.INFO,"临时目录："+desensitizeDownloadTagPath);
 
         /**步骤一：查询es获得该tag下面所有series_UID,SeriesInstanceUID,StudyInstanceUID，organ，hdfs路径*/
         //1.构造查询条件
@@ -324,6 +338,8 @@ public class DesensitizationServiceImpl implements DesensitizationService {
                 success = false;
             }
         }
+
+        logger.log(Level.INFO,"查询es获得所属tag["+tag+"]所有序列:"+(success?result.getLong(SysConsts.TOTAL):success));
 
         /**步骤二：手动聚合分类，把属于同一个study的series放在同一个组中，下面以study为单位逐个处理*/
         if(success){
@@ -393,6 +409,10 @@ public class DesensitizationServiceImpl implements DesensitizationService {
                 InfoSupplyerTool.delFolder(desensitizeDownloadTagPath);
             }
         }
+
+        logger.log(Level.INFO,"zip压缩文件路径:"+zipFilePath);
+        logger.log(Level.INFO,"方法:downloadDesensitizeDicomByTag 流程结束:");
+
         return zipFilePath;
     }
 

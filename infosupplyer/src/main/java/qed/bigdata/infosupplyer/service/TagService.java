@@ -1,6 +1,7 @@
 package qed.bigdata.infosupplyer.service;
 
 import com.alibaba.fastjson.JSONObject;
+import qed.bigdata.infosupplyer.consts.DataTypeEnum;
 
 /**
  * @author WeiGuangWu
@@ -31,5 +32,8 @@ public interface TagService {
      * @return
      */
     JSONObject searchtags(String tag);
+
+
+    boolean removeTag(String tag, DataTypeEnum type);
 
 }

@@ -185,7 +185,6 @@ public class EsConsts {
 
     /***************接收参数中的字段****************/
     public static String BACKFIELDS = "backfields";
-    public static String IDS = "ids";
     public static String DATA = "data";
 
 
@@ -227,6 +226,7 @@ public class EsConsts {
     public static List<String> IntegerFieldList = new ArrayList<String>();
     public static List<String> LongFieldList = new ArrayList<String>();
     public static List<String> DoubleFieldList = new ArrayList<String>();
+    public static List<String> PreMatchList = new ArrayList<String>();   //需要前缀匹配的字段。
     static{
         IntegerFieldList.add("PatientAge");
         IntegerFieldList.add("SeriesNumber");
@@ -242,6 +242,8 @@ public class EsConsts {
         DoubleFieldList.add("SliceThickness");
         DoubleFieldList.add("ReconstructionDiameter");
         DoubleFieldList.add("SliceLocation");
+
+        PreMatchList.add("PatientName");
     }
 
 

@@ -1,8 +1,10 @@
 package qed.bigdata.infosupplyer.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,8 +45,12 @@ public class DownloadController {
     //下载dicom文件缩略图
     @RequestMapping("/downloadDicomNail")
     public String downloadDicomNail(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.log(Level.INFO,"接口:downloadDicomNail 被调用");
+
         String id = request.getParameter("id");
-        System.out.println("id:"+id);
+
+        logger.log(Level.INFO,"接口接收的参数:id"+id);
+
         //访问ES获取rowkey
         JSONObject param = new JSONObject();
         JSONArray ids = new JSONArray();
@@ -52,8 +58,8 @@ public class DownloadController {
         ids.add(id);
         backfields.add(EsConsts.ROWKEY);
         param.put(SysConsts.DATATYPE,SysConsts.TYPE_DICOM);
-        param.put(EsConsts.IDS,ids);
-        param.put(EsConsts.BACKFIELDS,backfields);
+        param.put(SysConsts.IDS,ids);
+        param.put(SysConsts.BACKFIELDS,backfields);
 
         JSONObject result = elasticSearchService.searchByIds(param);
         String rowkey = null;
@@ -64,11 +70,13 @@ public class DownloadController {
             return null;
         }
 
+        logger.log(Level.INFO,"查询到rowkey:"+rowkey);
         //访问hbase下载文件到临时目录，并生成zip压缩文件，返回压缩文件路径
         InfosupplyerConfiguration infosupplyerConfiguration = ConfigFactory.getInfosupplyerConfiguration();
 
         //存放缩略图文件夹的临时目录
         String tempPath = infosupplyerConfiguration.getThumbnailTempPath();
+        logger.log(Level.INFO,"存放缩略图文件夹的临时目录:"+tempPath);
         String zipFilePath = null;
         try {
             System.out.println("tempPath:"+tempPath+",rowkey:"+rowkey);
@@ -76,13 +84,14 @@ public class DownloadController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        logger.log(Level.INFO,"输出zip压缩文件:"+zipFilePath);
 
-        System.out.println("压缩文件路径："+zipFilePath);
         //读取压缩文件，写出输出流
         writeOutZip(zipFilePath,response);
 
         //删除压缩文件
         InfoSupplyerTool.delSingleFile(zipFilePath);
+        logger.log(Level.INFO,"删除zip压缩文件:"+zipFilePath);
 
         return null;
     }
@@ -91,8 +100,10 @@ public class DownloadController {
 
     @RequestMapping("/downloadDesensitizeDicomByTag")
     public String downloadDesensitizeDicomByTag(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.log(Level.INFO,"接口:downloadDesensitizeDicomByTag 被调用");
+
         String tag = request.getParameter("id");
-        System.out.println("tag:"+tag);
+        logger.log(Level.INFO,"接口接收的参数:tag"+tag);
 
         String zipFilePath = null;
         try {
@@ -100,13 +111,17 @@ public class DownloadController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("压缩文件路径："+zipFilePath);
+
+        logger.log(Level.INFO,"输出zip压缩文件:"+zipFilePath);
         //读取压缩文件，写出输出流
         if(zipFilePath != null){
             writeOutZip(zipFilePath,response);
+
             //删除压缩文件
             InfoSupplyerTool.delSingleFile(zipFilePath);
+            logger.log(Level.INFO,"删除zip压缩文件:"+zipFilePath);
         }else{
+            logger.log(Level.INFO,"生成脱敏数据失败:"+zipFilePath);
             response.setStatus(500);
         }
 
@@ -115,19 +130,26 @@ public class DownloadController {
 
     @RequestMapping("/downloadElectricByName")
     public String downloadElectricByName(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String patientname = request.getParameter("patientname");
-        System.out.println("patientname:"+patientname);
+        logger.log(Level.INFO,"接口:downloadElectricByName 被调用");
+
+        String patientname = request.getParameter(SysConsts.PATIENTNAME);
+
+        logger.log(Level.INFO,"接口接收的参数:patientname"+patientname);
 
         String zipFilePath = downloadService.downloadElectricByPatientname(patientname);
 
+        logger.log(Level.INFO,"输出zip压缩文件:"+zipFilePath);
 
-        System.out.println("压缩文件路径："+zipFilePath);
         //读取压缩文件，写出输出流
-        writeOutZip(zipFilePath,response);
-
-        //删除压缩文件
-        InfoSupplyerTool.delSingleFile(zipFilePath);
-
+        if( !StringUtils.isBlank(zipFilePath )){
+            writeOutZip(zipFilePath,response);
+            //删除压缩文件
+            InfoSupplyerTool.delSingleFile(zipFilePath);
+            logger.log(Level.INFO,"删除zip压缩文件:"+zipFilePath);
+        }else{
+            logger.log(Level.INFO,"下载电信号数据失败:"+zipFilePath);
+            response.setStatus(500);
+        }
         return null;
     }
 

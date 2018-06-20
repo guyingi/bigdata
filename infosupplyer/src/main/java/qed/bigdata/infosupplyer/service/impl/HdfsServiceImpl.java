@@ -1,5 +1,7 @@
 package qed.bigdata.infosupplyer.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -11,6 +13,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 import qed.bigdata.infosupplyer.consts.SysConsts;
+import qed.bigdata.infosupplyer.factory.ConfigFactory;
 import qed.bigdata.infosupplyer.service.HdfsService;
 import yasen.dicom.DicomWritable;
 
@@ -29,10 +32,14 @@ import java.util.List;
  */
 @Service("HdfsService")
 public class HdfsServiceImpl implements HdfsService {
-
     static Logger logger = Logger.getLogger(HdfsServiceImpl.class);
 
+    @Override
     public boolean downloadDicom(List<String> paths, String localPath){
+        JSONArray rowkeysJson = JSON.parseArray(JSON.toJSONString(paths));
+        logger.log(Level.INFO,"方法:downloadDicom 被调用，参数:{localPath="+localPath
+                +"paths;"+rowkeysJson+"}");
+
         if(paths==null || paths.size()==0)
             return false;
         boolean isSuccess = true;
@@ -41,12 +48,13 @@ public class HdfsServiceImpl implements HdfsService {
         }
         for(String e : paths){
             if(downloadSingleSeries(e,localPath)){
-                System.out.println("下载："+e);
+                logger.log(Level.INFO,"下载:"+e);
             }else{
                 isSuccess = false;
-                System.out.println("失败："+e);
+                logger.log(Level.INFO,"失败:"+e);
             }
         }
+        logger.log(Level.INFO,"方法:downloadDicom 调用结束，isSuccess:"+isSuccess);
         return isSuccess;
     }
 
@@ -60,17 +68,22 @@ public class HdfsServiceImpl implements HdfsService {
      */
     @Override
     public boolean downloadElectric(List<String> paths, String localPath,Configuration hdfsconf) throws IOException {
+        JSONArray pathsJson = JSON.parseArray(JSON.toJSONString(paths));
+        logger.log(Level.INFO,"方法:downloadElectric 被调用，参数:{localPath="+localPath
+                +"paths;"+pathsJson+"}");
+
         if(paths==null || paths.size()==0)
             return false;
         boolean isSuccess = true;
         for(String e : paths){
             if(downloadElectricSignal(e,localPath,hdfsconf)){
-                System.out.println("下载："+e);
+                logger.log(Level.INFO,"下载:"+e);
             }else{
                 isSuccess = false;
-                System.out.println("失败："+e);
+                logger.log(Level.INFO,"失败:"+e);
             }
         }
+        logger.log(Level.INFO,"方法:downloadElectric 调用结束，isSuccess:"+isSuccess);
         return false;
     }
 
@@ -115,7 +128,6 @@ public class HdfsServiceImpl implements HdfsService {
                 count++;
             }
             logger.log(Level.INFO,"下载文件数："+count);
-//            System.out.println("下载文件数："+count);
         } catch (IOException e) {
             isSuccess = false;
             logger.log(Level.INFO,"下载失败文件："+hdfsPath);
@@ -128,16 +140,22 @@ public class HdfsServiceImpl implements HdfsService {
 
     @Override
     public int upDicomDesensitization(String localDir, String remoteDir, Configuration hdfsconf) throws IOException {
+        logger.log(Level.INFO,"方法:upDicomDesensitization 被调用，参数:{localDir="+localDir
+                +"remoteDir;"+remoteDir+"}");
         File localDirFile = new File(localDir);
         FileSystem fs = FileSystem.get(hdfsconf);
         for(File file : localDirFile.listFiles()){
             fs.copyFromLocalFile(new Path(file.getAbsolutePath()),new Path(remoteDir+SysConsts.LEFT_SLASH+file.getName()));
         }
+        logger.log(Level.INFO,"方法:upDicomDesensitization 调用结束");
         return SysConsts.SUCCESS;
     }
 
     @Override
     public String[] downDicomDesensitization(String localDir, String remoteDir, Configuration hdfsconf) throws IOException {
+        logger.log(Level.INFO,"方法:downDicomDesensitization 被调用，参数:{localDir="+localDir
+                +"remoteDir;"+remoteDir+"}");
+
         String desensitizedFileName = remoteDir.substring(remoteDir.lastIndexOf(SysConsts.LEFT_SLASH)+1, remoteDir.length());
         String[] localFilePath = new String[2];
         localFilePath[0] = localDir+File.separator+desensitizedFileName+".mhd";
@@ -148,7 +166,20 @@ public class HdfsServiceImpl implements HdfsService {
         fs.copyToLocalFile(new Path(remoteDir+SysConsts.LEFT_SLASH+desensitizedFileName+".raw"),
                 new Path(localDir+File.separator+desensitizedFileName+".raw"));
         fs.close();
+        logger.log(Level.INFO,"方法:downDicomDesensitization 调用结束");
         return localFilePath;
+    }
+
+    @Override
+    public void delFile(Path path) {
+        Configuration hdfsConfiguration = ConfigFactory.getHdfsConfiguration();
+        FileSystem fs = null;
+        try {
+            fs = FileSystem.get(hdfsConfiguration);
+            fs.delete(path,true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean downloadElectricSignal(String hdfspath,String localPath,Configuration hdfsconf) throws IOException {
@@ -157,7 +188,6 @@ public class HdfsServiceImpl implements HdfsService {
         FileSystem fs = FileSystem.get(hdfsconf);
         fs.copyToLocalFile(new Path(hdfspath),new Path(localPath));
         fs.close();
-
         return true;
     }
 

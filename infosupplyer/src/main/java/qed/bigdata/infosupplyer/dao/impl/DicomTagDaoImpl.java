@@ -67,6 +67,27 @@ public class DicomTagDaoImpl implements DicomTagDao {
     }
 
     @Override
+    public boolean deleteByTag(String tag) {
+        String sql = "delete from dicomtag where `tagname`=?";
+        String checksql = "select * from dicomtag where `tagname`=?";
+        try {
+            PreparedStatement preparedStatement = bigdataConnection.prepareStatement(sql);
+            preparedStatement.setString(1,tag);
+            preparedStatement.execute();
+
+            PreparedStatement preparedStatement1 = bigdataConnection.prepareStatement(checksql);
+            preparedStatement1.setString(1,tag);
+            ResultSet resultSet = preparedStatement1.executeQuery();
+            if(resultSet.next()){
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    @Override
     public List<DicomTag> list() {
         List<DicomTag> result = new ArrayList<>();
         if(bigdataConnection == null){

@@ -1,11 +1,15 @@
 package qed.bigdata.infosupplyer.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 import qed.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
 import qed.bigdata.infosupplyer.consts.EsConsts;
@@ -22,6 +26,7 @@ import java.util.*;
 
 @Service("HBaseService")
 public class HBaseServiceImpl implements HBaseService {
+    static Logger logger = Logger.getLogger(ElasticSearchServiceImpl.class);
 
     Connection conn = null;
     InfosupplyerConfiguration infosupplyerConfiguration = null;
@@ -53,6 +58,9 @@ public class HBaseServiceImpl implements HBaseService {
 
     @Override
     public String downloadThumbnailByRowkey(String rowkey,String path) throws Exception {
+        logger.log(Level.INFO,"方法:downloadThumbnailByRowkey 被调用，参数:{rowkey:"+rowkey
+                +"path："+path+"}");
+
         Table table = conn.getTable(TableName.valueOf(infosupplyerConfiguration.getDicomThumbnailTablename()));
         Scan scan  = new Scan();
         scan.setStartRow(Bytes.toBytes(rowkey+"0"));
@@ -64,20 +72,19 @@ public class HBaseServiceImpl implements HBaseService {
         if(!tempDir.exists()){
             tempDir.mkdir();
         }
-        System.out.println("thumbnailTemp:"+thumbnailTemp);
+
+        logger.log(Level.INFO,"存放缩略图临时目录:"+thumbnailTemp);
+
         FileOutputStream fout = null;
 
         ResultScanner scanner = table.getScanner(scan);
-        System.out.println("A");
         for(Result result : scanner){
-            System.out.println("B");
             Cell[] cells = result.rawCells();
             for(Cell cell : cells){
                 String tempRowkey = Bytes.toString(CellUtil.cloneRow(cell));
                 String qualify = Bytes.toString(CellUtil.cloneQualifier(cell));
                 if(qualify.equals(SysConsts.THUMBNAIL)){
                     byte[] temp = CellUtil.cloneValue(cell);
-                    System.out.println("C:"+temp.length);
                     String filename = tempRowkey.substring(tempRowkey.length()-6,tempRowkey.length());
                     System.out.println(thumbnailTemp+File.separator+filename+".jpg");
                     fout = new FileOutputStream(new File(thumbnailTemp+File.separator+filename+".jpg"));
@@ -93,21 +100,42 @@ public class HBaseServiceImpl implements HBaseService {
          */
         ZipUtil.zip(tempDir.getAbsolutePath(),path,filename);
         InfoSupplyerTool.delFolder(thumbnailTemp);
-        return path+File.separator+filename;
+
+        String zipFilePath = path+File.separator+filename;
+
+        logger.log(Level.INFO,"zip压缩略文件路径:"+zipFilePath);
+
+        return zipFilePath;
     }
 
 
 
     @Override
     public void updateColumn(String tablename, String rowkey, String cf, String qualify, String value) throws IOException {
+        logger.log(Level.INFO,"方法:updateColumn 被调用，参数:{tablename:"+tablename
+                +"rowkey："+rowkey
+                +"cf：" + cf
+                +"qualify："+qualify
+                +"value："+value
+                +"}");
+
         Table table = conn.getTable(TableName.valueOf(tablename));
         Put put = new Put(Bytes.toBytes(rowkey));
         put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(qualify),Bytes.toBytes(value));
         table.put(put);
+        logger.log(Level.INFO,"方法：updateColumn 调用结束");
     }
 
     @Override
     public void updateTagForDicom(String tablename, List<String> rowkeys, String cf, String qualify, String value) throws IOException {
+        JSONArray rowkeysJson = JSON.parseArray(JSON.toJSONString(rowkeys));
+        logger.log(Level.INFO,"方法:updateTagForDicom 被调用，参数:{tablename:"+tablename
+                +"rowkeys："+rowkeysJson
+                +"cf：" + cf
+                +"qualify："+qualify
+                +"value："+value
+                +"}");
+
         Table table = conn.getTable(TableName.valueOf(tablename));
         int batchSize = 1000;
         int counter = 0;
@@ -123,15 +151,21 @@ public class HBaseServiceImpl implements HBaseService {
             }
         }
         table.put(puts);
+        logger.log(Level.INFO,"方法：updateTagForDicom 调用结束");
     }
 
     @Override
-    public int putOne(String tableName, String cf, JSONObject metaJson) throws IOException {
+    public int putOne(String tablename, String cf, JSONObject metaJson) throws IOException {
+        logger.log(Level.INFO,"方法:putOne 被调用，参数:{tablename:"+tablename
+                +"cf：" + cf
+                +"metaJson："+metaJson.toJSONString()
+                +"}");
+
         String rowkey = metaJson.getString(EsConsts.ROWKEY);
-        if(isExists(tableName,rowkey)){
+        if(isExists(tablename,rowkey)){
             return SysConsts.EXISTS;
         }
-        BufferedMutatorParams params = new BufferedMutatorParams(TableName.valueOf(tableName));
+        BufferedMutatorParams params = new BufferedMutatorParams(TableName.valueOf(tablename));
         try(BufferedMutator mutator = conn.getBufferedMutator(params)){
             Put put = new Put(Bytes.toBytes(rowkey));
             for(String key : metaJson.keySet()){
@@ -150,6 +184,7 @@ public class HBaseServiceImpl implements HBaseService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        logger.log(Level.INFO,"方法：putOne 调用结束");
         return SysConsts.SUCCESS;
     }
 
@@ -168,11 +203,18 @@ public class HBaseServiceImpl implements HBaseService {
     }
 
     @Override
-    public int putCell(String tableName, String rowkey, String cf, String col, byte[] value) throws IOException {
-        if(isExists(tableName,rowkey)){
+    public int putCell(String tablename, String rowkey, String cf, String col, byte[] value) throws IOException {
+        logger.log(Level.INFO,"方法:putCell 被调用，参数:{tablename:"+tablename
+                +"rowkey：" + rowkey
+                +"cf：" + cf
+                +"col：" + col
+                +"value："+value.length
+                +"}");
+
+        if(isExists(tablename,rowkey)){
             return SysConsts.EXISTS;
         }
-        BufferedMutatorParams params = new BufferedMutatorParams(TableName.valueOf(tableName));
+        BufferedMutatorParams params = new BufferedMutatorParams(TableName.valueOf(tablename));
         try(BufferedMutator mutator = conn.getBufferedMutator(params)){
             Put put = new Put(Bytes.toBytes(rowkey));
             put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(col),value);
@@ -181,19 +223,24 @@ public class HBaseServiceImpl implements HBaseService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        logger.log(Level.INFO,"方法：putCell 调用结束");
         return SysConsts.SUCCESS;
     }
 
     @Override
-    public boolean delete(String tableName, String rowkey) {
+    public boolean delete(String tablename, String rowkey) {
+        logger.log(Level.INFO,"方法:delete 被调用，参数:{tablename:"+tablename
+                +"rowkey：" + rowkey
+                +"}");
         HTable table = null;
         long length = 0;
         try {
-            table = (HTable)conn.getTable(TableName.valueOf(tableName));
+            table = (HTable)conn.getTable(TableName.valueOf(tablename));
             Delete delete = new Delete(rowkey.getBytes()); // 根据主键查询
             table.delete(delete);
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }finally {
             try {
                 table.close();
@@ -201,15 +248,19 @@ public class HBaseServiceImpl implements HBaseService {
                 e.printStackTrace();
             }
         }
-        return false;
+        logger.log(Level.INFO,"方法：delete 调用结束");
+        return true;
     }
 
     @Override
-    public boolean isExists(String tableName, String rowkey){
+    public boolean isExists(String tablename, String rowkey){
+        logger.log(Level.INFO,"方法:isExists 被调用，参数:{tablename:"+tablename
+                +"rowkey：" + rowkey
+                +"}");
         HTable table = null;
         long length = 0;
         try {
-            table = (HTable)conn.getTable(TableName.valueOf(tableName));
+            table = (HTable)conn.getTable(TableName.valueOf(tablename));
             Get get = new Get(rowkey.getBytes()); // 根据主键查询
             Result result = table.get(get);
             length = result.rawCells().length;
@@ -222,6 +273,7 @@ public class HBaseServiceImpl implements HBaseService {
                 e.printStackTrace();
             }
         }
+        logger.log(Level.INFO,"方法：isExists 调用结束");
         return length>0;
     }
 

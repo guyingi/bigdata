@@ -1,9 +1,16 @@
 package qed.bigdata.infosupplyer.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.delete.DeleteRequestBuilder;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -26,6 +33,7 @@ import qed.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
 import qed.bigdata.infosupplyer.consts.DataTypeEnum;
 import qed.bigdata.infosupplyer.consts.EsConsts;
 import qed.bigdata.infosupplyer.consts.SysConsts;
+import qed.bigdata.infosupplyer.controller.DownloadController;
 import qed.bigdata.infosupplyer.pojo.IdSearchParamBean;
 import qed.bigdata.infosupplyer.pojo.PageSearchParamBean;
 import qed.bigdata.infosupplyer.factory.EsClientFactory;
@@ -42,6 +50,7 @@ import java.util.*;
  */
 @Service("ElasticSearchService")
 public class ElasticSearchServiceImpl implements ElasticSearchService {
+    static Logger logger = Logger.getLogger(ElasticSearchServiceImpl.class);
 
     InfosupplyerConfiguration conf = null;
 
@@ -51,18 +60,24 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 
     @Override
     public JSONObject searchByPaging(JSONObject param, DataTypeEnum type) {
-        PageSearchParamBean pageSearchParamBean = new PageSearchParamBean(param);
+        logger.log(Level.INFO,"方法:searchByPaging 被调用，参数:{param="+param.toJSONString()+",type"+type+"}");
+
         JSONObject result = null;
         TransportClient transportClient = EsClientFactory.getTransportClient();
+        PageSearchParamBean pageSearchParamBean = new PageSearchParamBean(param);
+
+        //步骤一、参数检查
+        if(!pageSearchParamBean.isCriteriaAvailable()){
+            logger.log(Level.INFO,"查询条件参数为空");
+            return createErrorMsg(SysConsts.CODE_010,"searchByPaging","查询条件参数为空");
+        }else if(pageSearchParamBean.isParseError()){
+            logger.log(Level.INFO,"参数解析错误");
+            return createErrorMsg(SysConsts.CODE_011,"searchByPaging","参数解析错误");
+        }
 
         //创建查询条件
-
         if(type == DataTypeEnum.DICOM){
-            if(!pageSearchParamBean.isCriteriaAvailable()){
-                return createErrorMsg(SysConsts.CODE_010,"searchByPaging","查询条件参数为空");
-            }else if(pageSearchParamBean.isParseError()){
-                return createErrorMsg(SysConsts.CODE_011,"searchByPaging","参数解析错误");
-            }
+            logger.log(Level.INFO,"进入dicom分支");
             //创建查询条件
             QueryBuilder queryBuilder = createQueryBuilder(pageSearchParamBean);
             //封装请求
@@ -72,11 +87,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             result = createResult(transportClient,searchRequestBuilder,
                     pageSearchParamBean.getBackfields(),pageSearchParamBean.isPaging(),pageSearchParamBean.getPagesize());
         }else if(type == DataTypeEnum.ELECTRIC){
-            if(!pageSearchParamBean.isCriteriaAvailable()){
-                return createErrorMsg(SysConsts.CODE_010,"searchByPaging","查询条件参数为空");
-            }else if(pageSearchParamBean.isParseError()){
-                return createErrorMsg(SysConsts.CODE_011,"searchByPaging","参数解析错误");
-            }
+            logger.log(Level.INFO,"进入electric分支");
             //创建查询条件
             QueryBuilder queryBuilder = createQueryBuilder(pageSearchParamBean);
             //封装请求
@@ -85,11 +96,27 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             //拿取结果
             result = createResult(transportClient,searchRequestBuilder,
                     pageSearchParamBean.getBackfields(),pageSearchParamBean.isPaging(),pageSearchParamBean.getPagesize());
+        }else if(type == DataTypeEnum.MULTIDIMENSION){
+            logger.log(Level.INFO,"进入multidimension分支");
+            //创建查询条件
+            QueryBuilder queryBuilder = createQueryBuilder(pageSearchParamBean);
+            //封装请求
+            SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(transportClient, pageSearchParamBean,
+                    conf.getIndexDicomDisensitization(),conf.getTypeDicomDisensitization(), queryBuilder);
+            //拿取结果
+            result = createResult(transportClient,searchRequestBuilder,
+                    pageSearchParamBean.getBackfields(),pageSearchParamBean.isPaging(),pageSearchParamBean.getPagesize());
         }
+
+        transportClient.close();
+        logger.log(Level.DEBUG,"方法:searchByPaging 返回结果"+result.toJSONString());
+        logger.log(Level.INFO,"方法:searchByPaging 返回结果"+result.getLong(SysConsts.TOTAL));
         return result;
     }
 
     private QueryBuilder createQueryBuilder(PageSearchParamBean pageSearchParamBean){
+        logger.log(Level.INFO,"方法:createQueryBuilder 被调用，参数:{"+pageSearchParamBean.toString()+"}");
+
         if(!pageSearchParamBean.isCriteriaAvailable()){
             return QueryBuilders.matchAllQuery();
         }
@@ -125,12 +152,12 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
                     if (obj.getBoolean(SysConsts.IS_END_AVAILABLE)) {
                         rangbuilder.lte(obj.getDouble(SysConsts.END));
                     }
-                }else{
+                }else {
                     if (obj.getBoolean(SysConsts.IS_START_AVAILABLE)) {
-                        rangbuilder.gte(obj.getDouble(SysConsts.START));
+                        rangbuilder.gte(obj.getString(SysConsts.START));
                     }
                     if (obj.getBoolean(SysConsts.IS_END_AVAILABLE)) {
-                        rangbuilder.lte(obj.getDouble(SysConsts.END));
+                        rangbuilder.lte(obj.getString(SysConsts.END));
                     }
                 }
                 matchQueryList.add(rangbuilder);
@@ -142,6 +169,9 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
                 }else if(EsConsts.DoubleFieldList.contains(keyword)){
                     matchQueryList.add(QueryBuilders.matchQuery(keyword, obj.getDouble(SysConsts.VALUE)));
                 }else {
+                    if(EsConsts.PreMatchList.contains(keyword)){
+                        matchQueryList.add(QueryBuilders.matchPhrasePrefixQuery(keyword, obj.getString(SysConsts.VALUE)));
+                    }
                     matchQueryList.add(QueryBuilders.matchQuery(keyword, obj.getString(SysConsts.VALUE)));
                 }
             }
@@ -404,6 +434,8 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 
     @Override
     public JSONObject searchTotalRecord(JSONObject param, DataTypeEnum type) {
+        logger.log(Level.INFO,"方法:searchByPaging 被调用，参数:{param="+param.toJSONString()+",type"+type+"}");
+
         PageSearchParamBean pageSearchParamBean = new PageSearchParamBean(param);
         if(!pageSearchParamBean.isCriteriaAvailable()){
             return createErrorMsg(SysConsts.CODE_010,"searchTotalRecord","查询条件参数为空");
@@ -433,11 +465,16 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             result.put(SysConsts.CODE,SysConsts.CODE_000);
             result.put(SysConsts.TOTAL,totalHits);
         }
+        transportClient.close();
+        logger.log(Level.INFO,"方法:searchTotalRecord 返回结果"+result.toJSONString());
+
         return result;
     }
 
     @Override
     public JSONObject searchByIds(JSONObject param) {
+        logger.log(Level.INFO,"方法:searchByIds 被调用，参数:{param="+param.toJSONString());
+
         IdSearchParamBean idSearchParamBean = new IdSearchParamBean(param);
         if(!idSearchParamBean.isIdsAvailable()){
             return createErrorMsg(SysConsts.CODE_010,"searchByIds","id参数为空");
@@ -460,6 +497,9 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             result = createResult(transportClient, searchRequestBuilderForIds, idSearchParamBean.getBackfields(),
                     false,SysConsts.DEFAULT_PAGESIZE);
         }
+        transportClient.close();
+
+        logger.log(Level.INFO,"方法:searchByIds 返回结果"+result.toJSONString());
 
         return result;
     }
@@ -479,23 +519,35 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         //拿取结果
         JSONObject result = createResult(transportClient,searchRequestBuilder,
                 pageSearchParamBean.getBackfields(),pageSearchParamBean.isPaging(),pageSearchParamBean.getPagesize());
-
+        transportClient.close();
         return result;
     }
 
     @Override
     public void updateField(String index, String type, String id,String field, String value) {
+        logger.log(Level.INFO,"方法:updateField 被调用，参数:{index:"+index
+                +",type:"+type
+                +",id:"+id
+                +",field:"+field
+                +",value:"+value+"}");
+
         TransportClient transportClient = EsClientFactory.getTransportClient();
         UpdateRequestBuilder updateRequestBuilder = transportClient.prepareUpdate(index, type, id);
         Map<String,String> map = new HashMap<String,String>();
         map.put(field,value);
         updateRequestBuilder.setDoc(map);
         UpdateResponse updateResponse = updateRequestBuilder.execute().actionGet();
-        System.out.println("update status:"+updateResponse.status());
+        transportClient.close();
+        logger.log(Level.INFO,"update status:"+updateResponse.status());
     }
 
     @Override
     public Object getFieldById(String index, String type, String id, String field) {
+        logger.log(Level.INFO,"方法:getFieldById 被调用，参数:{index:"+index
+                +",type:"+type
+                +",id:"+id
+                +",field:"+field);
+        Object result = null;
         TransportClient transportClient = EsClientFactory.getTransportClient();
         IdsQueryBuilder idsQueryBuilder = QueryBuilders.idsQuery(type);
         idsQueryBuilder.addIds(id);
@@ -511,10 +563,48 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         long len = response.getHits().getTotalHits();
         for(SearchHit hit : response.getHits().getHits()){
             Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-            Object fieldValue = sourceAsMap.get(field);
-            return (String)fieldValue;
+            result = sourceAsMap.get(field);
         }
-        return null;
+        transportClient.close();
+        logger.log(Level.INFO,"返回值:"+result);
+        return result;
+    }
+
+    @Override
+    public List<String> getIdByField(DataTypeEnum typeEnum , String field,String value) {
+        logger.log(Level.INFO,"方法:getFieldById 被调用，参数:{typeEnum:"+typeEnum
+                +",field:"+field
+                +",value:"+value);
+
+        List<String> result = new ArrayList<>();
+
+        JSONObject param = new JSONObject();
+        JSONArray criteria = new JSONArray();
+        JSONObject obj = new JSONObject();
+        obj.put(SysConsts.SECTION,SysConsts.NO);
+        obj.put(SysConsts.KEYWORD,field);
+        obj.put(SysConsts.VALUE,value);
+        criteria.add(obj);
+
+        JSONArray backfields = new JSONArray();
+        backfields.add(EsConsts.ID);
+
+        param.put(SysConsts.DATATYPE,SysConsts.TYPE_MULTIDIMENSION);
+        param.put(SysConsts.CRITERIA,criteria);
+        param.put(SysConsts.BACKFIELDS,backfields);
+
+        JSONObject tempResult = searchByPaging(param, typeEnum);
+        if(SysConsts.CODE_000.equals(tempResult.getString(SysConsts.CODE))){
+            JSONArray data = tempResult.getJSONArray(SysConsts.DATA);
+            int size = data.size();
+            for(int i=0;i<size;i++){
+                JSONObject jsonObject = data.getJSONObject(i);
+                String id = jsonObject.getString(EsConsts.ID);
+                result.add(id);
+            }
+        }
+
+        return result;
     }
 
     private SearchRequestBuilder createSearchRequestBuilderForIds(
@@ -537,7 +627,12 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 
     @Override
     public int insertOne(String index,String type,String id,JSONObject docJson) {
-        if(index==null||type==null){
+        logger.log(Level.INFO,"方法:insertOne 被调用，参数:{index:"+index
+                +",type:"+type
+                +",id:"+id
+                +",docJson:"+docJson.toJSONString());
+
+        if(StringUtils.isBlank(index)|| StringUtils.isBlank(type)){
             return SysConsts.FAILED;
         }
 
@@ -561,9 +656,11 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         BulkResponse bulkResponse = bulkRequest.execute().actionGet();
 
         if (bulkResponse.hasFailures()) {
-            System.out.println("message"+bulkResponse.buildFailureMessage());
+            logger.log(Level.INFO,"写入elasticsearch失败:"+bulkResponse.buildFailureMessage());
             return SysConsts.FAILED;
         }
+        transportClient.close();
+        logger.log(Level.INFO,"写入elasticsearch成功:");
         return SysConsts.SUCCESS;
     }
 
@@ -577,7 +674,13 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
     }
 
     @Override
-    public JSONObject searchAggregation(String index, String type,Map<String,String> searchcondition, String aggrfield) {
+    public JSONObject searchAggregation(String index, String type,Map<String,String> criteria, String aggrfield) {
+        JSONObject criteriaJson =  JSONObject.parseObject(JSON.toJSONString(criteria));
+        logger.log(Level.INFO,"方法:searchAggregation 被调用，参数:{index:"+index
+                +",type:"+type
+                +",criteria:"+criteriaJson
+                +",aggrfield:"+aggrfield);
+
         TransportClient transportClient = EsClientFactory.getTransportClient();
 
 //        AggregationBuilders
@@ -587,9 +690,9 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(index).setTypes(type)
                 .addAggregation(aggregation);
 
-        if(searchcondition != null && searchcondition.size()!=0) {
+        if(criteria != null && criteria.size()!=0) {
             BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
-            for (Map.Entry<String, String> entry : searchcondition.entrySet()) {
+            for (Map.Entry<String, String> entry : criteria.entrySet()) {
                 QueryBuilder matchQuery = QueryBuilders.matchQuery(entry.getKey(), entry.getValue());
                 boolBuilder.must(matchQuery);
             }
@@ -615,7 +718,34 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         result.put(SysConsts.DATA,data);
         System.out.println(result.toJSONString());
         transportClient.close();
+
+        logger.log(Level.INFO,"返回结果:"+result.toJSONString());
+
         return result;
+    }
+
+    @Override
+    public boolean deleteIndex(String index, String type, String id) {
+        TransportClient transportClient = EsClientFactory.getTransportClient();
+        DeleteRequestBuilder deleteRequestBuilder = transportClient.prepareDelete();
+        ActionFuture<DeleteResponse> execute = deleteRequestBuilder.setIndex(index).setType(type).setId(id).execute();
+        execute.actionGet();
+        transportClient.close();
+        return false;
+    }
+
+    @Override
+    public boolean deleteIndex(String index, String type, List<String> ids) {
+        TransportClient transportClient = EsClientFactory.getTransportClient();
+        DeleteRequestBuilder deleteRequestBuilder = transportClient.prepareDelete();
+        deleteRequestBuilder.setIndex(conf.getIndexDicomDisensitization())
+                .setType(conf.getTypeDicomDisensitization());
+        for(String id : ids){
+            ActionFuture<DeleteResponse> execute = deleteRequestBuilder.setId(id).execute();
+            execute.actionGet();
+        }
+        transportClient.close();
+        return true;
     }
 
     private JSONObject createErrorMsg(String code,String interfaceStr,String msg){
@@ -626,5 +756,10 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         error.put(SysConsts.INTERFACE,interfaceStr);
         result.put(SysConsts.ERROR,error);
         return result;
+    }
+
+    public static void main(String[] args) {
+
+        //        transportClient.close();
     }
 }

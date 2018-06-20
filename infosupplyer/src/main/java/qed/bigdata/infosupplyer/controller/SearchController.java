@@ -9,8 +9,10 @@ package qed.bigdata.infosupplyer.controller;
  * @version V1.0
  */
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -42,25 +44,31 @@ public class SearchController {
      * @return: com.alibaba.fastjson.JSONObject
      * @Date: 2018/4/23 14:37
      */
-    @PostMapping("/_searchpaging")
+    @PostMapping("/searchpaging")
     public JSONObject searchPaging(@RequestBody Map<String, Object> parameter) {
-//        JSONArray arr = (JSONArray)parameter.get(SysConsts.SEARCH_CRITERIA);
-        System.out.println("_searchpaging 收到");
 
-        logger.info("_searchpaging is called");
-        System.out.println("_searchpaging is called");
-        JSONObject reuslt = new JSONObject();
+        logger.log(Level.INFO,"接口:searchpaging 被调用");
+
+        JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
+        logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
+
+        JSONObject result = new JSONObject();
         JSONObject param = InfoSupplyerTool.formatParameter(parameter);
+
+        logger.log(Level.INFO,"格式化后的参数:"+param.toJSONString());
+
         if(SysConsts.TYPE_DICOM.equals(param.getString(SysConsts.DATATYPE))){
             System.out.println(param.toJSONString());
             DataTypeEnum type = DataTypeEnum.DICOM;
-            reuslt = elasticSearchService.searchByPaging(param,type);
+            result = elasticSearchService.searchByPaging(param,type);
         }else if(SysConsts.TYPE_ELECTRIC.equals(param.getString(SysConsts.DATATYPE))){
             DataTypeEnum type = DataTypeEnum.ELECTRIC;
-            reuslt = elasticSearchService.searchByPaging(param,type);
+            result = elasticSearchService.searchByPaging(param,type);
         }
-        System.out.println(reuslt.toJSONString());
-        return reuslt;
+
+        logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
+
+        return result;
     }
 
     /**
@@ -70,32 +78,37 @@ public class SearchController {
      * @return: com.alibaba.fastjson.JSONObject
      * @Date: 2018/4/23 14:38
      */
-    @PostMapping("/_searchByIds")
+    @PostMapping("/searchByIds")
     public JSONObject searchByIds(@RequestBody Map<String, Object> parameter) {
-        logger.info("_searchByIds is called");
-        System.out.println("_searchByIds is called");
+        logger.log(Level.INFO,"接口:searchByIds 被调用");
+        JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
+        logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
+
         JSONObject param = new JSONObject();
-        List<String> idsList = (List<String>) parameter.get("ids");
-        String datatype = (String)parameter.get("datatype");
-        List<String> backfields = (List<String>) parameter.get("backfields");
+        List<String> idsList = (List<String>) parameter.get(SysConsts.IDS);
+        String datatype = (String)parameter.get(SysConsts.DATATYPE);
+        List<String> backfields = (List<String>) parameter.get(SysConsts.BACKFIELDS);
         if (idsList != null && idsList.size() != 0) {
             JSONArray tempArr = new JSONArray();
             for (String e : idsList) {
                 tempArr.add(e);
             }
-            param.put("ids", tempArr);
+            param.put(SysConsts.IDS, tempArr);
         } else {
             return new JSONObject();
         }
-        param.put("datatype",datatype);
+        param.put(SysConsts.DATATYPE,datatype);
         if (backfields != null) {
             JSONArray tempArr = new JSONArray();
             for (String e : backfields) {
                 tempArr.add(e);
             }
-            param.put("backfields", tempArr);
+            param.put(SysConsts.BACKFIELDS, tempArr);
         }
         JSONObject result = elasticSearchService.searchByIds(param);
+
+        logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
+
         return result;
     }
 
@@ -106,14 +119,22 @@ public class SearchController {
      * @return: com.alibaba.fastjson.JSONObject
      * @Date: 2018/4/23 15:14
      */
-    @PostMapping("/_searchtotal")
+    @PostMapping("/searchtotal")
     public JSONObject searchtotal(@RequestBody Map<String, Object> parameter) {
-        logger.info("_searchtotal is called");
-        System.out.println("_searchtotal is called");
+        logger.log(Level.INFO,"接口:searchtotal 被调用");
+        JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
+        logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
+
         JSONObject param = InfoSupplyerTool.formatParameter(parameter);
+
+        logger.log(Level.INFO,"格式化后的参数:"+param.toJSONString());
+
         DataTypeEnum type = DataTypeEnum.DICOM;
-        JSONObject jsonObject = elasticSearchService.searchTotalRecord(param,type);
-        return jsonObject;
+        JSONObject result = elasticSearchService.searchTotalRecord(param,type);
+
+        logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
+
+        return result;
     }
 
     /**
@@ -122,31 +143,36 @@ public class SearchController {
      * @return: java.lang.String
      * @Date: 2018/4/23 15:16
      */
-    @RequestMapping("/_searchall")
+    @RequestMapping("/searchall")
     public String searchall() {
-        logger.info("_searchall is called");
-        elasticSearchService.searchAll();
-        return "this is _searchall";
+        logger.log(Level.INFO,"接口:searchall 被调用");
+//        elasticSearchService.searchAll();
+
+        return "this is searchall";
     }
 
 
-    //一定要查询数据库，因为这个人可能只有电信号或者量表，没有dicom
+    /**
+     * 一定要查询数据库，因为这个人可能只有电信号或者量表，没有dicom
+     * @param parameter
+     * @return
+     */
     @PostMapping("/getpatients")
     public JSONObject searchPatients(@RequestBody Map<String, Object> parameter){
-        String patientname = (String)parameter.get("patientname");
-        System.out.println("getpatients 接收到的参数："+patientname);
+        logger.log(Level.INFO,"接口:getpatients 被调用");
+        JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
+        logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
+
+        String patientname = (String)parameter.get(SysConsts.PATIENTNAME);
         List<Patient> patients = patientDao.getPatientByName(patientname);
         System.out.println(patients.size());
         JSONObject result = new JSONObject();
         result.put(SysConsts.CODE,SysConsts.CODE_000);
         result.put(SysConsts.TOTAL,patients.size());
         result.put(SysConsts.DATA,patients);
-        System.out.println("getpatients返回的数据："+result.toJSONString());
+
+        logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
+
         return result;
     }
-
-
-
-
-
 }

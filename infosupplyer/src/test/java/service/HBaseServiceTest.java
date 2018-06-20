@@ -27,7 +27,7 @@ public class HBaseServiceTest {
         Connection conn = HBaseUtil.getConnection();
         Table table = conn.getTable(TableName.valueOf(infosupplyerConfiguration.getDicomThumbnailTablename()));
 
-        String rowkey = "2592930b48f9021e934bfa290737203";
+        String rowkey = "9230237715bec00b51c8672868086351";
         Scan scan  = new Scan();
         scan.setStartRow(Bytes.toBytes(rowkey+"0"));
         scan.setStopRow(Bytes.toBytes(rowkey+"9"));

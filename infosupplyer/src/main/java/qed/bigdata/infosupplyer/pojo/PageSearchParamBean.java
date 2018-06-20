@@ -76,6 +76,8 @@ public class PageSearchParamBean {
                 type = DataTypeEnum.KFB;
             }else if(SysConsts.TYPE_GUAGE.equals(datatype)){
                 type = DataTypeEnum.GUAGE;
+            }else if(SysConsts.TYPE_MULTIDIMENSION.equals(datatype)){
+                type = DataTypeEnum.MULTIDIMENSION;
             }
 
             JSONArray backfieldsParam = param.getJSONArray("backfields");
@@ -89,6 +91,10 @@ public class PageSearchParamBean {
         }
     }
 
+    /**
+     * 下面方法的作用是将区间参数格式化为标准的区间参数，添加is等boolean数据。同时将int,long,double等数据进行格式转换
+     * @param param
+     */
     private void parseCriteria(JSONArray param){
         int size = param.size();
         for(int i=0; i<size; i++){
@@ -264,4 +270,30 @@ public class PageSearchParamBean {
         return type;
     }
 
+
+    @Override
+    public String toString() {
+        String backfieldsStr = "";
+        String sortfieldsStr = "";
+        if(backfields!=null) {
+            for (String e : backfields) {
+                backfieldsStr += e;
+            }
+        }
+        if(sortfields!=null) {
+            for (String e : sortfields) {
+                sortfieldsStr += e;
+            }
+        }
+        return "PageSearchParamBean{" +
+                "criteria=" + criteria +
+                ", pageid=" + pageid +
+                ", pagesize=" + pagesize +
+                ", backfields=" + backfieldsStr +
+                ", sortfields=" + sortfieldsStr +
+                ", type=" + type +
+                ", paging=" + paging +
+                ", parseError=" + parseError +
+                '}';
+    }
 }

@@ -1,13 +1,16 @@
 package qed.bigdata.infosupplyer.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import qed.bigdata.infosupplyer.consts.DataTypeEnum;
 import qed.bigdata.infosupplyer.consts.SysConsts;
 import qed.bigdata.infosupplyer.pojo.db.DicomTag;
 import qed.bigdata.infosupplyer.util.InfoSupplyerTool;
@@ -46,24 +49,40 @@ public class TagController{
 
     @PostMapping("/tagfordicom")
     public JSONObject tagfordicom(@RequestBody Map<String, Object> parameter) {
-        logger.info("tagfordicom is called");
-        System.out.println("tagfordicom is called");
+        logger.log(Level.INFO,"接口:tagfordicom 被调用");
+        JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
+        logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
+
         JSONObject param = InfoSupplyerTool.formatParameter(parameter);
-        System.out.println("tagfordicom接口接收的参数："+param.toJSONString());
+
+        logger.log(Level.INFO,"接口接收的参数"+param.toJSONString());
+
         Integer count = tagService.signForDicom(param);
         JSONObject result = new JSONObject();
         result.put(SysConsts.CODE,SysConsts.CODE_000);
         result.put("total",count);
+
+        logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
+
         return result;
     }
 
+
+
     @PostMapping("/desensitizedicom")
     public JSONObject desensitizedicom(@RequestBody Map<String, Object> parameter){
-        String tag = (String)parameter.get("tag");
+        logger.log(Level.INFO,"接口:desensitizedicom 被调用");
+        JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
+        logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
+
+        String tag = (String)parameter.get(SysConsts.TAG);
         Long count = desensitizationService.desensitizedicom(tag);
         JSONObject result = new JSONObject();
         result.put(SysConsts.CODE,SysConsts.CODE_000);
         result.put("total",count);
+
+        logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
+
         return result;
     }
 
@@ -75,9 +94,13 @@ public class TagController{
      */
     @PostMapping("/searchtags")
     public JSONObject searchtags(@RequestBody Map<String, Object> parameter){
-        System.out.println("searchtags is called");
+        logger.log(Level.INFO,"接口:searchtags 被调用");
+        JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
+        logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
+
         JSONObject result = new JSONObject();
         String tag = (String)parameter.get(SysConsts.TAG_PARAM);
+
         if(tag != null && tag.length() != 0){
             JSONObject tags = tagService.searchtags(tag);
             if(SysConsts.CODE_000.equals(tags.getString(SysConsts.CODE))){
@@ -93,7 +116,38 @@ public class TagController{
                 result.put(SysConsts.DATA,tags.getJSONArray(SysConsts.DATA));
             }
         }
-        System.out.println("info 发送："+result.toJSONString());
+
+        logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
+
+        return result;
+    }
+
+    /**
+     * 移除标签
+     * @param parameter
+     * @return
+     */
+    @PostMapping("/removetag")
+    public JSONObject removetag(@RequestBody Map<String, Object> parameter){
+        logger.log(Level.INFO,"接口:removetag 被调用");
+        JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
+        logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
+
+        JSONObject result = new JSONObject();
+        String tag = (String)parameter.get(SysConsts.TAG_PARAM);
+        String datatype = (String)parameter.get(SysConsts.DATATYPE);
+
+        if(SysConsts.TYPE_DICOM.equals(datatype)){
+            boolean success = tagService.removeTag(tag,DataTypeEnum.DICOM);
+            if(success){
+                result.put(SysConsts.CODE,SysConsts.CODE_000);
+            }else{
+                result.put(SysConsts.CODE,SysConsts.CODE_999);
+            }
+        }
+
+        logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
+
         return result;
     }
 
@@ -104,7 +158,7 @@ public class TagController{
      */
     @PostMapping("/listtags")
     public JSONObject listtags(@RequestBody Map<String, Object> parameter){
-        System.out.println("listtags is called");
+        logger.log(Level.INFO,"接口:listtags 被调用");
         List<DicomTag> list = dicomTagDao.list();
         JSONObject result = new JSONObject();
         JSONArray data = new JSONArray();
@@ -120,7 +174,9 @@ public class TagController{
             data.add(element);
         }
         result.put(SysConsts.DATA,data);
-        System.out.println("info 发送："+result.toJSONString());
+
+        logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
+
         return result;
     }
 
