@@ -12,12 +12,15 @@ package qed.bigdata.infosupplyer.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import qed.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
 import qed.bigdata.infosupplyer.consts.DataTypeEnum;
 import qed.bigdata.infosupplyer.consts.SysConsts;
+import qed.bigdata.infosupplyer.factory.ConfigFactory;
 import qed.bigdata.infosupplyer.pojo.db.Patient;
 import qed.bigdata.infosupplyer.util.InfoSupplyerTool;
 import qed.bigdata.infosupplyer.dao.PatientDao;
@@ -30,6 +33,7 @@ import java.util.Map;
 @RequestMapping("/info")
 public class SearchController {
     static Logger logger = Logger.getLogger(SearchController.class);
+    static InfosupplyerConfiguration infoConf = ConfigFactory.getInfosupplyerConfiguration();
 
     @Autowired
     ElasticSearchService elasticSearchService;
@@ -171,6 +175,33 @@ public class SearchController {
         result.put(SysConsts.TOTAL,patients.size());
         result.put(SysConsts.DATA,patients);
 
+        logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
+
+        return result;
+    }
+
+    /**
+     * 列出dicom表中的某个字段的值域，即某个字段所有种类的值
+     * @param parameter
+     * @return
+     */
+    @PostMapping("/listValueRangeInDicom")
+    public JSONObject listValueRangeInDicom(@RequestBody Map<String, Object> parameter){
+        logger.log(Level.INFO,"接口:listValueRangeInDicom 被调用");
+        JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
+        logger.log(Level.INFO,"接口listValueRangeInDicom接收的参数:"+paramJson.toJSONString());
+
+        JSONObject result = new JSONObject();
+        String field = (String)parameter.get(SysConsts.FIELD_PARAM);
+
+        if(!StringUtils.isBlank(field)){
+            JSONObject tempResult = elasticSearchService.searchAggregation(infoConf.getIndexDicom(),infoConf.getTypeDicom(),null,field);
+            if(SysConsts.CODE_000.equals(tempResult.getString(SysConsts.CODE))){
+                result.put(SysConsts.CODE,SysConsts.CODE_000);
+                result.put(SysConsts.TOTAL,tempResult.getLong(SysConsts.TOTAL));
+                result.put(SysConsts.DATA,tempResult.getJSONArray(SysConsts.DATA));
+            }
+        }
         logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
 
         return result;

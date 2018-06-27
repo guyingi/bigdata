@@ -39,20 +39,20 @@ import qed.bigdata.es.tool.Tool;
 public class SearchServiceImpl implements SearchService {
     static Logger logger = Logger.getLogger(SearchServiceImpl.class);
 	public static void main(String[] args) {
-		JSONObject json = new JSONObject();
-		JSONArray criteria = new JSONArray();
-		JSONObject obj1 = new JSONObject();
-        obj1.put("keyword","InstitutionName");
-        obj1.put("value","Ningbo No.2 Hosp");
-        obj1.put("section","no");
-
-        JSONObject obj2 = new JSONObject();
-        obj2.put("keyword","PatientAge");
-        obj2.put("start","0");
-        obj2.put("end","23");
-        obj2.put("section","yes");
-        criteria.add(obj1);
-        criteria.add(obj2);
+//		JSONObject json = new JSONObject();
+//		JSONArray criteria = new JSONArray();
+//		JSONObject obj1 = new JSONObject();
+//        obj1.put("keyword","InstitutionName");
+//        obj1.put("value","Ningbo No.2 Hosp");
+//        obj1.put("section","no");
+//
+//        JSONObject obj2 = new JSONObject();
+//        obj2.put("keyword","PatientAge");
+//        obj2.put("start","0");
+//        obj2.put("end","23");
+//        obj2.put("section","yes");
+//        criteria.add(obj1);
+//        criteria.add(obj2);
 //		searchcondition.put(SysConsts.DEVICE_PARAM,"PET/MR");
 //        searchcondition.put(SysConsts.SERIES_DESCRIPTION_PARAM,"Flair");
 //        searchcondition.put(SysConsts.ORGAN_PARAM,"brain");
@@ -68,8 +68,8 @@ public class SearchServiceImpl implements SearchService {
 //        searchcondition.put(SysConsts.IMAGECOUNT_MAX_PARAM,121);
 //		json.put("searchcondition",searchcondition);
 
-		JSONArray backfields = new JSONArray();
-        backfields.add(ESConsts.InstitutionName_ES);
+//		JSONArray backfields = new JSONArray();
+//        backfields.add(ESConsts.InstitutionName_ES);
 //        backfields.add(ESConsts.ORGAN_ES);
 //		backfields.add(ESConsts.PatientName_ES);
 //		backfields.add(ESConsts.PatientsAge_ES);
@@ -80,23 +80,23 @@ public class SearchServiceImpl implements SearchService {
 //        backfields.add(ESConsts.ID_ES);
 
 //
-		JSONArray sortfields = new JSONArray();
-		sortfields.add(ESConsts.SeriesDate_ES);
+//		JSONArray sortfields = new JSONArray();
+//		sortfields.add(ESConsts.SeriesDate_ES);
 //		sortfields.add(ESConsts.PatientName_ES);
-        json.put("pageid",1);
-        json.put("pagesize",3);
-        json.put("backfields",backfields);
-		json.put("sortfields",sortfields);
-        json.put("criteria",criteria);
-        json.put("datatype",SysConsts.TYPE_DICOM);
-        String interfaceStr = "/info/searchpaging";
-        JSONObject searchPagingResult = null;
-        try {
-            searchPagingResult = Tool.doCallAndGetResult(json,interfaceStr,DataTypeEnum.DICOM);
-            System.out.println(searchPagingResult.toJSONString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        json.put("pageid",1);
+//        json.put("pagesize",3);
+//        json.put("backfields",backfields);
+//		json.put("sortfields",sortfields);
+//        json.put("criteria",criteria);
+//        json.put("datatype",SysConsts.TYPE_DICOM);
+//        String interfaceStr = "/info/searchpaging";
+//        JSONObject searchPagingResult = null;
+//        try {
+//            searchPagingResult = Tool.doCallAndGetResult(json,interfaceStr,DataTypeEnum.DICOM);
+//            System.out.println(searchPagingResult.toJSONString());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 //		JSONObject jsonObject = new SearchServiceImpl().searchDicomByPaging(searchcondition,backfields,sortfields,1,3);
 //		System.out.println(jsonObject.toJSONString());
 //		String code = jsonObject.getString("code");
@@ -297,6 +297,53 @@ public class SearchServiceImpl implements SearchService {
         }
         logger.log(Level.INFO,"调用 getDesensitizeDownloadFileByTag 结束,返回结果:"+filepath);
         return filepath;
+    }
+
+    @Override
+    public List<String> listInstitutionName() {
+        logger.log(Level.INFO,"调用方法:listInstitutionName");
+
+        String interfaceStr = "/info/listValueRangeInDicom";
+        JSONObject param = new JSONObject();
+        param.put("field",ESConsts.InstitutionName_ES);
+        JSONObject jsonObject = Tool.doCallAndGetResult(param, interfaceStr, DataTypeEnum.OTHER);
+        List<String> resultList = parseValueRange(jsonObject,ESConsts.InstitutionName_ES);
+
+        JSONArray resultListJson = JSON.parseArray(JSON.toJSONString(resultList));
+        logger.log(Level.INFO,"调用方法:listInstitutionName结束，返回结果："+resultListJson.toJSONString());
+        return resultList;
+    }
+
+    @Override
+    public List<String> listManufacturerModelName(){
+        logger.log(Level.INFO,"调用方法:listManufacturerModelName");
+
+        String interfaceStr = "/info/listValueRangeInDicom";
+        JSONObject param = new JSONObject();
+        param.put("field",ESConsts.ManufacturerModelName_ES);
+        JSONObject jsonObject = Tool.doCallAndGetResult(param, interfaceStr, DataTypeEnum.OTHER);
+        List<String> resultList = parseValueRange(jsonObject,ESConsts.ManufacturerModelName_ES);
+
+        JSONArray resultListJson = JSON.parseArray(JSON.toJSONString(resultList));
+        logger.log(Level.INFO,"调用方法:listManufacturerModelName，返回结果："+resultListJson.toJSONString());
+
+        return resultList;
+    }
+
+    @Override
+    public List<String> listSeriesDescription(){
+        logger.log(Level.INFO,"调用方法:listSeriesDescription");
+
+        String interfaceStr = "/info/listValueRangeInDicom";
+        JSONObject param = new JSONObject();
+        param.put("field",ESConsts.SeriesDescription_ES);
+        JSONObject jsonObject = Tool.doCallAndGetResult(param, interfaceStr, DataTypeEnum.OTHER);
+
+        List<String> resultList = parseValueRange(jsonObject,ESConsts.SeriesDescription_ES);
+
+        JSONArray resultListJson = JSON.parseArray(JSON.toJSONString(resultList));
+        logger.log(Level.INFO,"调用方法:listSeriesDescription，返回结果："+resultListJson.toJSONString());
+        return resultList;
     }
 
     @Override
@@ -513,6 +560,22 @@ public class SearchServiceImpl implements SearchService {
         return Tool.zipCompress(srcDir,zipPath,zipName);
     }
 
+    private List<String> parseValueRange(JSONObject param,String field){
+	    List<String> list = new ArrayList<>();
+        if(SysConsts.CODE_000.equals(param.getString(SysConsts.CODE))) {
+            Long total = param.getLong(SysConsts.TOTAL);
+            if (total > 0) {
+                JSONArray data = param.getJSONArray(SysConsts.DATA);
+                int size = data.size();
+                for (int i = 0; i < size; i++) {
+                    JSONObject obj = data.getJSONObject(i);
+                    String value = obj.getString(field);
+                    list.add(value);
+                }
+            }
+        }
+        return list;
+    }
 
 
 

@@ -81,6 +81,7 @@ public class SysConsts {
     /***************查询条件中的字段******************/
 
     public static String TAG_PARAM = "tag";
+    public static String FIELD_PARAM = "field";
 
     public static String PatientUID_ELECTRIC_PARAM = "patientuid";
     public static String PatientName_ELECTRIC_PARAM = "patientname";

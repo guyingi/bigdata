@@ -78,9 +78,13 @@ public class DicomSearchController {
         sortfields.add(ESConsts.NumberOfSlices_ES);
 
         JSONObject tempResult = searchService.searchDicomByPaging(param, backfields,sortfields,1, SysConsts.DEFAULT_PAGE_SIZE);
-        result.put("total",tempResult.getLong("total"));
+        Long total = tempResult.getLong("total");
+        if(total==null || total==0L)
+            result.put("total",0L);
+        else
+            result.put("total",total);
+
         result.put("rows",tempResult.getJSONArray("data"));
-        System.out.println("total:"+tempResult.getLong("total"));
 
         logger.log(Level.DEBUG,"接口返回结果:"+result.toJSONString());
         logger.log(Level.INFO,"接口返回结果:"+"total:"+tempResult.getLong("total"));
@@ -288,38 +292,66 @@ public class DicomSearchController {
 
     //assSearchHospital 是个ajax请求方法，医院做成联想搜索
     @ResponseBody
-    @RequestMapping(value = "associativeSearchHospital", method = RequestMethod.GET)
-    public List<Map<String,String>> associativeSearchHospital() {
-        logger.log(Level.INFO,"controller:associativeSearchHospital 被调用");
-        
+    @RequestMapping(value = "associativeSearchManufacturerModelName", method = RequestMethod.GET)
+    public List<Map<String,String>> associativeSearchManufacturerModelName() {
+        logger.log(Level.INFO,"controller:associativeSearchManufacturerModelName 被调用");
+
         List<Map<String,String>> list = new ArrayList<Map<String,String>>();
         Map<String,String> map;
 
-        String[] organ = new String[]{};
-        for(String e : organ){
+        List<String> manufacturerModelNameList = searchService.listManufacturerModelName();
+
+        for(String e : manufacturerModelNameList){
             map = new HashMap<String,String>();
             map.put("lable",e);
             map.put("text",e);
             list.add(map);
         }
+        JSONArray resultJson = JSON.parseArray(JSON.toJSONString(list));
+        logger.log(Level.INFO,"controller:associativeSearchManufacturerModelName反与前数据:"+resultJson.toJSONString());
         return list;
     }
 
     //assSearchHospital 是个ajax请求方法，医院做成联想搜索
     @ResponseBody
-    @RequestMapping(value = "associativeSearchOrgan", method = RequestMethod.GET)
-    public List<Map<String,String>> associativeSearchOrgan() {
-//        System.out.println("associativeSearchOrgan is called");
+    @RequestMapping(value = "associativeSearchInstitutionName", method = RequestMethod.GET)
+    public List<Map<String,String>> associativeSearchInstitutionName() {
+        logger.log(Level.INFO,"controller:associativeSearchInstitutionName 被调用");
+
+        List<String> institutionNameList = searchService.listInstitutionName();
+
         List<Map<String,String>> list = new ArrayList<Map<String,String>>();
-//        Map<String,String> map;
-//
-//        String[] organ = new String[]{"brain","lungs","heart"};
-//        for(String e : organ){
-//            map = new HashMap<String,String>();
-//            map.put("lable",e);
-//            map.put("text",e);
-//            list.add(map);
-//        }
+        Map<String,String> map;
+        for(String e : institutionNameList){
+            map = new HashMap<String,String>();
+            map.put("lable",e);
+            map.put("text",e);
+            list.add(map);
+        }
+
+        JSONArray resultJson = JSON.parseArray(JSON.toJSONString(list));
+        logger.log(Level.INFO,"controller:associativesearchinstitution反与前端数据:"+resultJson.toJSONString());
+
+        return list;
+    }
+
+    //assSearchHospital 是个ajax请求方法，医院做成联想搜索
+    @ResponseBody
+    @RequestMapping(value = "associativeSearchSeriesDescription", method = RequestMethod.GET)
+    public List<Map<String,String>> associativeSearchSeriesDescription() {
+        logger.log(Level.INFO,"controller:associativeSearchSeriesDescription 被调用");
+        List<String> seriesDescriptionList = searchService.listSeriesDescription();
+
+        List<Map<String,String>> list = new ArrayList<Map<String,String>>();
+        Map<String,String> map;
+        for(String e : seriesDescriptionList){
+            map = new HashMap<String,String>();
+            map.put("lable",e);
+            map.put("text",e);
+            list.add(map);
+        }
+        JSONArray resultJson = JSON.parseArray(JSON.toJSONString(list));
+        logger.log(Level.INFO,"controller:associativeSearchSeriesDescription:"+resultJson.toJSONString());
         return list;
     }
 

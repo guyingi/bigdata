@@ -718,7 +718,6 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         result.put(SysConsts.TOTAL,total);
         result.put(SysConsts.CODE,SysConsts.CODE_000);
         result.put(SysConsts.DATA,data);
-        System.out.println(result.toJSONString());
         transportClient.close();
 
         logger.log(Level.INFO,"返回结果:"+result.toJSONString());

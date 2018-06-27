@@ -193,8 +193,16 @@
             success: function (data) {
                 console.log(data);
                 if(data!=null){
-                    $("#resulttable").datagrid("loadData",data);
-                    $("#hint").html("");
+                    if(data.total==0) {
+                        $("#hint").html("");
+                        var tempObj = new Object();
+                        tempObj.total = 0;
+                        tempObj.rows = new Array();
+                        $("#resulttable").datagrid("loadData", tempObj);
+                    }else{
+                        $("#resulttable").datagrid("loadData",data);
+                        $("#hint").html("");
+                    }
                 }else{
                     $("#hint").html("查询失败");
                 }

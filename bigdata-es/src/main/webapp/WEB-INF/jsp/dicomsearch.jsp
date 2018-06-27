@@ -55,20 +55,60 @@
         $('#resulttable').datagrid('getPager').pagination({//分页栏下方文字显示
             displayMsg:'当前显示{from}-{to} 共{total}条记录',
         });
-
+        //ManufacturerModelName联想搜索
+        $.ajax({
+            type: "GET",
+            url: "/associativeSearchManufacturerModelName",
+            data: null,
+            dataType: 'json',
+            traditional:true,
+            contentType: 'application/json;charset=utf-8',
+            success: function (data) {
+                if(data!=null){
+                    $("#ManufacturerModelName").combobox({
+                        data :data,//获取要显示的json数据
+                        valueField: 'lable',
+                        textField: 'text',
+                        panelHeight: 'auto'
+                    });
+                }
+            },
+            error: function () {
+            }
+        });
         //医院联想搜索
         $.ajax({
             type: "GET",
-            url: "/associativeSearchHospital",
+            url: "/associativeSearchInstitutionName",
             data: null,
             dataType: 'json',
             traditional:true,
             contentType: 'application/json;charset=utf-8',
             success: function (data) {
-                console.log(JSON.stringify(data));
-                console.log(data);
                 if(data!=null){
-                    $("#hospital").combobox({
+                    console.log(data);
+                    $("#InstitutionName").combobox({
+                        data :data,//获取要显示的json数据
+                        valueField: 'lable',
+                        textField: 'text',
+                        panelHeight: 'auto'
+                    });
+                }
+            },
+            error: function () {
+            }
+        });
+        //序列描述联想搜索
+        $.ajax({
+            type: "GET",
+            url: "/associativeSearchSeriesDescription",
+            data: null,
+            dataType: 'json',
+            traditional:true,
+            contentType: 'application/json;charset=utf-8',
+            success: function (data) {
+                if(data!=null){
+                    $("#SeriesDescription").combobox({
                         data :data,//获取要显示的json数据
                         valueField: 'lable',
                         textField: 'text',
@@ -80,29 +120,7 @@
             }
         });
 
-        //器官联想搜索
-        $.ajax({
-            type: "GET",
-            url: "/associativeSearchOrgan",
-            data: null,
-            dataType: 'json',
-            traditional:true,
-            contentType: 'application/json;charset=utf-8',
-            success: function (data) {
-                console.log(JSON.stringify(data));
-                console.log(data);
-                if(data!=null){
-                    $("#organ").combobox({
-                        data :data,//获取要显示的json数据
-                        valueField: 'lable',
-                        textField: 'text',
-                        panelHeight: 'auto'
-                    });
-                }
-            },
-            error: function () {
-            }
-        });
+
 
         $.extend($.fn.textbox.defaults.rules, {
             number: {
@@ -265,8 +283,16 @@
             success: function (data) {
                 console.log(data);
                 if(data!=null){
-                    $("#resulttable").datagrid("loadData",data);
-                    $("#hint").html("");
+                    if(data.total==0){
+                        $("#hint").html("");
+                        var tempObj = new Object();
+                        tempObj.total = 0;
+                        tempObj.rows=new Array();
+                        $("#resulttable").datagrid("loadData",tempObj);
+                    }else{
+                        $("#resulttable").datagrid("loadData",data);
+                        $("#hint").html("");
+                    }
                 }else{
                     $("#hint").html("查询失败");
                 }
@@ -366,7 +392,7 @@
                                                             <table cellpadding="2px" style="margin:0px;">
                                                             <tr>
                                                                 <td>模型名称:</td>
-                                                                <td><input class="easyui-textbox" type="text" name="ManufacturerModelName" data-options="required:false" /></td>
+                                                                <td><input id="ManufacturerModelName" class="easyui-textbox" type="text" name="ManufacturerModelName" data-options="required:false" /></td>
                                                             </tr>
                                                                 <!--       <tr>
                                                                           <td>器官:</td>
@@ -374,11 +400,11 @@
                                                                       </tr> -->
                                                             <tr>
                                                                 <td>序列描述:</td>
-                                                                <td><input class="easyui-textbox" type="text" name="SeriesDescription" data-options="required:false"/></td>
+                                                                <td><input id="SeriesDescription" class="easyui-textbox" type="text" name="SeriesDescription" data-options="required:false"/></td>
                                                             </tr>
                                                             <tr>
                                                                 <td>医院:</td>
-                                                                <td><input id="hospital" class="easyui-combobox" name="InstitutionName" type="text"/></td>
+                                                                <td><input id="InstitutionName" class="easyui-combobox" name="InstitutionName" type="text"/></td>
                                                             </tr>
                                                             <tr>
                                                                 <td>性别:</td>
@@ -481,13 +507,13 @@
                                                                     <table cellpadding="0px">
                                                                         <tr>
                                                                             <td>
-                                                                                <input class="easyui-numberspinner" name="SliceThickness_start" value="0" data-options="precision:1,increment:0.1," style="width:80px;"></input>
+                                                                                <input class="easyui-numberspinner" name="SliceThickness_start" value="" data-options="precision:1,increment:0.1," style="width:80px;"></input>
                                                                             </td>
                                                                             <td>
                                                                                 <p style="margin:0;">至</p>
                                                                             </td>
                                                                             <td>
-                                                                                <input class="easyui-numberspinner" name="SliceThickness_end" value="10" data-options="precision:1,increment:0.1," style="width:80px;"></input>
+                                                                                <input class="easyui-numberspinner" name="SliceThickness_end" value="" data-options="precision:1,increment:0.1," style="width:80px;"></input>
                                                                             </td>
                                                                         </tr>
                                                                     </table>

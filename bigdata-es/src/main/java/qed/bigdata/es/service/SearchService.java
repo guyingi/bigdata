@@ -100,4 +100,22 @@ public interface SearchService {
 	String getDesensitizeDownloadFileByTag(List<String> tags,String tempDir);
 
 
+	/**
+	 * 从es的dicom表中查询所有医院名称
+	 * @return
+	 */
+	List<String> listInstitutionName();
+
+	/**
+	 * 从es的dicom表中查询所有ManufacturerModelName名称
+	 * @return
+	 */
+	List<String> listManufacturerModelName();
+
+
+	/**
+	 * 从es的dicom表中查询所有SeriesDescription名称
+	 * @return
+	 */
+	List<String> listSeriesDescription();
 }
