@@ -41,7 +41,7 @@ function submit() {
         $("#tablediv").panel({title: tag});
         $.ajax({
             type: "POST",
-            url: "/es/searchDicomByTag",
+            url: "/searchDicomByTag",
             data: JSON.stringify(obj),
             dataType: 'json',
             traditional:true,
@@ -65,52 +65,108 @@ function desensitize() {
     //请求做脱敏处理
     var tag = "";
     var rows = $('#tagtable').datagrid('getSelections');
-    if(rows.length > 1){
-        alert("只能同时对单个tag脱敏");
+
+    if(0 != rows.length){
+        tag = rows[0].tagname;
+    }
+    // tag = $("#tablediv").panel("options").title;
+    if(tag.length == 0){
+        alert("提示，当前tag值为空");
     }else{
-        if(0 == rows.length){
-            tag = $("#tablediv").panel("options").title;
-        }else{
-            tag = rows[0].tagname;
-        }
-        if(tag.length == 0){
-            alert("提示，当前tag值为空");
-        }else{
-            $.messager.confirm('确认', '对tag为'+tag+"的序列做脱敏处理", function(r){
-                if(r){
-                    $("#hint").html("正在脱敏处理....稍等");
-                    var obj = new Object()
-                    obj.tag = tag;
-                    $.ajax({
-                        type: "POST",
-                        url: "/es/desensitize",
-                        data: JSON.stringify(obj),
-                        dataType: 'json',
-                        traditional:true,
-                        contentType: 'application/json;charset=utf-8',
-                        success: function (data) {
-                            console.log(data);
-                            if(data.result == 0){
-                                $("#hint").html("");
-                                $.messager.confirm('消息', '脱敏完成', function(r){});
-                            }else if(data.result == 1){
-                                $("#hint").html("");
-                                alert("tag："+tag+"已经做过脱敏");
-                            }else{
-                                $("#hint").html("");
-                                alert("脱敏操作失败");
-                            }
-                        },
-                        error: function () {
-                            $("#hint").html("程序运行出错！");
+        $.messager.confirm('确认', '对tag为'+tag+"的序列做脱敏处理", function(r){
+            if(r){
+                $("#hint").html("正在脱敏处理....稍等");
+                var obj = new Object()
+                obj.tag = tag;
+                $.ajax({
+                    type: "POST",
+                    url: "/desensitize",
+                    data: JSON.stringify(obj),
+                    dataType: 'json',
+                    traditional:true,
+                    contentType: 'application/json;charset=utf-8',
+                    success: function (data) {
+                        console.log(data);
+                        if(data.result == 0){
+                            $("#hint").html("");
+                            $.messager.confirm('消息', '脱敏完成', function(r){});
+                        }else if(data.result == 1){
+                            $("#hint").html("");
+                            alert("tag："+tag+"已经做过脱敏");
+                        }else{
+                            $("#hint").html("");
+                            alert("脱敏操作失败");
                         }
-                    });
-                }
-            });
-        }
+                    },
+                    error: function () {
+                        $("#hint").html("程序运行出错！");
+                    }
+                });
+            }
+        });
     }
 }
+function removetag() {
+    var tag = "";
+    var rows = $('#tagtable').datagrid('getSelections');
 
+    if(0 != rows.length){
+        tag = rows[0].tagname;
+    }
+    if(tag.length == 0){
+        alert("提示，当前tag值为空");
+    }else{
+        $.messager.confirm('提示', '确定取消标签'+tag+",取消之后，该tag下面的脱敏数据将会被清除", function(r) {
+            if (r) {
+                var obj = new Object();
+                obj.tag = tag;
+                $("#hint").html("正在取消标签....");
+                $.ajax({
+                    type: "POST",
+                    url: "/removedcmtag",
+                    data: JSON.stringify(obj),
+                    dataType: 'json',
+                    traditional: true,
+                    contentType: 'application/json;charset=utf-8',
+                    success: function (data) {
+                        $("#hint").html("");
+                        if (data.result) {
+                            $.messager.confirm('消息', '移除tag完成', function (r) {
+                            });
+                        } else {
+                            $.messager.confirm('消息', '移除tag失败', function (r) {
+                            });
+                        }
+                    },
+                    error: function () {
+                        $("#hint").html("程序运行出错！");
+                    }
+                });
+            }
+        });
+    }
+}
+function downloadJson() {
+    //下载json文件，包含hdfs路径，可用第三方脚本下载dicom文件
+    var tag = "";
+    var rows = $('#tagtable').datagrid('getSelections');
+
+    if(0 != rows.length){
+        tag = rows[0].tagname;
+    }
+    if(tag.length == 0){
+        alert("提示，当前tag值为空");
+    }else{
+        $("#hint").html("正在下载....稍等");
+        simulationForm("/getDcmDownloadFileByTag?tag="+tag);
+        $("#hint").html("");
+    }
+}
+function simulationForm(url) {
+    var form = $('<form method="post" action="'+url+'"></form>');
+    form.appendTo("body").submit().remove();
+    return;
+}
 function listSeriesOfTag(index,record) {
     var tagname = record['tagname'];
     var obj = new Object();
@@ -118,7 +174,7 @@ function listSeriesOfTag(index,record) {
     $("#tablediv").panel({title: tagname});
     $.ajax({
         type: "POST",
-        url: "/es/searchDicomByTag",
+        url: "/searchDicomByTag",
         data: JSON.stringify(obj),
         dataType: 'json',
         traditional:true,
@@ -153,12 +209,12 @@ function listSeriesOfTag(index,record) {
             <div class="easyui-accordion" fit="true" id="navmenu">
                 <div title="功能菜单">
                     <ul class="navmenu">
-                        <li><a href="./navigation.html">首页</a></li>
-                        <li><a href="./dicomsearch.html">查询dicom</a></li>
-                        <li><a href="./patientsearch.html">查询患者</a></li>
-                        <li><a href="./signtag.html">打标签</a></li>
-                        <li class="active"><a href="#">数据脱敏</a></li>
-                        <li><a href="./downloaddesensitization.html">下载脱敏数据</a></li>
+                        <li><a href="navigation">首页</a></li>
+                        <li><a href="dicomsearch">查询dicom</a></li>
+                        <li><a href="patientsearch">查询患者</a></li>
+                        <li><a href="signtag">打标签</a></li>
+                        <li class="active"><a href="#">标签管理</a></li>
+                        <li><a href="downloaddesensitization">下载脱敏数据</a></li>
                     </ul>
                 </div>
                 <div title="雅森天机"></div>
@@ -194,6 +250,12 @@ function listSeriesOfTag(index,record) {
                                                         <a class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:80px;height:30px;" onclick="desensitize()">开始脱敏</a>
                                                     </td>
                                                     <td>
+                                                        <a class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:80px;height:30px;" onclick="removetag()">取消标签</a>
+                                                    </td>
+                                                    <td>
+                                                        <a class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:80px;height:30px;" onclick="downloadJson()">下载</a>
+                                                    </td>
+                                                    <td>
                                                         <p id="hint"></p>
                                                     </td>
                                                 </tr>
@@ -207,13 +269,14 @@ function listSeriesOfTag(index,record) {
                                             <div data-options="region:'north'" data-options="fit:true,border:false" style="height:150px;">
                                                 <div id="tagdiv" class="easyui-panel" title="" style="width:auto" data-options="fit:true,border:false">
                                                       <table id="tagtable" title="" class="easyui-datagrid" style="width:auto;height:480px"
-                                                           url="/es/listtags"
-                                                           pageList="[4]"
-                                                           pageSize="4"
+                                                           url="/listtags"
+                                                           pageList="[20]"
+                                                           pageSize="20"
                                                            idField="id"
                                                            rownumbers="true"
                                                            pagination="true"
                                                            iconCls="icon-table"
+                                                           singleSelect="true"
                                                            data-options="onClickRow:listSeriesOfTag"
                                                     >
                                                         <thead>
@@ -229,8 +292,7 @@ function listSeriesOfTag(index,record) {
                                             </div>
                                             <div data-options="region:'center',border:false" style="height:150px;">
                                                 <div id="tablediv" class="easyui-panel" title="" data-options="fit:true,border:false" style="margin-top:5px;">
-                                                    <table id="resulttable" title="" class="easyui-datagrid" style="width:auto;height:480px"
-                                                           url="/es/ajaxPage"
+                                                    <table id="resulttable" title="" class="easyui-datagrid" style="width:auto;height:auto"
                                                            pageList="[20]"
                                                            pageSize="20"
                                                            idField="id"

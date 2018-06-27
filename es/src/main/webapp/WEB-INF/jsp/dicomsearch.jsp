@@ -59,7 +59,7 @@
         //医院联想搜索
         $.ajax({
             type: "GET",
-            url: "/es/associativeSearchHospital",
+            url: "/associativeSearchHospital",
             data: null,
             dataType: 'json',
             traditional:true,
@@ -83,7 +83,7 @@
         //器官联想搜索
         $.ajax({
             type: "GET",
-            url: "/es/associativeSearchOrgan",
+            url: "/associativeSearchOrgan",
             data: null,
             dataType: 'json',
             traditional:true,
@@ -150,7 +150,7 @@
             var paramJsonStr = JSON.stringify(obj)
             $.ajax({
                 type: "POST",
-                url: "/es/exportdsomepathhelp",
+                url: "/exportdsomepathhelp",
                 data: paramJsonStr,
                 dataType: 'json',
                 traditional:true,
@@ -162,7 +162,7 @@
                 }
             });
 
-            simulationForm("/es/exportdsomepath");
+            simulationForm("/exportdsomepath");
         }
     }
     function simulationForm(url) {
@@ -200,20 +200,27 @@
             var obj = new Object()
             obj.ids=arr;
             var paramJsonStr = JSON.stringify(obj)
+            $("#hint").html("正在生成数据...");
             $.ajax({
                 type: "POST",
-                url: "/es/downloaddicomhelp",
+                url: "/downloaddicomhelp",
                 data: paramJsonStr,
                 dataType: 'json',
                 traditional:true,
                 contentType: 'application/json;charset=utf-8',
                 success: function (data) {
+                    if(data.result){
+                        simulationForm("/downloaddicom");
+                        $("#hint").html("");
+                    }else{
+                        alert("下载内容大小超过2G，请使用脚本方式下载");
+                    }
                 },
                 error: function () {
                     $("#hint").html("程序运行出错！");
                 }
             });
-            simulationForm("/es/downloaddicom");
+
         }
     }
     function downloadDicomSingle(event) {
@@ -231,7 +238,7 @@
         var paramJsonStr = JSON.stringify(obj)
         $.ajax({
             type: "POST",
-            url: "/es/downloadDicomHelp",
+            url: "/downloadDicomHelp",
             data: paramJsonStr,
             dataType: 'json',
             traditional:true,
@@ -246,8 +253,8 @@
     }
 
     function submitForm(){
-        alert("dddd");
         var paramJsonStr = JSON.stringify($("#ff").serializeObject());
+        $("#hint").html("正在查询...");
         $.ajax({
             type: "POST",
             url: "/ajaxSearch",
@@ -259,6 +266,7 @@
                 console.log(data);
                 if(data!=null){
                     $("#resulttable").datagrid("loadData",data);
+                    $("#hint").html("");
                 }else{
                     $("#hint").html("查询失败");
                 }
@@ -268,15 +276,19 @@
             }
         });
     }
-    function showthumbnail(index,record){
+    function showthumbnail(index){
         var obj = new Object()
-        obj.id=record["id"];
-        var paramJsonStr = JSON.stringify(obj)
+        var rows = $('#resulttable').datagrid('getRows');//获得所有行
+        var row = rows[index];//根据index获得其中一行。
+        obj.id=row["id"];
+
+        var paramJsonStr = JSON.stringify(obj);
         var thumbnailtitle = "行号："+(index+1)+"的略缩图"
         $("#thumbnailtable").panel({title: thumbnailtitle});
+        $("#hint").html("加载缩略图...");
         $.ajax({
             type: "POST",
-            url: "/es/getdicomThumbnail",
+            url: "/getdicomThumbnail",
             data: paramJsonStr,
             dataType: 'json',
             traditional:true,
@@ -285,6 +297,7 @@
                 console.log(data);
                 if(data!=null){
                     $("#thumbnailtable").datagrid("loadData",data);
+                    $("#hint").html("");
                 }else{
                     $("#hint").html("查询失败");
                 }
@@ -296,6 +309,9 @@
     }
     function showPicture(value,row,index){
         return  '<img height="100" width="100" src=\''+value+'\'/>';
+    }
+    function formatter(val,row,index){
+        return '<a href="#" rel="external nofollow" onclick="showthumbnail('+index+')">缩略图</a>';
     }
 </script>
  <body class="easyui-layout" id="layout" style="visibility:hidden;">
@@ -316,7 +332,7 @@
                         <li class="active"><a href="#">查询dicom</a></li>
                         <li><a href="patientsearch">查询患者</a></li>
                         <li><a href="signtag">打标签</a></li>
-                        <li><a href="desensitization">数据脱敏</a></li>
+                        <li><a href="tagmanage">标签管理</a></li>
                         <li><a href="downloaddesensitization">下载脱敏数据</a></li>
                     </ul>
                 </div>
@@ -338,7 +354,7 @@
                         <div class="easyui-layout" data-options="fit:true">
                             <div data-options="region:'center',border:false">
                                 <div class="easyui-layout" data-options="fit:true,border:false">
-                                    <div data-options="region:'north',split:true" style="height:120px;">
+                                    <div data-options="region:'north',split:true" style="height:140px;">
                                         <!-- 查询和打标签部分开始 -->
                                         <div class="easyui-layout" data-options="fit:true,border:false">
                                             <!-- 查询条件部分 -->
@@ -348,17 +364,17 @@
                                                         <div data-options="region:'west'" style="border: none;width:280px;">
                                                             <!-- 查询条件一 -->
                                                             <table cellpadding="2px" style="margin:0px;">
-                                                         <!--    <tr>
-                                                                <td>设备:</td>
-                                                                <td><input class="easyui-textbox" type="text" name="device" data-options="required:false" /></td>
-                                                            </tr>
                                                             <tr>
-                                                                <td>器官:</td>
-                                                                <td><input id="organ" class="easyui-combobox" name="organ" type="text"/></td>
-                                                            </tr> -->
+                                                                <td>模型名称:</td>
+                                                                <td><input class="easyui-textbox" type="text" name="ManufacturerModelName" data-options="required:false" /></td>
+                                                            </tr>
+                                                                <!--       <tr>
+                                                                          <td>器官:</td>
+                                                                          <td><input id="organ" class="easyui-combobox" name="organ" type="text"/></td>
+                                                                      </tr> -->
                                                             <tr>
                                                                 <td>序列描述:</td>
-                                                                <td><input class="easyui-textbox" type="text" name="ManufacturerModelName" data-options="required:false"/></td>
+                                                                <td><input class="easyui-textbox" type="text" name="SeriesDescription" data-options="required:false"/></td>
                                                             </tr>
                                                             <tr>
                                                                 <td>医院:</td>
@@ -478,8 +494,8 @@
                                                                 </td>
                                                             </tr>
                                                             </table>
-                                                             <a class="easyui-linkbutton" data-options="iconCls:'icon-search',size:'small'" style="margin-left:0px;width:70px;height:25px;" onclick="submitForm()">查询</a>
-
+                                                            <a class="easyui-linkbutton" data-options="iconCls:'icon-search',size:'small'" style="margin-left:0px;width:70px;height:25px;" onclick="submitForm()">查询</a>
+                                                            <p id="hint" style="margin-left:0px;width:70px;height:15px;"></p>
                                                         </div>
 
                                                      </div>
@@ -495,34 +511,35 @@
                                             <!-- 相关操作按钮 -->
                                             <div data-options="region:'north',title:'查询结果',border:false" style="height:60px;">
                                                 <div style="margin:5px;">
-                                                    <a href="/es/exportallpath"  class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportAllPath();" style="width: 100px;height:20px" align="right">导出全部</a>
+                                                    <a href="/exportallpath"  class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportAllPath();" style="width: 100px;height:20px" align="right">导出全部</a>
                                                     <a   class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="exportSomePath();" style="width:100px;height:20px" align="right">导出选中</a>
-                                                    <a href="/es/exportexcel"  class="easyui-linkbutton" data-options="iconCls:'icon-save'"  style="width:100px;height:20px" align="right">导出excel</a>
+                                                    <a href="/exportexcel"  class="easyui-linkbutton" data-options="iconCls:'icon-save'"  style="width:100px;height:20px" align="right">导出excel</a>
                                                     <a  id="downloadchecked" class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="downloadDicomChecked();" style="width:100px;height:20px" align="right">下载选中</a>
                                                 </div>
                                             </div>
                                             <!-- 查询结果表格部分 -->
                                             <div id="tablediv" data-options="region:'center',border:false" style="padding:5px;background:#eee;">
                                                 <table id="resulttable" title="" class="easyui-datagrid" style="width:auto;height:auto"
-                                                       url="/es/ajaxPage"
+                                                       url="/ajaxPage"
                                                        pageList="[25]"
                                                        pageSize="25"
                                                        idField="id"
                                                        rownumbers="true"
                                                        pagination="true"
                                                        iconCls="icon-table"
-                                                       data-options="onClickRow:showthumbnail"
                                                 >
                                                     <thead>
                                                     <tr>
                                                         <th field="ck" checkbox="true"></th>
                                                         <th field="id" width="0%">Item ID</th>
                                                         <th field="InstitutionName" width="14%">医院</th>
-                                                        <th field="ManufacturerModelName" width="20%" align="left">序列类型</th>
-                                                        <th field="PatientName" width="20%" align="left">名字</th>
+                                                        <th field="ManufacturerModelName" width="16%" align="left">模型名称</th>
+                                                        <th field="SeriesDescription" width="16%" align="left">序列描述</th>
+                                                        <th field="PatientName" width="14%" align="left">名字</th>
                                                         <th field="SeriesDate" width="10%" align="left">检查日期</th>
                                                         <th field="NumberOfSlices" width="10%" align="center">张数</th>
                                                         <th field="tag" width="10%" align="center">Tag</th>
+                                                        <th field="operate" width:10% align="center" formatter="formatter">操作</th>
                                                     </tr>
                                                     </thead>
                                                 </table>

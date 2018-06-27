@@ -7,8 +7,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -16,15 +19,18 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
 
-import qed.bigdata.es.consts.ESConstants;
+import qed.bigdata.es.consts.DataTypeEnum;
+import qed.bigdata.es.consts.ESConsts;
+import qed.bigdata.es.consts.SysConsts;
+import qed.bigdata.es.factory.ConfFactory;
 import qed.bigdata.es.service.DataDownloadService;
 import qed.bigdata.es.service.SearchService;
-import qed.bigdata.es.consts.SysConstants;
-import qed.bigdata.es.tool.MilkTool;
+import qed.bigdata.es.tool.Tool;
 
 @Controller
 @RequestMapping("")
 public class DicomSearchController {
+    static Logger logger = Logger.getLogger(DicomSearchController.class);
 
 	@Autowired
     SearchService searchService;
@@ -42,38 +48,42 @@ public class DicomSearchController {
 
     @RequestMapping(value = "ajaxSearch", method = RequestMethod.POST)
     @ResponseBody
-    public JSONObject ajaxSearch(HttpServletRequest request, HttpServletResponse response,@RequestBody Map<String, String> parametr) {
-        System.out.println("ajaxSearch is called");
+    public JSONObject ajaxSearch(HttpServletRequest request, HttpServletResponse response,@RequestBody Map<String, String> parameter) {
+        logger.log(Level.INFO,"controller:ajaxSearch 被调用");
+        JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
+        logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
 
         JSONObject result = new JSONObject();
-        JSONArray param = formatParameter(parametr);
+        JSONArray param = formatParameter(parameter);
         System.out.println(param.toJSONString());
         HttpSession session = request.getSession();
         session.setAttribute("searchParam", param);
 
         JSONArray backfields = new JSONArray();
-        backfields.add(ESConstants.InstitutionName_ES);
-        backfields.add(ESConstants.PatientName_ES);
-        backfields.add(ESConstants.SeriesDate_ES);
-        backfields.add(ESConstants.ManufacturerModelName_ES);
-        backfields.add(ESConstants.NumberOfSlices_ES);
-        backfields.add(ESConstants.TAG_ES);
-        backfields.add(ESConstants.ID_ES);
+        backfields.add(ESConsts.InstitutionName_ES);
+        backfields.add(ESConsts.PatientName_ES);
+        backfields.add(ESConsts.SeriesDate_ES);
+        backfields.add(ESConsts.ManufacturerModelName_ES);
+        backfields.add(ESConsts.SeriesDescription_ES);
+        backfields.add(ESConsts.NumberOfSlices_ES);
+        backfields.add(ESConsts.TAG_ES);
+        backfields.add(ESConsts.ID_ES);
 //
         JSONArray sortfields = new JSONArray();
-        sortfields.add(ESConstants.InstitutionName_ES);
-        sortfields.add(ESConstants.SeriesDescription_ES);
-        sortfields.add(ESConstants.PatientName_ES);
-        sortfields.add(ESConstants.SeriesDate_ES);
-        sortfields.add(ESConstants.TAG_ES);
-        sortfields.add(ESConstants.NumberOfSlices_ES);
+        sortfields.add(ESConsts.InstitutionName_ES);
+        sortfields.add(ESConsts.SeriesDescription_ES);
+        sortfields.add(ESConsts.PatientName_ES);
+        sortfields.add(ESConsts.SeriesDate_ES);
+        sortfields.add(ESConsts.TAG_ES);
+        sortfields.add(ESConsts.NumberOfSlices_ES);
 
-        JSONObject tempResult = searchService.searchDicomByPaging(param, backfields,sortfields,1, SysConstants.DEFAULT_PAGE_SIZE);
+        JSONObject tempResult = searchService.searchDicomByPaging(param, backfields,sortfields,1, SysConsts.DEFAULT_PAGE_SIZE);
         result.put("total",tempResult.getLong("total"));
         result.put("rows",tempResult.getJSONArray("data"));
         System.out.println("total:"+tempResult.getLong("total"));
-//        result.put("total",0);
-//        result.put("rows","[]");
+
+        logger.log(Level.DEBUG,"接口返回结果:"+result.toJSONString());
+        logger.log(Level.INFO,"接口返回结果:"+"total:"+tempResult.getLong("total"));
         return result;
     }
 
@@ -82,57 +92,69 @@ public class DicomSearchController {
     public JSONObject ajaxPage(HttpServletRequest request, HttpServletResponse response,
                                @RequestParam(value="page", required=false) String page,
                                @RequestParam(value="rows", required=false) String rows) {
-        System.out.println("ajaxPage  is called");
+        logger.log(Level.INFO,"controller:ajaxPage 被调用");
+
 
         JSONObject result = new JSONObject();
         Integer pageid = Integer.parseInt(page);
         HttpSession session = request.getSession();
         JSONArray param = (JSONArray)session.getAttribute("searchParam");
 
+        logger.log(Level.INFO,"接口接收的参数:pageid:"+pageid+",searchParam"+param.toJSONString());
+
         JSONArray backfields = new JSONArray();
-        backfields.add(ESConstants.InstitutionName_ES);
-        backfields.add(ESConstants.PatientName_ES);
-        backfields.add(ESConstants.SeriesDate_ES);
-        backfields.add(ESConstants.ManufacturerModelName_ES);
-        backfields.add(ESConstants.NumberOfSlices_ES);
-        backfields.add(ESConstants.TAG_ES);
-        backfields.add(ESConstants.ID_ES);
+        backfields.add(ESConsts.InstitutionName_ES);
+        backfields.add(ESConsts.PatientName_ES);
+        backfields.add(ESConsts.SeriesDate_ES);
+        backfields.add(ESConsts.ManufacturerModelName_ES);
+        backfields.add(ESConsts.SeriesDescription_ES);
+        backfields.add(ESConsts.NumberOfSlices_ES);
+        backfields.add(ESConsts.TAG_ES);
+        backfields.add(ESConsts.ID_ES);
 //
         JSONArray sortfields = new JSONArray();
-        sortfields.add(ESConstants.InstitutionName_ES);
-        sortfields.add(ESConstants.SeriesDescription_ES);
-        sortfields.add(ESConstants.PatientName_ES);
-        sortfields.add(ESConstants.SeriesDate_ES);
-        sortfields.add(ESConstants.TAG_ES);
-        sortfields.add(ESConstants.NumberOfSlices_ES);
+        sortfields.add(ESConsts.InstitutionName_ES);
+        sortfields.add(ESConsts.SeriesDescription_ES);
+        sortfields.add(ESConsts.PatientName_ES);
+        sortfields.add(ESConsts.SeriesDate_ES);
+        sortfields.add(ESConsts.TAG_ES);
+        sortfields.add(ESConsts.NumberOfSlices_ES);
 
-        JSONObject tempResult = searchService.searchDicomByPaging(param, backfields,sortfields,pageid, SysConstants.DEFAULT_PAGE_SIZE);
+        JSONObject tempResult = searchService.searchDicomByPaging(param, backfields,sortfields,pageid, SysConsts.DEFAULT_PAGE_SIZE);
         System.out.println(tempResult.toJSONString());
         result.put("total",tempResult.getLong("total"));
         result.put("rows",tempResult.getJSONArray("data"));
         System.out.println("total:"+tempResult.getLong("total"));
+
+        logger.log(Level.DEBUG,"接口返回结果:"+result.toJSONString());
+        logger.log(Level.INFO,"接口返回结果:"+"total:"+tempResult.getLong("total"));
+
         return result;
     }
 
     @RequestMapping(value="exportallpath")
     public void exportallpath(HttpServletRequest request, HttpServletResponse response) {
+        logger.log(Level.INFO,"controller:exportallpath 被调用");
         String projectPath = request.getSession().getServletContext().getRealPath("/");
-        String tempDir = projectPath+"temp"+MilkTool.getDelimiter();
+        String tempDir = projectPath+"temp"+Tool.getDelimiter();
         HttpSession session = request.getSession();
         JSONArray param = (JSONArray)session.getAttribute("searchParam");
         String tempFilePath = null;
         if(param!=null)
             tempFilePath = searchService.getDownloadFile(param, tempDir);
-        MilkTool.doDownload(response,tempFilePath,"json");
+        Tool.doDownload(response,tempFilePath,"json");
+        logger.log(Level.INFO,"controller:exportallpath 调用结束");
     }
 
 
     //导出部分选中项路径
     @RequestMapping(value="exportdsomepath")
     public void exportdsomepath(HttpServletRequest request, HttpServletResponse response) {
+        logger.log(Level.INFO,"controller:exportdsomepath 被调用");
+
         int times = 10;
         String projectPath = request.getSession().getServletContext().getRealPath("/");
-        String tempDir = projectPath+"temp"+MilkTool.getDelimiter();
+        String tempDir = projectPath+"temp"+Tool.getDelimiter();
         HttpSession session = request.getSession();
         List<String> ids = ( List<String>)session.getAttribute("ids");
         while(ids==null && times-->0){
@@ -146,7 +168,12 @@ public class DicomSearchController {
         String tempFilePath = null;
         if(ids != null)
             tempFilePath = searchService.getDownloadFileByIds(ids,tempDir);
-        MilkTool.doDownload(response,tempFilePath,"json");
+        if( !StringUtils.isBlank(tempFilePath) ){
+            Tool.doDownload(response,tempFilePath,"json");
+            logger.log(Level.DEBUG,"返回结果成功:"+tempFilePath);
+        }else{
+            logger.log(Level.DEBUG,"返回结果失败:"+tempFilePath);
+        }
     }
     /**
      * 在下载部分选中项的json文件时，需要传选中项的id值过来，但是ajax方式不能下载，因为
@@ -163,6 +190,8 @@ public class DicomSearchController {
     @RequestMapping(value = "exportdsomepathhelp", method = RequestMethod.POST)
     @ResponseBody
     public JSONObject exportSomePathHelp(HttpServletRequest request, HttpServletResponse response,@RequestBody Map<String, Object> parameter) {
+        logger.log(Level.INFO,"controller:exportdsomepathhelp 被调用");
+
         String type = (String)parameter.get("type");
         System.out.println("type:"+type);
         //调用_searchpaging接口
@@ -180,23 +209,28 @@ public class DicomSearchController {
 
     @RequestMapping(value="exportexcel")
     public void exportexcel(HttpServletRequest request, HttpServletResponse response) {
+        logger.log(Level.INFO,"controller:exportexcel 被调用");
+
         String projectPath = request.getSession().getServletContext().getRealPath("/");
-        String tempDir = projectPath+"temp"+MilkTool.getDelimiter();
+        String tempDir = projectPath+"temp"+Tool.getDelimiter();
         HttpSession session = request.getSession();
         JSONArray param = (JSONArray)session.getAttribute("searchParam");
         String tempFilePath = null;
         if(param!=null)
             tempFilePath = searchService.exportExcel(param, tempDir);
-        MilkTool.doDownload(response,tempFilePath,"excel");
+        Tool.doDownload(response,tempFilePath,"excel");
     }
 
     @RequestMapping(value="downloaddicom")
     public void downloadDicom(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        System.out.println("downloadDicom is called");
+        logger.log(Level.INFO,"controller:downloaddicom 被调用");
+
+        //步骤一、获取本地临时目录以及待下载id，这里的id是elasticsearch的_id字段
         int times = 10;
         String projectPath = request.getSession().getServletContext().getRealPath("/");
+        //C:\Users\WeiGuangWu\IdeaProjects\bigdata\es\target\es\temp
         String tempDir = projectPath+"temp";
-        String name = "dicom"+MilkTool.getRandonNumber(3);
+        String name = "dicom"+Tool.getRandonNumber(3);
         String dicomTempDir = tempDir + File.separator + name;
         HttpSession session = request.getSession();
         List<String> ids = ( List<String>)session.getAttribute("idsForDicomFileDownload");
@@ -208,43 +242,60 @@ public class DicomSearchController {
             }
             ids = ( List<String>)session.getAttribute("idsForDicomFileDownload");
         }
+
         String zipSrcDir = null;
         if(ids!=null && ids.size()!=0) {
             zipSrcDir = dataDownloadService.downloadDicomByIds(ids, dicomTempDir);
         }
 
-        MilkTool.zipCompress(zipSrcDir,tempDir,name+".zip");
-        String zipFilePath = tempDir+File.separator+name+".zip";
-        MilkTool.doDownload(response,zipFilePath,"zip");
+        if( !StringUtils.isBlank(zipSrcDir) ){
+            Tool.zipCompress(zipSrcDir,tempDir,name+".zip");
+            String zipFilePath = tempDir+File.separator+name+".zip";
+            Tool.doDownload(response,zipFilePath,"zip");
 
-        //删除临时目录，zip文件
-        MilkTool.delFolder(zipSrcDir);
-        MilkTool.delFile(zipFilePath);
-
+            //删除临时目录，zip文件
+            Tool.delFolder(zipSrcDir);
+            Tool.delFile(zipFilePath);
+            logger.log(Level.DEBUG,"dicom下载成功");
+        }else{
+            logger.log(Level.DEBUG,"dicom下载失败");
+        }
     }
 
     @RequestMapping(value = "downloaddicomhelp", method = RequestMethod.POST)
     @ResponseBody
     public JSONObject downloadDicomHelp(HttpServletRequest request, HttpServletResponse response,@RequestBody Map<String, Object> parameter) {
-        System.out.println("downloadDicomHelp is called");
-        List<String> ids = (List<String>)parameter.get("ids");
-        for(String e : ids){
-            System.out.println(e);
-        }
+        logger.log(Level.INFO,"controller:downloaddicomhelp 被调用");
+
+        List<String> ids = (List<String>)parameter.get(SysConsts.IDS);
+        JSONArray idsJson = JSON.parseArray(JSON.toJSONString(ids));
+        logger.log(Level.INFO,"接收参数:"+idsJson);
+
+        JSONObject result = new JSONObject();
         HttpSession session = request.getSession();
         session.setAttribute("idsForDicomFileDownload", ids);
-        return new JSONObject();
+
+        List<String> hdfsPathByIds = searchService.getHdfsPathByIds(ids,DataTypeEnum.DICOM);
+        Long sizeOfDicom = searchService.getSizeForData(hdfsPathByIds);
+        Long downloadThreshhold = ConfFactory.getMilkConfiguration().getDownloadThreshhold();
+        if(sizeOfDicom > downloadThreshhold){
+            result.put("result",false);
+        }else{
+            result.put("result",true);
+        }
+        return result;
     }
 
     //assSearchHospital 是个ajax请求方法，医院做成联想搜索
     @ResponseBody
     @RequestMapping(value = "associativeSearchHospital", method = RequestMethod.GET)
     public List<Map<String,String>> associativeSearchHospital() {
-        System.out.println("assSearchHospital is called");
+        logger.log(Level.INFO,"controller:associativeSearchHospital 被调用");
+        
         List<Map<String,String>> list = new ArrayList<Map<String,String>>();
         Map<String,String> map;
 
-        String[] organ = new String[]{"PLAGH","PUMCH"};
+        String[] organ = new String[]{};
         for(String e : organ){
             map = new HashMap<String,String>();
             map.put("lable",e);
@@ -258,17 +309,17 @@ public class DicomSearchController {
     @ResponseBody
     @RequestMapping(value = "associativeSearchOrgan", method = RequestMethod.GET)
     public List<Map<String,String>> associativeSearchOrgan() {
-        System.out.println("associativeSearchOrgan is called");
+//        System.out.println("associativeSearchOrgan is called");
         List<Map<String,String>> list = new ArrayList<Map<String,String>>();
-        Map<String,String> map;
-
-        String[] organ = new String[]{"brain","lungs","heart"};
-        for(String e : organ){
-            map = new HashMap<String,String>();
-            map.put("lable",e);
-            map.put("text",e);
-            list.add(map);
-        }
+//        Map<String,String> map;
+//
+//        String[] organ = new String[]{"brain","lungs","heart"};
+//        for(String e : organ){
+//            map = new HashMap<String,String>();
+//            map.put("lable",e);
+//            map.put("text",e);
+//            list.add(map);
+//        }
         return list;
     }
 
@@ -286,28 +337,34 @@ public class DicomSearchController {
 		return json;
 	}
 
-	public JSONArray formatParameter(Map<String, String> parametr){
+	public JSONArray formatParameter(Map<String, String> parameter){
         JSONArray param = new JSONArray();
 
         Map<String,List<String>> tempMap = new HashMap<>();
-        for(Map.Entry<String, String> entry : parametr.entrySet()) {
+        for(Map.Entry<String, String> entry : parameter.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
+
             if(StringUtils.isBlank(value)){
                 continue;
             }
+
+            if(key.indexOf("Date")>0 || key.indexOf("date")>0){
+                value = formatDate(value);
+            }
+
             List<String> tempList = null;
             String keyword;
-            if(key.indexOf(SysConstants.UNDERLINE)>0){
-                String[] split = key.split(SysConstants.UNDERLINE);
+            if(key.indexOf(SysConsts.UNDERLINE)>0){
+                String[] split = key.split(SysConsts.UNDERLINE);
                 keyword = split[0];
                 String suffix = split[1];
                 if(tempMap.containsKey(keyword)){
                     tempList = tempMap.get(keyword);
-                    tempList.add(suffix+SysConstants.UNDERLINE+value);
+                    tempList.add(suffix+SysConsts.UNDERLINE+value);
                 }else{
                     tempList = new ArrayList<>();
-                    tempList.add(suffix+SysConstants.UNDERLINE+value);
+                    tempList.add(suffix+SysConsts.UNDERLINE+value);
                 }
                 tempMap.put(keyword,tempList);
             }else{
@@ -327,16 +384,16 @@ public class DicomSearchController {
             String key = entry.getKey();
             List<String> values= entry.getValue();
             JSONObject item = new JSONObject();
-            if(values.get(0).indexOf(SysConstants.UNDERLINE)>0){
+            if(values.get(0).indexOf(SysConsts.UNDERLINE)>0){
                 //为区间参数
                 item.put("section","yes");
                 item.put("keyword",key);
                 for(String value : values){
                     if(value.startsWith("start")){
-                        item.put("start",value.substring(value.indexOf(SysConstants.UNDERLINE)+1,value.length()));
+                        item.put("start",value.substring(value.indexOf(SysConsts.UNDERLINE)+1,value.length()));
                     }
                     if(value.startsWith("end")){
-                        item.put("end",value.substring(value.indexOf(SysConstants.UNDERLINE)+1,value.length()));
+                        item.put("end",value.substring(value.indexOf(SysConsts.UNDERLINE)+1,value.length()));
                     }
                 }
             }else{
@@ -352,17 +409,21 @@ public class DicomSearchController {
     @ResponseBody
     @RequestMapping(value = "getdicomThumbnail", method = RequestMethod.POST)
     public JSONObject getDicomThumbnail(HttpServletRequest request,@RequestBody Map<String, String> parametr) {
+        logger.log(Level.INFO,"controller:getdicomThumbnail 被调用");
+        String id = parametr.get("id");
+
+        
         //projectPath是工程绝对路径 C://.../../es
-        String projectRealPath = request.getSession().getServletContext().getRealPath(SysConstants.LEFT_SLASH);
+        String projectRealPath = request.getSession().getServletContext().getRealPath(SysConsts.LEFT_SLASH);
         //工程下面temp目录绝对路径，用于存放临时文件，操作需要
-        String tempRealPath = projectRealPath+SysConstants.TEMP_STRING;
+        String tempRealPath = projectRealPath+SysConsts.TEMP_STRING;
 
         //contextPath是上下文相对路径，/es，获取这个是因为页面显示需要显示为/es/temp/2323/00001.jpg
         String contextPath = request.getContextPath();
         //上下文路径在后面新增一个临时目录/temp
-        String tempContextPath = contextPath+SysConstants.LEFT_SLASH+SysConstants.TEMP_STRING;
+        String tempContextPath = contextPath+SysConsts.LEFT_SLASH+SysConsts.TEMP_STRING;
 
-        String id = parametr.get("id");
+
         List<String> picturePathList = null;
         try {
             picturePathList = dataDownloadService.downloadDicomThumbnail(id,tempRealPath,tempContextPath);
@@ -388,7 +449,7 @@ public class DicomSearchController {
             tempArray.add(temp);
         result.put("rows",tempArray);
 
-        System.out.println(result.toJSONString());
+        logger.log(Level.INFO,"controller:getdicomThumbnail返与前端结果"+result.toJSONString());
         return result;
     }
 
@@ -396,6 +457,16 @@ public class DicomSearchController {
         System.out.println("即将显示页面的数据："+result.toJSONString());
     }
 
+
+    //将日期格式从12/04/2017格式化为2017-12-04
+    private String formatDate(String date){
+        String result = "";
+        if(!StringUtils.isBlank(date)){
+            String[] temp = date.split("/");
+            result = temp[2]+SysConsts.LINE+temp[0]+SysConsts.LINE+temp[1];
+        }
+        return result;
+    }
 
     /*	//老用法1
 	@RequestMapping(value = "search", method = RequestMethod.POST)

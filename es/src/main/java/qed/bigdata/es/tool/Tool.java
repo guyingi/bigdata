@@ -2,7 +2,7 @@ package qed.bigdata.es.tool;
 
 
 /**
- * @Title: MilkTool.java
+ * @Title: Tool.java
  * @Package yasen.bigdata.es.util
  * @Description: 该工具类主要包含全局可用的一些工具函数
  * @author weiguangwu
@@ -14,9 +14,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONReader;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import qed.bigdata.es.conf.MilkConfiguration;
 import qed.bigdata.es.consts.DataTypeEnum;
-import qed.bigdata.es.consts.SysConstants;
+import qed.bigdata.es.consts.SysConsts;
+import qed.bigdata.es.controller.DicomSearchController;
 import qed.bigdata.es.pojo.Dicom;
 
 import javax.servlet.http.HttpServletResponse;
@@ -25,7 +29,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Random;
 
-public class MilkTool {
+public class Tool {
+    static Logger logger = Logger.getLogger(Tool.class);
+
     static Random random = new Random();
 
     /**
@@ -36,10 +42,10 @@ public class MilkTool {
      * @Date: 2018/4/24 14:58
      */
 	public static String getDelimiter(){
-        String delimiter = SysConstants.LEFT_SLASH;
-        String osType = System.getProperty(SysConstants.OS_NAME);
-        if(osType.startsWith(SysConstants.WINDOWS)){
-            delimiter = SysConstants.RIGHT_SLASH;
+        String delimiter = SysConsts.LEFT_SLASH;
+        String osType = System.getProperty(SysConsts.OS_NAME);
+        if(osType.startsWith(SysConsts.WINDOWS)){
+            delimiter = SysConsts.RIGHT_SLASH;
         }
         return delimiter;
     }
@@ -75,11 +81,11 @@ public class MilkTool {
     public static String formatData(String date){
 	    if(date==null || date.length()==0)
 	        return "";
-	    String arr[] = date.split(SysConstants.LEFT_SLASH);
+	    String arr[] = date.split(SysConsts.LEFT_SLASH);
 	    if(arr.length!=3)
 	        return "";
 
-	    return arr[2]+SysConstants.LINE+arr[0]+SysConstants.LINE+arr[1];
+	    return arr[2]+SysConsts.LINE+arr[0]+SysConsts.LINE+arr[1];
     }
 
     /**
@@ -145,6 +151,9 @@ public class MilkTool {
 
 
     public static JSONObject doCallAndGetResult(JSONObject parameter,String interfaceStr,DataTypeEnum dataTypeEnum){
+        logger.log(Level.INFO,"方法 doCallAndGetResult 被调用,参数{parameter:"+parameter.toJSONString()
+        +",interfaceStr:"+interfaceStr
+        +",dataTypeEnum:"+dataTypeEnum);
         MilkConfiguration conf = new MilkConfiguration();
         JSONObject result = new JSONObject();
         StringBuilder builder = new StringBuilder();
@@ -152,7 +161,7 @@ public class MilkTool {
 //        System.out.println(parameter.toJSONString());
         try {
             byte[] param = parameter.toString().getBytes("UTF-8");
-            String url = SysConstants.HTTP_HEAD+conf.getInfosupplyerip()+":"+conf.getInfosupplyerport()+interfaceStr;
+            String url = SysConsts.HTTP_HEAD+conf.getInfosupplyerip()+":"+conf.getInfosupplyerport()+interfaceStr;
             URL restServiceURL = new URL(url);
 
             HttpURLConnection httpConnection = (HttpURLConnection) restServiceURL.openConnection();
@@ -182,7 +191,7 @@ public class MilkTool {
                 inputStream.close();
                 isSuccess = true;
             } else {
-                System.out.println("从infosupplyer获取文件失败");
+                logger.log(Level.INFO,"从infosupplyer获取文件失败");
             }
 //		    System.out.println("接收到的数据："+builder.toString());
             httpConnection.disconnect();
@@ -198,6 +207,7 @@ public class MilkTool {
             }else if(dataTypeEnum == DataTypeEnum.OTHER){
                 result = parseResultOtherType(builder);
             }
+            logger.log(Level.INFO,"接口["+interfaceStr+"]调用返回结果数量:"+result.getLong(SysConsts.TOTAL));
         }
         return result;
     }
@@ -300,7 +310,8 @@ public class MilkTool {
     }
 
     public static void delFile(String file){
-        new File(file).delete();
+        if(!StringUtils.isBlank(file))
+            new File(file).delete();
     }
 
 }

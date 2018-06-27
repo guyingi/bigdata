@@ -59,7 +59,7 @@
         //医院联想搜索
         $.ajax({
             type: "GET",
-            url: "/es/associativeSearchHospital",
+            url: "/associativeSearchHospital",
             data: null,
             dataType: 'json',
             traditional:true,
@@ -83,7 +83,7 @@
         //器官联想搜索
         $.ajax({
             type: "GET",
-            url: "/es/associativeSearchOrgan",
+            url: "/associativeSearchOrgan",
             data: null,
             dataType: 'json',
             traditional:true,
@@ -142,23 +142,33 @@
             var obj = new Object();
             obj.tag = tag;
             var paramJsonStr = JSON.stringify(obj);
-            // $('#dlg').dialog('open');
-            $.ajax({
-                type: "POST",
-                url: "/es/dosigntag",
-                data: paramJsonStr,
-                dataType: 'json',
-                traditional:true,
-                contentType: 'application/json;charset=utf-8',
-                success: function (data) {
-                    console.log(data);
-                    if(data.result){
-                        //打标签成功
-                        $.messager.confirm('消息', '你成功为该批序列打上了'+data.tag+'的标签，数量'+data.total, function(r){});
-                    }
-                },
-                error: function () {
-                    $("#hint").html("程序运行出错！");
+            $.messager.confirm('提示', '确定为查询结果中的数据打上标签'+paramJsonStr, function(r){
+                if(r){
+                    $("#hint").html("正在打标签，请勿做其他操作..");
+                    $.ajax({
+                        type: "POST",
+                        url: "/dosigntag",
+                        data: paramJsonStr,
+                        dataType: 'json',
+                        traditional:true,
+                        contentType: 'application/json;charset=utf-8',
+                        success: function (data) {
+                            console.log(data);
+                            if(data.result){
+                                //打标签成功
+                                $('#dlg').dialog('close');
+                                $("#hint").html("");
+                                $.messager.confirm('消息', '你成功为该批序列打上了'+data.tag+'的标签，'+data.content, function(r){});
+
+                            }else{
+                                $("#hint").html("");
+                                $.messager.confirm('消息', "失败,"+data.content, function(r){});
+                            }
+                        },
+                        error: function () {
+                            $("#hint").html("程序运行出错！");
+                        }
+                    });
                 }
             });
         }
@@ -172,9 +182,10 @@
 
     function submitForm(){
         var paramJsonStr = JSON.stringify($("#ff").serializeObject());
+        $("#hint").html("正在查询...");
         $.ajax({
             type: "POST",
-            url: "/es/ajaxSearch",
+            url: "/ajaxSearch",
             data: paramJsonStr,
             dataType: 'json',
             traditional:true,
@@ -183,6 +194,7 @@
                 console.log(data);
                 if(data!=null){
                     $("#resulttable").datagrid("loadData",data);
+                    $("#hint").html("");
                 }else{
                     $("#hint").html("查询失败");
                 }
@@ -192,15 +204,19 @@
             }
         });
     }
-    function showthumbnail(index,record){
+    function showthumbnail(index){
         var obj = new Object()
-        obj.id=record["id"];
+        var rows = $('#resulttable').datagrid('getRows');//获得所有行
+        var row = rows[index];//根据index获得其中一行。
+        obj.id=row["id"];
+
+        var paramJsonStr = JSON.stringify(obj)
         var thumbnailtitle = "行号："+(index+1)+"的略缩图"
         $("#thumbnailtable").panel({title: thumbnailtitle});
-        var paramJsonStr = JSON.stringify(obj)
+        $("#hint").html("正在加载缩略图...");
         $.ajax({
             type: "POST",
-            url: "/es/getdicomThumbnail",
+            url: "/getdicomThumbnail",
             data: paramJsonStr,
             dataType: 'json',
             traditional:true,
@@ -209,6 +225,7 @@
                 console.log(data);
                 if(data!=null){
                     $("#thumbnailtable").datagrid("loadData",data);
+                    $("#hint").html("");
                 }else{
                     $("#hint").html("查询失败");
                 }
@@ -221,6 +238,10 @@
     function showPicture(value,row,index){
         return  '<img height="100" width="100" src=\''+value+'\'/>';
     }
+    function formatter(val,row,index){
+        return '<a href="#" rel="external nofollow" onclick="showthumbnail('+index+')">缩略图</a>';
+    }
+
 </script>
 
 
@@ -242,7 +263,7 @@
                         <li><a href="dicomsearch">查询dicom</a></li>
                         <li><a href="patientsearch">查询患者</a></li>
                         <li class="active"><a href="#">打标签</a></li>
-                        <li><a href="desensitization">数据脱敏</a></li>
+                        <li><a href="tagmanage">标签管理</a></li>
                         <li><a href="downloaddesensitization">下载脱敏数据</a></li>
                     </ul>
                 </div>
@@ -264,7 +285,7 @@
                         <div class="easyui-layout" data-options="fit:true,border:false">
                             <div data-options="region:'center'" style="padding:5px;">
                                 <div class="easyui-layout" data-options="fit:true,border:false">
-                                    <div data-options="region:'north',split:true" style="height:150px;">
+                                    <div data-options="region:'north',split:true" style="height:170px;">
                                         <!-- 查询和打标签部分开始 -->
                                         <div class="easyui-layout" data-options="fit:true,border:false">
                                             <div data-options="region:'east',split:true" style="width:260px;border:none;">
@@ -288,8 +309,12 @@
                                                             <!-- 查询条件一 -->
                                                             <table cellpadding="2px">
                                                                 <tr>
+                                                                    <td>模型名称:</td>
+                                                                    <td><input class="easyui-textbox" type="text" name="ManufacturerModelName" data-options="required:false" /></td>
+                                                                </tr>
+                                                                <tr>
                                                                     <td>序列描述:</td>
-                                                                    <td><input class="easyui-textbox" type="text" name="ManufacturerModelName" data-options="required:false"/></td>
+                                                                    <td><input class="easyui-textbox" type="text" name="SeriesDescription" data-options="required:false"/></td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td>医院:</td>
@@ -387,6 +412,11 @@
                                                                     <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px;height:25px;" onclick="submitForm()">查询</a>
                                                                 </td>
                                                             </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <p id="hint" style="margin-left:0px;width:200px;height:10px;"></p>
+                                                                    </td>
+                                                                </tr>
                                                         </table>
                                                         </div>
 
@@ -399,24 +429,25 @@
                                     </div>
                                     <div id="tablediv" data-options="region:'center',title:'查询结果'">
                                          <table id="resulttable" title="" class="easyui-datagrid" style="width:auto;height:auto"
-                                               url="/es/ajaxPage"
+                                               url="/ajaxPage"
                                                pageList="[25]"
                                                pageSize="25"
                                                idField="id"
                                                rownumbers="true"
                                                pagination="true"
                                                iconCls="icon-table"
-                                               data-options="onClickRow:showthumbnail"
                                         >
                                             <thead>
                                             <tr>
                                                 <th field="id" width="0%">Item ID</th>
                                                 <th field="InstitutionName" width="14%">医院</th>
-                                                <th field="ManufacturerModelName" width="20%" align="left">序列描述</th>
-                                                <th field="PatientName" width="20%" align="left">名字</th>
+                                                <th field="ManufacturerModelName" width="16%" align="left">模型名称</th>
+                                                <th field="SeriesDescription" width="16%" align="left">序列描述</th>
+                                                <th field="PatientName" width="14%" align="left">名字</th>
                                                 <th field="SeriesDate" width="10%" align="left">检查日期</th>
                                                 <th field="NumberOfSlices" width="10%" align="center">张数</th>
                                                 <th field="tag" width="10%" align="center">Tag</th>
+                                                <th field="operate" width:10% align="center" formatter="formatter">操作</th>
                                             </tr>
                                             </thead>
                                         </table>

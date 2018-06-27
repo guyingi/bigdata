@@ -3,6 +3,7 @@ package qed.bigdata.infosupplyer.consts;
 public class SysConsts {
 
     public static String LINE = "-";
+    public static String UNDER_LINE = "_";
     public static String LEFT_SLASH = "/";
     public static String RIGHT_SLASH = "\\";
     public static String SPACE = " ";
@@ -13,6 +14,7 @@ public class SysConsts {
     public static String DESENSITIZE_TEMP_DIRNAME = "desensitizetemp"; //脱敏操作临时存放脱敏后的数据的目录
     public static String DESENSITIZE_BEFORE_TEMP_DIRNAME = "desensitizebeforetemp"; //脱敏操作临时存放脱敏后的数据的目录
     public static String DESENSITIZE_AFTER_TEMP_DIRNAME = "desensitizeaftertemp"; //脱敏操作临时存放脱敏后的数据的目录
+    public static String DESENSITIZE_COMBINE_TEMP_DIRNAME = "desensitizecombinetemp"; //脱敏操作临时存放raw,mhd,csv的目录
     public static String DESENSITIZE_TDOWNLOAD_TEMP_DIRNAME = "desensitizedownloadtemp"; //下载脱敏数据，临时存放脱敏数据的目录，因为以tag为单位下载
     public static String THUMBNAIL_TEMP_DIRNAME = "thumbnailtemp"; //下载脱敏数据，临时存放脱敏数据的目录，因为以tag为单位下载
     public static String ELECTRIC_TEMP_DIRNAME = "electrictemp"; //下载脱敏数据，临时存放脱敏数据的目录，因为以tag为单位下载
@@ -73,6 +75,7 @@ public class SysConsts {
     public static String CODE_000 = "000";  //查询成功
     public static String CODE_010 = "010";  //查询条件参数为空
     public static String CODE_011 = "011";  //参数解析错误
+    public static String CODE_501 = "501";  //标签冲突
     public static String CODE_999 = "999";  //查询失败
 
     /***************查询条件中的字段******************/
@@ -132,24 +135,54 @@ public class SysConsts {
 
     /**************乳腺脱敏数据定性信息表breast_roi中在数据库中对应的字段******************/
     public static String SERIES_UID = "series_uid";
+    public static String INSTANCES_UID = "instances_uid";
     public static String LOCATION = "location";
     public static String CLASSIFICATION = "classification";
     public static String SHAPE = "shape";
+    public static String BOUNDARY = "boundary";
     public static String BOUNDARY1 = "boundary1";
     public static String BOUNDARY2 = "boundary2";
     public static String DENSITY = "density";
     public static String QUADRANT = "quadrant";
     public static String RISK = "risk";
+    public static String POINTS = "points";
+    public static String TYPE = "type";
+    public static String UID = "uid";
+    public static String SERIES_DESCRIPTION = "series_description";
+    public static String TOOL_STATE_MANAGER = "tool_state_manager";
+    public static String RESTORE_DATA = "restore_data";
+
+    /**************乳腺脱敏数据定性信息表roi3d中在数据库中对应的字段******************/
+    public static String ROI3D_SERIES_UID = "roi3d_series_uid";
+    public static String ROI3D_SIGNS = "roi3d_signs";
+    public static String ROI3D_NODULE_ANALYSIS = "roi3d_nodule_analysis";
+    public static String ROI3D_FOLLOW_UP = "roi3d_follow_up";
+    public static String ROI3D_RISK_ASSESSMENT = "roi3d_risk_assessment";
+    public static String ROI3D_COLOR = "roi3d_color";
+    public static String ROI3D_WIDTH = "roi3d_width";
+    public static String ROI3D_TYPE = "roi3d_type";
+    public static String ROI3D_NODAL_POSITION = "roi3d_nodal_position";
+    public static String ROI3D_NUM = "roi3d_num";
 
 
     /***************乳腺脱敏数据病灶轮廓信息表roi2d中在数据库中对应的字段**************/
     public static String ROI2D_SERIES_UID = "roi2d_series_uid";
+    public static String ROI2D_INSTANCES_UID = "roi2d_instances_uid";
+    public static String ROI2D_DIM = "roi2d_dim";
+    public static String ROI2D_SLICE = "roi2d_slice";
     public static String ROI2D_POINTS = "roi2d_points";
 
     /***************Series详细信息表series中在数据库中对应的字段**************/
     public static String SERIES_DES= "series_des";
+    public static String SERIES_MODALITY= "series_modality";
+
+    /***************Series表series_modality字段值域**************/
+    public static String MG = "MG";
+    public static String CT = "CT";
 
 
-
+    /***************部位标识*****************************/
+    public static String BREAST = "breast";
+    public static String LUNG = "lung";
 
 }

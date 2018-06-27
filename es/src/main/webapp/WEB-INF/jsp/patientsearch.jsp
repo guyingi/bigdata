@@ -37,15 +37,17 @@
         return;
     }
     function submitForm() {
+        var patientname = $("#patientname").val();
         if(patientname.length==0){
             $.messager.confirm("友情提示","查询内容不能为空");
         }else{
-            var obj = new Object()
+            var obj = new Object();
             obj.patientname=patientname;
-            var paramJsonStr = JSON.stringify(obj)
+            var paramJsonStr = JSON.stringify(obj);
+            $("#hint").html("正在查询...");
             $.ajax({
                 type: "POST",
-                url: "/es/getpatient",
+                url: "/getpatient",
                 data: paramJsonStr,
                 dataType: 'json',
                 traditional:true,
@@ -54,6 +56,7 @@
                     console.log(data);
                     if(data!=null){
                         $("#patienttable").datagrid("loadData",data);
+                        $("#hint").html("");
                     }else{
                         $("#hint").html("查询失败");
                     }
@@ -66,16 +69,16 @@
     }
     function showdatatype(index,record) {
         var patientname = record["PatientName"];
-        alert(patientname);
         if(patientname.length==0){
             $.messager.confirm("友情提示","患者名不能为空");
         }else{
             var obj = new Object()
             obj.patientname=patientname;
             var paramJsonStr = JSON.stringify(obj)
+            $("#hint").html("正在查询...");
             $.ajax({
                 type: "POST",
-                url: "/es/getpatientdatatype",
+                url: "/getpatientdatatype",
                 data: paramJsonStr,
                 dataType: 'json',
                 traditional:true,
@@ -84,6 +87,7 @@
                     console.log(data);
                     if(data!=null){
                         $("#datatypetable").datagrid("loadData",data);
+                        $("#hint").html("");
                     }else{
                         $("#hint").html("查询失败");
                     }
@@ -100,10 +104,11 @@
         var obj = new Object()
         obj.patientname=patientname;
         obj.datatype=datatype;
-        var paramJsonStr = JSON.stringify(obj)
+        var paramJsonStr = JSON.stringify(obj);
+        $("#hint").html("正在查询...");
         $.ajax({
             type: "POST",
-            url: "/es/getdetail",
+            url: "/getdetail",
             data: paramJsonStr,
             dataType: 'json',
             traditional:true,
@@ -112,6 +117,7 @@
                 console.log(data);
                 if(data!=null){
                     $("#detailtable").datagrid("loadData",data);
+                    $("#hint").html("");
                 }else{
                     $("#hint").html("查询失败");
                 }
@@ -125,16 +131,16 @@
         var arr = new Array();
         var rows = $('#patienttable').datagrid('getSelections');
         for(var i=0;i<rows.length;i++){
-            arr.push(rows[i].patientname);
+            arr.push(rows[i].PatientName);
         }
         if(arr.length == 0){
             $.messager.confirm("友情提示","您未选中任何人");
         }else{
             var param = "";
             for(var j=0; j<arr.length; j++){
-                param += encodeURI(arr[j])+"#";
+                param += encodeURI(arr[j])+"*";
             }
-            var url = "/es/downloadbypatient?patientname="+param;
+            var url = "/downloadbypatient?patientname="+param;
             simulationForm(url);
         }
 
@@ -154,10 +160,10 @@
         }else{
             var typeStr = ""
             for(var j=0; j<typearr.length; j++){
-                typeStr += typearr[j]+"#";
+                typeStr += typearr[j]+"*";
             }
             var paramStr = "patientname="+encodeURI(patientname)+"&datatype="+typeStr;
-            var url = "/es/downloadbytype?"+paramStr;
+            var url = "/downloadbytype?"+paramStr;
             simulationForm(url);
 
         }
@@ -179,10 +185,10 @@
         }else{
             var idStr = ""
             for(var j=0; j<idarr.length; j++){
-                idStr += idarr[j]+"#";
+                idStr += idarr[j]+"*";
             }
             var paramStr = "patientname="+encodeURI(patientname)+"&datatype="+datatype+"&ids="+idStr;
-            var url = "/es/downloaddetail?"+paramStr;
+            var url = "/downloaddetail?"+paramStr;
             simulationForm(url);
 
         }
@@ -206,7 +212,7 @@
                         <li><a href="dicomsearch">查询dicom</a></li>
                         <li class="active"><a href="#">查询患者</a></li>
                         <li><a href="signtag">打标签</a></li>
-                        <li><a href="desensitization">数据脱敏</a></li>
+                        <li><a href="tagmanage">标签管理</a></li>
                         <li><a href="downloaddesensitization">下载脱敏数据</a></li>
                     </ul>
                 </div>
@@ -233,7 +239,7 @@
                                             <table cellpadding="5">
                                                 <tr>
                                                     <td>姓名:</td>
-                                                    <td><input id="patientname" class="easyui-textbox" type="text" name="name" data-options="required:true"></input></td>
+                                                    <td><input id="patientname" class="easyui-textbox" type="text" name="PatientName" data-options="required:true"></input></td>
                                                     <td>
                                                         <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px;height:30px;" onclick="submitForm()">查询</a>
                                                     </td>

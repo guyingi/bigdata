@@ -1,7 +1,7 @@
 package qed.bigdata.es.consts;
 
 /**
- * @Title: SysConstants.java
+ * @Title: SysConsts.java
  * @Package yasen.bigdata.es.conf
  * @Description: 该类包含milk工程相关常量
  * @author weiguangwu
@@ -9,7 +9,7 @@ package qed.bigdata.es.consts;
  * @version V1.0
  */
 
-public class SysConstants {
+public class SysConsts {
 
     public static String LINE = "-";
     public static String UNDERLINE = "_";
@@ -20,6 +20,8 @@ public class SysConstants {
     public static String INFOSUPPLYER_IP = "infosupplyer.ip";
     public static String INFOSUPPLYER_PORT = "infosupplyer.port";
     public static String FS__DEFAULTFS = "fs.defaultFS";
+    public static String DOWNLOAD_THRESHHOLD = "downlaoddata.threshold";
+
 
     public static String HTTP_HEAD = "http://";
 
@@ -98,10 +100,17 @@ public class SysConstants {
     public static String TOTAL = "total";
     public static String ROWS = "rows";
     public static String TAG = "tag";
+    public static String RESULT = "result";
 
 
     /****************编码*******************************/
-    public static String CODE_000 = "000";
+    public static String CODE_000 = "000";  //成功
+    public static String CODE_999 = "999";  //失败
+
+
+    /*******************需要转换日期格式为-的参数***************************/
+    public static String StudyDate = "";
+    public static String entrydate = "";
 
 
 }

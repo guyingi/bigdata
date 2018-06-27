@@ -57,6 +57,7 @@ public class InfosupplyerConfiguration {
     String thumbnailTempPath = null;
     String desensitizeBeforeTempPath = null;  //脱敏操作之前临时存放dicom的目录
     String desensitizeAfterTempPath = null;  //脱敏操作之后临时存放.mhd,.raw的目录
+    String desensitizeCombineTempPath = null;  //生成脱敏数据以及生成csv数据的目录，最后直接从这个目录上传脱敏数据
     String desensitizeDownloadTempPath = null;  //下载脱敏数据临时存放.mhd,.raw,.csv文件的目录
     String electrictempPath = null; //下载电信号edf文件临时目录。
 
@@ -119,6 +120,10 @@ public class InfosupplyerConfiguration {
         desensitizeAfterTempPath = InfoSupplyerTool.getRunnerPath()+ File.separator+SysConsts.TEMP_DIRNAME+File.separator+
                 SysConsts.DESENSITIZE_TEMP_DIRNAME+File.separator+SysConsts.DESENSITIZE_AFTER_TEMP_DIRNAME;
 
+        //脱敏操作临时存放raw,mhd,csv的目录/temp/desensitizetemp/desensitizecombinetemp
+        desensitizeCombineTempPath = InfoSupplyerTool.getRunnerPath()+ File.separator+SysConsts.TEMP_DIRNAME+File.separator+
+                SysConsts.DESENSITIZE_TEMP_DIRNAME+File.separator+SysConsts.DESENSITIZE_COMBINE_TEMP_DIRNAME;
+
         //下载脱敏数据的临时目录//temp/desensitizetemp/desensitizedownloadtemp
         desensitizeDownloadTempPath = InfoSupplyerTool.getRunnerPath()+ File.separator+SysConsts.TEMP_DIRNAME+File.separator+
                 SysConsts.DESENSITIZE_TEMP_DIRNAME+File.separator+SysConsts.DESENSITIZE_TDOWNLOAD_TEMP_DIRNAME;
@@ -134,6 +139,9 @@ public class InfosupplyerConfiguration {
         }
         if(! new File(desensitizeAfterTempPath).exists()){
             new File(desensitizeAfterTempPath).mkdirs();
+        }
+        if(! new File(desensitizeCombineTempPath).exists()){
+            new File(desensitizeCombineTempPath).mkdirs();
         }
         if(! new File(desensitizeDownloadTempPath).exists()){
             new File(desensitizeDownloadTempPath).mkdirs();
@@ -234,6 +242,10 @@ public class InfosupplyerConfiguration {
 
     public String getDesensitizeAfterTempPath() {
         return desensitizeAfterTempPath;
+    }
+
+    public String getDesensitizeCombineTempPath() {
+        return desensitizeCombineTempPath;
     }
 
     public String getDesensitizeDownloadTempPath() {

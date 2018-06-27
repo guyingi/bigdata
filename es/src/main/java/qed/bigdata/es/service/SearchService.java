@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import qed.bigdata.es.consts.DataTypeEnum;
 
 /**
  *
@@ -58,6 +59,14 @@ public interface SearchService {
 	*/
 	String getDownloadFileByIds(List<String> list, String tempDir);
 
+
+	/**
+	 *
+	 * @param ids
+	 * @return
+	 */
+	List<String> getHdfsPathByIds(List<String> ids, DataTypeEnum typeEnum);
+
 	/**
 	* @Author:weiguangwu
 	* @Description: 该接口gen据查询条件将查询的结果数据写入一个excel表格里面，xsl文件绝对路径
@@ -66,5 +75,29 @@ public interface SearchService {
 	* @Date: 2018/4/24 15:16
 	*/
 	String exportExcel(JSONArray criteria, String tempDir);
+
+	/**
+	 * 传入hdfs路径，返回这批数据在hdfs上的大小
+	 * @param paths
+	 * @return
+	 */
+	Long getSizeForData(List<String> paths);
+
+	/**
+	 * 根据tag下载包含hdfs路径的json文件
+	 * @param tag
+	 * @param tempDir
+	 * @return
+	 */
+	String getDownloadFileByTag(String tag,String tempDir);
+
+	/**
+	 * 根据tag下载包含hdfs路径的json文件,这个脱敏数据的，以tag为单位，同时下载多个tag
+	 * @param tags
+	 * @param tempDir
+	 * @return
+	 */
+	String getDesensitizeDownloadFileByTag(List<String> tags,String tempDir);
+
 
 }

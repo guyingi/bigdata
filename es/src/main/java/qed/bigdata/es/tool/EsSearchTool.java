@@ -31,9 +31,9 @@ package qed.bigdata.es.tool;//package yasen.bigdata.es.util;
 ////        String hos = "PUMCH";
 ////        String se = "M";
 ////        String seq = "1.2.840.113619.2.363.10499743.3902406.15735.1483921213.783";
-////        json.addProperty(ESConstants.HOSPITAL,hos);
-////        json.addProperty(ESConstants.SEX,se);
-////        json.addProperty(ESConstants.MRI_SEQUENCE,seq);
+////        json.addProperty(ESConsts.HOSPITAL,hos);
+////        json.addProperty(ESConsts.SEX,se);
+////        json.addProperty(ESConsts.MRI_SEQUENCE,seq);
 ////        List<String> result = esSearch(json);
 ////        for(String e : result){
 ////            System.out.println(e);
@@ -82,42 +82,42 @@ package qed.bigdata.es.tool;//package yasen.bigdata.es.util;
 //        //创建查询条件
 //        //精确值的字段：MRI序列，性别
 //        //如果有该查询条件则加到querybuilder中，否则则不加
-//        JsonPrimitive mriSeq = searchFieldJson.getAsJsonPrimitive(ESConstants.MRISEQUENCE);
+//        JsonPrimitive mriSeq = searchFieldJson.getAsJsonPrimitive(ESConsts.MRISEQUENCE);
 //        if(mriSeq != null && mriSeq.toString().length()!=0){
 //            //此处使用termsQuery(String name,String value)精确匹配单个值
-//            matchQueryList.add(QueryBuilders.matchQuery(ESConstants.MRISEQUENCE, mriSeq.toString()));
+//            matchQueryList.add(QueryBuilders.matchQuery(ESConsts.MRISEQUENCE, mriSeq.toString()));
 //        }
-//        JsonPrimitive sex = searchFieldJson.getAsJsonPrimitive(ESConstants.SEX);
+//        JsonPrimitive sex = searchFieldJson.getAsJsonPrimitive(ESConsts.SEX);
 //        if(sex != null && sex.toString().length()!=0){
 //            //此处使用termsQuery(String name,String value)精确匹配单个值
-//            matchQueryList.add(QueryBuilders.matchQuery(ESConstants.SEX, sex.toString()));
+//            matchQueryList.add(QueryBuilders.matchQuery(ESConsts.SEX, sex.toString()));
 //            System.out.println(sex.toString());
 //        }
 //
 //        //范围值的字段：年龄段，检查日期段，数据收入日期段
 //        // 查询在时间区间范围内的结果
 //        //年龄段
-//        JsonPrimitive ageSection = searchFieldJson.getAsJsonPrimitive(ESConstants.AGE_SECTION);
+//        JsonPrimitive ageSection = searchFieldJson.getAsJsonPrimitive(ESConsts.AGE_SECTION);
 //        if(ageSection != null && ageSection.toString().length()!=0){
-//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstants.AGE);
+//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConsts.AGE);
 //            String section[] = ageSection.toString().split("\\-");
 //            rangbuilder.gte(section[0]);
 //            rangbuilder.lte(section[1]);
 //            matchQueryList.add(rangbuilder);
 //        }
 //        //检查日期段20170811-20180201
-//        JsonPrimitive studyDateSection = searchFieldJson.getAsJsonPrimitive(ESConstants.STUDYDATE_SECTION);
+//        JsonPrimitive studyDateSection = searchFieldJson.getAsJsonPrimitive(ESConsts.STUDYDATE_SECTION);
 //        if(studyDateSection != null && studyDateSection.toString().length()!=0){
-//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstants.STUDYDATE);
+//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConsts.STUDYDATE);
 //            String section[] = studyDateSection.toString().split("\\-");
 //            rangbuilder.gte(section[0]);
 //            rangbuilder.lte(section[1]);
 //            matchQueryList.add(rangbuilder);
 //        }
 //        //数据收入日期段
-//        JsonPrimitive entryDateSection = searchFieldJson.getAsJsonPrimitive(ESConstants.ENTRYDATE_SECTION);
+//        JsonPrimitive entryDateSection = searchFieldJson.getAsJsonPrimitive(ESConsts.ENTRYDATE_SECTION);
 //        if(entryDateSection !=null && entryDateSection.toString().length()!=0){
-//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstants.ENTRYDATE);
+//            RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConsts.ENTRYDATE);
 //            String section[] = entryDateSection.toString().split("\\-");
 //            rangbuilder.gte(section[0]);
 //            rangbuilder.lte(section[1]);
@@ -126,20 +126,20 @@ package qed.bigdata.es.tool;//package yasen.bigdata.es.util;
 //
 //        //枚举值的字段：设备种类，数据来源（医院），扫描部位
 //
-//        JsonPrimitive deviceType = searchFieldJson.getAsJsonPrimitive(ESConstants.DEVIETYPE);
+//        JsonPrimitive deviceType = searchFieldJson.getAsJsonPrimitive(ESConsts.DEVIETYPE);
 //        if(deviceType != null && deviceType.toString().length()!=0){
 //            //此处使用termsQuery(String name,String ...values)同时匹配多个值
-//            matchQueryList.add(QueryBuilders.matchQuery(ESConstants.DEVIETYPE,deviceType.toString() ));
+//            matchQueryList.add(QueryBuilders.matchQuery(ESConsts.DEVIETYPE,deviceType.toString() ));
 //        }
-//        JsonPrimitive hospital = searchFieldJson.getAsJsonPrimitive(ESConstants.HOSPITAL);
+//        JsonPrimitive hospital = searchFieldJson.getAsJsonPrimitive(ESConsts.HOSPITAL);
 //        if(hospital != null && hospital.toString().length()!=0){
 //            //此处使用termsQuery(String name,String ...values)同时匹配多个值
-//            matchQueryList.add(QueryBuilders.matchQuery(ESConstants.HOSPITAL, hospital.toString()));
+//            matchQueryList.add(QueryBuilders.matchQuery(ESConsts.HOSPITAL, hospital.toString()));
 //        }
-//        JsonPrimitive organ = searchFieldJson.getAsJsonPrimitive(ESConstants.ORGAN_ES);
+//        JsonPrimitive organ = searchFieldJson.getAsJsonPrimitive(ESConsts.ORGAN_ES);
 //        if(organ != null && organ.toString().length()!=0){
 //            //此处使用termsQuery(String name,String ...values)同时匹配多个值
-//            matchQueryList.add(QueryBuilders.matchQuery(ESConstants.ORGAN_ES, organ.toString()));
+//            matchQueryList.add(QueryBuilders.matchQuery(ESConsts.ORGAN_ES, organ.toString()));
 //        }
 //
 //        // 等同于bool，将两个查询合并
@@ -186,7 +186,7 @@ package qed.bigdata.es.tool;//package yasen.bigdata.es.util;
 //
 //    public static boolean isExists(String id){
 //        JsonObject json = new JsonObject();
-//        json.addProperty(ESConstants.ID_ES,id);
+//        json.addProperty(ESConsts.ID_ES,id);
 //        List<String> results = esSearch(json);
 //        return results.size()!=0;
 //    }
@@ -201,42 +201,42 @@ package qed.bigdata.es.tool;//package yasen.bigdata.es.util;
 //          //创建查询条件
 //          //精确值的字段：MRI序列，性别
 //          //如果有该查询条件则加到querybuilder中，否则则不加
-//          JsonPrimitive mriSeq = searchFieldJson.getAsJsonPrimitive(ESConstants.MRISEQUENCE);
+//          JsonPrimitive mriSeq = searchFieldJson.getAsJsonPrimitive(ESConsts.MRISEQUENCE);
 //          if(mriSeq != null && mriSeq.toString().length()!=0){
 //              //此处使用termsQuery(String name,String value)精确匹配单个值
-//              matchQueryList.add(QueryBuilders.matchQuery(ESConstants.MRISEQUENCE, mriSeq.toString()));
+//              matchQueryList.add(QueryBuilders.matchQuery(ESConsts.MRISEQUENCE, mriSeq.toString()));
 //          }
-//          JsonPrimitive sex = searchFieldJson.getAsJsonPrimitive(ESConstants.SEX);
+//          JsonPrimitive sex = searchFieldJson.getAsJsonPrimitive(ESConsts.SEX);
 //          if(sex != null && sex.toString().length()!=0){
 //              //此处使用termsQuery(String name,String value)精确匹配单个值
-//              matchQueryList.add(QueryBuilders.matchQuery(ESConstants.SEX, sex.toString()));
+//              matchQueryList.add(QueryBuilders.matchQuery(ESConsts.SEX, sex.toString()));
 ////              System.out.println(sex.toString());
 //          }
 //
 //          //范围值的字段：年龄段，检查日期段，数据收入日期段
 //          // 查询在时间区间范围内的结果
 //          //年龄段
-//          JsonPrimitive ageSection = searchFieldJson.getAsJsonPrimitive(ESConstants.AGE_SECTION);
+//          JsonPrimitive ageSection = searchFieldJson.getAsJsonPrimitive(ESConsts.AGE_SECTION);
 //          if(ageSection != null && ageSection.toString().length()!=0){
-//              RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstants.AGE);
+//              RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConsts.AGE);
 //              String section[] = ageSection.toString().split("\\-");
 //              rangbuilder.gte(section[0]);
 //              rangbuilder.lte(section[1]);
 //              matchQueryList.add(rangbuilder);
 //          }
 //          //检查日期段20170811-20180201
-//          JsonPrimitive studyDateSection = searchFieldJson.getAsJsonPrimitive(ESConstants.STUDYDATE_SECTION);
+//          JsonPrimitive studyDateSection = searchFieldJson.getAsJsonPrimitive(ESConsts.STUDYDATE_SECTION);
 //          if(studyDateSection != null && studyDateSection.toString().length()!=0){
-//              RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstants.STUDYDATE);
+//              RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConsts.STUDYDATE);
 //              String section[] = studyDateSection.toString().split("\\-");
 //              rangbuilder.gte(section[0]);
 //              rangbuilder.lte(section[1]);
 //              matchQueryList.add(rangbuilder);
 //          }
 //          //数据收入日期段
-//          JsonPrimitive entryDateSection = searchFieldJson.getAsJsonPrimitive(ESConstants.ENTRYDATE_SECTION);
+//          JsonPrimitive entryDateSection = searchFieldJson.getAsJsonPrimitive(ESConsts.ENTRYDATE_SECTION);
 //          if(entryDateSection !=null && entryDateSection.toString().length()!=0){
-//              RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConstants.ENTRYDATE);
+//              RangeQueryBuilder rangbuilder = QueryBuilders.rangeQuery(ESConsts.ENTRYDATE);
 //              String section[] = entryDateSection.toString().split("\\-");
 //              rangbuilder.gte(section[0]);
 //              rangbuilder.lte(section[1]);
@@ -245,20 +245,20 @@ package qed.bigdata.es.tool;//package yasen.bigdata.es.util;
 //
 //          //枚举值的字段：设备种类，数据来源（医院），扫描部位
 //
-//          JsonPrimitive deviceType = searchFieldJson.getAsJsonPrimitive(ESConstants.DEVIETYPE);
+//          JsonPrimitive deviceType = searchFieldJson.getAsJsonPrimitive(ESConsts.DEVIETYPE);
 //          if(deviceType != null && deviceType.toString().length()!=0){
 //              //此处使用termsQuery(String name,String ...values)同时匹配多个值
-//              matchQueryList.add(QueryBuilders.matchQuery(ESConstants.DEVIETYPE,deviceType.toString() ));
+//              matchQueryList.add(QueryBuilders.matchQuery(ESConsts.DEVIETYPE,deviceType.toString() ));
 //          }
-//          JsonPrimitive hospital = searchFieldJson.getAsJsonPrimitive(ESConstants.HOSPITAL);
+//          JsonPrimitive hospital = searchFieldJson.getAsJsonPrimitive(ESConsts.HOSPITAL);
 //          if(hospital != null && hospital.toString().length()!=0){
 //              //此处使用termsQuery(String name,String ...values)同时匹配多个值
-//              matchQueryList.add(QueryBuilders.matchQuery(ESConstants.HOSPITAL, hospital.toString()));
+//              matchQueryList.add(QueryBuilders.matchQuery(ESConsts.HOSPITAL, hospital.toString()));
 //          }
-//          JsonPrimitive organ = searchFieldJson.getAsJsonPrimitive(ESConstants.ORGAN_ES);
+//          JsonPrimitive organ = searchFieldJson.getAsJsonPrimitive(ESConsts.ORGAN_ES);
 //          if(organ != null && organ.toString().length()!=0){
 //              //此处使用termsQuery(String name,String ...values)同时匹配多个值
-//              matchQueryList.add(QueryBuilders.matchQuery(ESConstants.ORGAN_ES, organ.toString()));
+//              matchQueryList.add(QueryBuilders.matchQuery(ESConsts.ORGAN_ES, organ.toString()));
 //          }
 //
 //          // 等同于bool，将两个查询合并

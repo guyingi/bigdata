@@ -336,7 +336,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         SearchRequestBuilder searchRequestBuilder = transportClient.prepareSearch(index)
                 .setTypes(type)
                 // 设置查询类型
-                .setSearchType(SearchType.DEFAULT)
+                .setSearchType(SearchType.QUERY_THEN_FETCH)
                 // 设置查询关键词
                 .setQuery(queryBuilder)
                 // 设置是否按查询匹配度排序
@@ -390,12 +390,14 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             tempDataList.addAll(parseSearchHits(searchHits,backfields));
             if(totalHits>1000) {
                 int page = (int) totalHits / (1000);//计算总页数,每次搜索数量为分片数*设置的size大小
-                for (int i = 0; i <= page; i++) {
+                for (int i = 0; i < page; i++) {
                     //再次发送请求,并使用上次搜索结果的ScrollId
+                    String scrollid = response.getScrollId();
                     response = transportClient
-                            .prepareSearchScroll(response.getScrollId())
+                            .prepareSearchScroll(scrollid)
                             .setScroll(new TimeValue(100000)).execute()
                             .actionGet();
+                    searchHits = response.getHits();
                     tempDataList.addAll(parseSearchHits(searchHits,backfields));
                 }
             }

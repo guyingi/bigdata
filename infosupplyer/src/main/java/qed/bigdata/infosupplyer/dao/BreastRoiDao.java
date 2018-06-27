@@ -1,6 +1,7 @@
 package qed.bigdata.infosupplyer.dao;
 
 import qed.bigdata.infosupplyer.pojo.BreastRoiInfoBean;
+import qed.bigdata.infosupplyer.pojo.marktool.BreastRoiEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.Map;
  */
 public interface BreastRoiDao {
 
-    public Map<String,BreastRoiInfoBean> getBreastRoiInfoBySeriesuid(List<String> seriesuids);
+    Map<String,BreastRoiInfoBean> getBreastRoiInfoBySeriesuid(List<String> seriesuids);
 
+    List<BreastRoiEntity> getEntityBySeriesuid(String seriesuid);
 }

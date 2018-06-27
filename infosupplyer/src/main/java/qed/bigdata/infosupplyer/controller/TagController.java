@@ -22,6 +22,7 @@ import qed.bigdata.infosupplyer.service.impl.DesensitizationServiceImpl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author WeiGuangWu
@@ -47,6 +48,11 @@ public class TagController{
     @Autowired
     DicomTagDao dicomTagDao;
 
+    /**
+     * 给dicom打标记接口，返回码说明:[000:成功，total：数量]，[999:失败，total:数量],[001:因tag冲突失败，content:冲突的tag]
+     * @param parameter
+     * @return
+     */
     @PostMapping("/tagfordicom")
     public JSONObject tagfordicom(@RequestBody Map<String, Object> parameter) {
         logger.log(Level.INFO,"接口:tagfordicom 被调用");
@@ -55,13 +61,30 @@ public class TagController{
 
         JSONObject param = InfoSupplyerTool.formatParameter(parameter);
 
-        logger.log(Level.INFO,"接口接收的参数"+param.toJSONString());
-
-        Integer count = tagService.signForDicom(param);
         JSONObject result = new JSONObject();
-        result.put(SysConsts.CODE,SysConsts.CODE_000);
-        result.put("total",count);
 
+        Set<String> conflictTags = tagService.checkTagConflictForDicom(param);
+        if(conflictTags!=null && conflictTags.size()!=0){
+            String content = new String();
+            for(String str : conflictTags){
+                content += str+",";
+            }
+            content = content.substring(0,content.length()-1);
+            JSONArray dataArr = new JSONArray();
+            dataArr.add(content);
+            result.put(SysConsts.CODE,"001");
+            result.put(SysConsts.DATA,dataArr);
+        }else{
+            Integer count = tagService.signForDicom(param);
+            if(count==0){
+                result.put(SysConsts.CODE,"999");
+                result.put(SysConsts.TOTAL,count);
+            }else{
+                result.put(SysConsts.CODE,"000");
+                result.put(SysConsts.TOTAL,count);
+            }
+
+        }
         logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
 
         return result;
@@ -178,17 +201,6 @@ public class TagController{
         logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
 
         return result;
-    }
-
-
-
-    public static void main(String[] args) {
-        String tag = "tag";
-        DesensitizationService desensitizationService = new DesensitizationServiceImpl();
-        Long count = desensitizationService.desensitizedicom(tag);
-        JSONObject result = new JSONObject();
-        result.put(SysConsts.CODE,SysConsts.CODE_000);
-        result.put("total",count);
     }
 
 }

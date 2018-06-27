@@ -32,7 +32,7 @@ public class DicomTagDaoImpl implements DicomTagDao {
     public boolean insert(DicomTag dicomTag){
         boolean isSuccess = false;
         if(bigdataConnection == null){
-            return isSuccess;
+            bigdataConnection = DBFactory.getBigdataConnection();
         }
         String sql = "insert into dicomtag(`tagname`,`count`,`desensitize`,`describe`) values(?,?,?,?)";
         try {
@@ -52,7 +52,7 @@ public class DicomTagDaoImpl implements DicomTagDao {
     public boolean updateDesensitize(DicomTag dicomTag) {
         boolean isSuccess = false;
         if(bigdataConnection == null){
-            return isSuccess;
+            bigdataConnection = DBFactory.getBigdataConnection();
         }
         String sql = "update dicomtag set desensitize=? where tagname=?";
         try {
@@ -68,6 +68,9 @@ public class DicomTagDaoImpl implements DicomTagDao {
 
     @Override
     public boolean deleteByTag(String tag) {
+        if(bigdataConnection == null){
+            bigdataConnection = DBFactory.getBigdataConnection();
+        }
         String sql = "delete from dicomtag where `tagname`=?";
         String checksql = "select * from dicomtag where `tagname`=?";
         try {
@@ -91,7 +94,7 @@ public class DicomTagDaoImpl implements DicomTagDao {
     public List<DicomTag> list() {
         List<DicomTag> result = new ArrayList<>();
         if(bigdataConnection == null){
-            return result;
+            bigdataConnection = DBFactory.getBigdataConnection();
         }
         String sql = "select * from dicomtag";
         try {
@@ -106,6 +109,7 @@ public class DicomTagDaoImpl implements DicomTagDao {
                 dicomTag.setDescribe(resultSet.getString("describe"));
                 result.add(dicomTag);
             }
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

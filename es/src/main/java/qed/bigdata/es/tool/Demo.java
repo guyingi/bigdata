@@ -17,7 +17,7 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.util.ReflectionUtils;
-import qed.bigdata.es.consts.ESConstants;
+import qed.bigdata.es.consts.ESConsts;
 import qed.bigdata.es.service.impl.SearchServiceImpl;
 import yasen.dicom.DicomWritable;
 
@@ -37,7 +37,7 @@ public class Demo {
 
     private static void downloadJson(){
         JSONArray backfields = new JSONArray();
-        backfields.add(ESConstants.HDFSPATH);
+        backfields.add(ESConsts.HDFSPATH);
 
         JSONObject json = new JSONObject();
         JSONObject searchcondition = new JSONObject();

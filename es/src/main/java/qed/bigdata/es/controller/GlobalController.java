@@ -1,5 +1,7 @@
 package qed.bigdata.es.controller;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,29 +14,38 @@ import javax.servlet.http.HttpSession;
 @Controller
 @RequestMapping("")
 public class GlobalController {
+    static Logger logger = Logger.getLogger(DicomSearchController.class);
 
     @RequestMapping(value = "dicomsearch", method = RequestMethod.GET)
     public ModelAndView dicomsearch(HttpServletRequest request, HttpServletResponse response) {
+
+        logger.log(Level.INFO,"controller:dicomsearch 被调用");
+
         HttpSession session = request.getSession();
         String username = null;
         if(session != null){
             username = (String)session.getAttribute("username");
         }
+        logger.log(Level.INFO,"跳转携带用户名:" + username);
+
         ModelAndView mav = new ModelAndView();
         mav.setViewName("dicomsearch");
         mav.addObject("username",username);
         System.out.println("dicomsearch:"+username);
+
         return mav;
     }
 
     @RequestMapping(value = "patientsearch", method = RequestMethod.GET)
     public ModelAndView patientsearch(HttpServletRequest request, HttpServletResponse response) {
+        logger.log(Level.INFO,"controller:patientsearch 被调用");
+
         HttpSession session = request.getSession();
         String username = null;
         if(session != null){
             username = (String)session.getAttribute("username");
         }
-        System.out.println("patientsearch:"+username);
+        logger.log(Level.INFO,"跳转携带用户名:" + username);
         ModelAndView mav = new ModelAndView();
         mav.setViewName("patientsearch");
         mav.addObject("username",username);
@@ -43,40 +54,48 @@ public class GlobalController {
 
     @RequestMapping(value = "signtag", method = RequestMethod.GET)
     public ModelAndView signtag(HttpServletRequest request, HttpServletResponse response) {
+        logger.log(Level.INFO,"controller:signtag 被调用");
+
         HttpSession session = request.getSession();
         String username = null;
         if(session != null){
             username = (String)session.getAttribute("username");
         }
-        System.out.println("signtag:"+username);
+        logger.log(Level.INFO,"跳转携带用户名:" + username);
         ModelAndView mav = new ModelAndView();
         mav.setViewName("signtag");
         mav.addObject("username",username);
         return mav;
     }
 
-    @RequestMapping(value = "desensitization", method = RequestMethod.GET)
-    public ModelAndView desensitization(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(value = "tagmanage", method = RequestMethod.GET)
+    public ModelAndView tagmanage(HttpServletRequest request, HttpServletResponse response) {
+        logger.log(Level.INFO,"controller:tagmanage 被调用");
+
         HttpSession session = request.getSession();
         String username = null;
         if(session != null){
             username = (String)session.getAttribute("username");
         }
-        System.out.println("desensitization:"+username);
+        logger.log(Level.INFO,"跳转携带用户名:" + username);
+
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("desensitization");
+        mav.setViewName("tagmanage");
         mav.addObject("username",username);
         return mav;
     }
 
     @RequestMapping(value = "downloaddesensitization", method = RequestMethod.GET)
     public ModelAndView downloaddesensitization(HttpServletRequest request, HttpServletResponse response) {
+        logger.log(Level.INFO,"controller:downloaddesensitization 被调用");
+
         HttpSession session = request.getSession();
         String username = null;
         if(session != null){
             username = (String)session.getAttribute("username");
         }
-        System.out.println("downloaddesensitization:"+username);
+        logger.log(Level.INFO,"跳转携带用户名:" + username);
+
         ModelAndView mav = new ModelAndView();
         mav.setViewName("downloaddesensitization");
         mav.addObject("username",username);
@@ -85,6 +104,7 @@ public class GlobalController {
 
     @RequestMapping(value = "navigation", method = RequestMethod.GET)
     public ModelAndView navigation(HttpServletRequest request, HttpServletResponse response) {
+        logger.log(Level.INFO,"controller:navigation 被调用");
         String username=  request.getParameter("username");
         String password=  request.getParameter("password");
         if(username != null && password != null){
@@ -92,7 +112,8 @@ public class GlobalController {
             session.setAttribute("username",username);
             session.setAttribute("password",password);
         }
-        System.out.println("navigation:"+username+","+password);
+        logger.log(Level.INFO,"跳转携带用户名:" + username);
+
         ModelAndView mav = new ModelAndView();
         mav.setViewName("navigation");
         mav.addObject("username",username);

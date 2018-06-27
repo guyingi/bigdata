@@ -38,7 +38,7 @@
                         <li><a href="dicomsearch">查询dicom</a></li>
                         <li><a href="patientsearch">查询患者</a></li>
                         <li><a href="signtag">打标签</a></li>
-                        <li><a href="desensitization">数据脱敏</a></li>
+                        <li><a href="tagmanage">标签管理</a></li>
                         <li><a href="downloaddesensitization">下载脱敏数据</a></li>
                     </ul>
                 </div>

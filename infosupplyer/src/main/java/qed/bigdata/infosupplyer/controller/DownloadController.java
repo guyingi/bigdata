@@ -7,6 +7,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import qed.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
@@ -22,6 +24,8 @@ import qed.bigdata.infosupplyer.service.HBaseService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/data")
@@ -96,6 +100,25 @@ public class DownloadController {
         return null;
     }
 
+
+    @PostMapping("/exportDesensitizeDicomByTag")
+    public JSONObject exportDesensitizeDicomByTag(@RequestBody Map<String, Object> parameter) {
+        logger.log(Level.INFO,"接口:exportDesensitizeDicomByTag 被调用");
+        JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
+        logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
+
+        List<String> tagsList = (List<String>) parameter.get("tags");
+        JSONObject result = null;
+        try {
+            result = desensitizationService.exportDesensitizeDicomByTag(tagsList);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
+
+        return result;
+    }
 
 
     @RequestMapping("/downloadDesensitizeDicomByTag")

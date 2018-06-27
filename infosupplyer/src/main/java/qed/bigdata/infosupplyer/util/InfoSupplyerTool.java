@@ -2,11 +2,13 @@ package qed.bigdata.infosupplyer.util;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import qed.bigdata.infosupplyer.consts.SysConsts;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -21,8 +23,9 @@ public class InfoSupplyerTool {
     static Logger logger = Logger.getLogger(InfoSupplyerTool.class);
 
     public static void main(String[] args) {
-
-        System.out.println(getRunnerPath());
+       String str = "1x2x840x113704x1x111x10192x1520926662x13";
+       str = str.replace("x",".");
+        System.out.println(str);
     }
 
     synchronized public static int formatInteger(String data){
@@ -324,5 +327,20 @@ public class InfoSupplyerTool {
             return "";
         }
     }
+
+    //将原目录下面的子文件拷贝到目标目录下
+    public static void copyDir(String srcDir,String desDir){
+        for(File file : new File(srcDir).listFiles()){
+            String name = file.getName();
+            String desFilePath = desDir+File.separator+name;
+            File desFile = new File(desFilePath);
+            try {
+                FileUtils.copyFile(file,desFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
 }

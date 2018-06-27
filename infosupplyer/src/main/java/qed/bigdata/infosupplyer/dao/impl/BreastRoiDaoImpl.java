@@ -5,11 +5,13 @@ import qed.bigdata.infosupplyer.consts.SysConsts;
 import qed.bigdata.infosupplyer.pojo.BreastRoiInfoBean;
 import qed.bigdata.infosupplyer.dao.BreastRoiDao;
 import qed.bigdata.infosupplyer.factory.DBFactory;
+import qed.bigdata.infosupplyer.pojo.marktool.BreastRoiEntity;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,4 +62,45 @@ public class BreastRoiDaoImpl implements BreastRoiDao {
         }
         return result;
     }
+
+    @Override
+    public List<BreastRoiEntity> getEntityBySeriesuid(String seriesuid) {
+        List<BreastRoiEntity> result = new ArrayList<>();
+        Connection connection = DBFactory.getMarkToolConnection();
+        String sql = "select * from breast_roi where series_uid=?";
+        PreparedStatement ps = null;
+        try {
+            ps = connection.prepareStatement(sql);
+            ps.setString(1,seriesuid);
+            ResultSet resultSet = ps.executeQuery();
+            while(resultSet.next()){
+                BreastRoiEntity entity = new BreastRoiEntity();
+
+                entity.setSeries_uid(resultSet.getString(SysConsts.SERIES_UID));
+                entity.setInstances_uid(resultSet.getString(SysConsts.INSTANCES_UID));
+                entity.setLocation(resultSet.getString(SysConsts.LOCATION));
+                entity.setClassification(resultSet.getInt(SysConsts.CLASSIFICATION));
+                entity.setShape(resultSet.getInt(SysConsts.SHAPE));
+                entity.setBoundary(resultSet.getString(SysConsts.BOUNDARY));
+                entity.setBoundary1(resultSet.getInt(SysConsts.BOUNDARY1));
+                entity.setBoundary2(resultSet.getInt(SysConsts.BOUNDARY2));
+                entity.setDensity(resultSet.getInt(SysConsts.DENSITY));
+                entity.setQuadrant(resultSet.getInt(SysConsts.QUADRANT));
+                entity.setRisk(resultSet.getInt(SysConsts.RISK));
+                entity.setPoints(resultSet.getString(SysConsts.POINTS));
+                entity.setType(resultSet.getString(SysConsts.TYPE));
+                entity.setUid(resultSet.getInt(SysConsts.UID));
+                entity.setSeries_description(resultSet.getString(SysConsts.SERIES_DESCRIPTION));
+                entity.setTool_state_manager(resultSet.getString(SysConsts.TOOL_STATE_MANAGER));
+                entity.setRestore_data(resultSet.getString(SysConsts.RESTORE_DATA));
+
+                result.add(entity);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
 }

@@ -1,7 +1,10 @@
 package qed.bigdata.infosupplyer.service;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 public interface DesensitizationService {
 
@@ -16,11 +19,12 @@ public interface DesensitizationService {
      * 每个序列下面就是该序列的脱敏数据，该序列目录名称为SeriesUID。该目录名承担着重要信息传递的作用
      *  yasen/bigdata/raw /标签/ year/month/day/文件
      *  文件：标签_患者名拼音年龄性别_【Info.csv、LCC.mhd、LCC.raw、LMLO.mhd、LMLO.raw、RCC.mhd、RCC.raw、RMLO.mhd、RMLO.raw、ROI.csv】
+     *  该方法暂时下架，其功能以私有方式实现。
      * @param desensitizationDir
      * @param tag     外部传入标记，可能提供一个页面，在页面查询出一批数据，然后将这批数据脱敏，然后输入一个标记，打上去，完美
      * @return  返回上传成功的个数
      */
-     int uploadDicomDesensitization(String desensitizationDir, String tag) throws IOException;
+//     int uploadDicomDesensitization(String desensitizationDir, String tag) throws IOException;
 
 
     /**
@@ -29,4 +33,7 @@ public interface DesensitizationService {
      * @return 返回本地临时目录中的zip压缩文件
      */
      String downloadDesensitizeDicomByTag(String tag) throws Exception;
+
+
+     JSONObject exportDesensitizeDicomByTag(List<String> tags) throws Exception;
 }

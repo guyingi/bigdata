@@ -4,11 +4,13 @@ import org.springframework.stereotype.Service;
 import qed.bigdata.infosupplyer.consts.SysConsts;
 import qed.bigdata.infosupplyer.dao.Rio2dDao;
 import qed.bigdata.infosupplyer.factory.DBFactory;
+import qed.bigdata.infosupplyer.pojo.marktool.Roi2dEntity;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,26 +24,26 @@ import java.util.Map;
  */
 @Service("Rio2dDao")
 public class Rio2dDaoImpl implements Rio2dDao {
-    public Map<String,String> getRoiCoordinateBySeriesuid(List<String> seriesuids){
-        Map<String,String> result = new HashMap<String,String>();
-        if(seriesuids == null || seriesuids.size()==0){
-            return result;
-        }
+
+    @Override
+    public List<Roi2dEntity> getEntityBySeriesuid(String seriesuid) {
+        List<Roi2dEntity> result = new ArrayList<>();
         Connection connection = DBFactory.getMarkToolConnection();
-        String param = "";
-        for(String temp : seriesuids){
-            param += "'"+temp+"',";
-        }
-        param = param.substring(0,param.length()-1);
-        String sql = "select roi2d_series_uid,roi2d_points " +
-                "from roi2d " +
-                "where roi2d_series_uid in ("+param+")";
+        String sql = "select * from roi2d where roi2d_series_uid=? order by roi3d_num";
         PreparedStatement ps = null;
         try {
             ps = connection.prepareStatement(sql);
+            ps.setString(1,seriesuid);
             ResultSet resultSet = ps.executeQuery();
             while(resultSet.next()){
-                result.put(resultSet.getString(SysConsts.ROI2D_SERIES_UID),resultSet.getString(SysConsts.ROI2D_POINTS));
+                Roi2dEntity entity = new Roi2dEntity();
+                entity.setRoi2d_dim(resultSet.getInt(SysConsts.ROI2D_DIM));
+                entity.setRoi2d_instances_uid(resultSet.getString(SysConsts.ROI2D_INSTANCES_UID));
+                entity.setRoi2d_points(resultSet.getString(SysConsts.ROI2D_POINTS));
+                entity.setRoi2d_series_uid(resultSet.getString(SysConsts.ROI2D_SERIES_UID));
+                entity.setRoi2d_slice(resultSet.getInt(SysConsts.ROI2D_SLICE));
+                entity.setRoi3d_num(resultSet.getInt(SysConsts.ROI3D_NUM));
+                result.add(entity);
             }
         } catch (SQLException e) {
             e.printStackTrace();

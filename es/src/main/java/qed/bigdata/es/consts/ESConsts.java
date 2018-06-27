@@ -1,6 +1,6 @@
 package qed.bigdata.es.consts;
 /**
- * @Title: ESConstants.java
+ * @Title: ESConsts.java
  * @Package yasen.bigdata.es.conf
  * @Description: 该类包含与ES相关的一些常量
  * @author weiguangwu
@@ -8,7 +8,7 @@ package qed.bigdata.es.consts;
  * @version V1.0
  */
 
-public class ESConstants {
+public class ESConsts {
 
     /*********************ES中edf类型存储的字段***************************/
     public static String PatientUID_ES_ELECTRIC = "PatientUID"; //医院8位PatientID+姓名拼音+出生日期+性别(F/M)最后求MD5,需要在多医院中唯一

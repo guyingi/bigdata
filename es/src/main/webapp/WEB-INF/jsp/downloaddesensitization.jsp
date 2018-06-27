@@ -45,7 +45,7 @@
         obj.tag = tag;
         $.ajax({
             type: "POST",
-            url: "/es/searchTag",
+            url: "/searchTag",
             data: JSON.stringify(obj),
             dataType: 'json',
             traditional:true,
@@ -64,6 +64,24 @@
         });
     }
 
+    function exportSomeTag() {
+        var arr = new Array();
+        var rows = $('#tagtable').datagrid('getSelections');
+        for(var i=0;i<rows.length;i++){
+            arr.push(rows[i].tag);
+        }
+        if(arr.length==0){
+            alert("未选中任何项")
+        }else{
+            var param="";
+            for(var e in arr){
+                param += arr[e]+"-";
+            }
+            simulationForm("/exportDesensitizeByTag?tags="+param);
+        }
+
+    }
+
     function downloadTagChecked(){
         //下载选中项的dicom文件
         var arr = new Array();
@@ -76,7 +94,7 @@
         }else if(arr.length > 1){
             alert("多个tag请用另一种方式下载")
         } else{
-            simulationForm("/es/downloadDesensitizeByTag?tag="+arr[0]);
+            simulationForm("/downloadDesensitizeByTag?tag="+arr[0]);
         }
     }
     function simulationForm(url) {
@@ -100,11 +118,11 @@
             <div class="easyui-accordion" fit="true" id="navmenu">
                 <div title="功能菜单">
                     <ul class="navmenu">
-                        <li><a href="./navigation.html">首页</a></li>
-                        <li><a href="./dicomsearch.html">查询dicom</a></li>
-                        <li><a href="./patientsearch.html">查询患者</a></li>
-                        <li><a href="./signtag.html">打标签</a></li>
-                        <li><a href="./desensitization.html">数据脱敏</a></li>
+                        <li><a href="navigation">首页</a></li>
+                        <li><a href="dicomsearch">查询dicom</a></li>
+                        <li><a href="patientsearch">查询患者</a></li>
+                        <li><a href="signtag">打标签</a></li>
+                        <li><a href="tagmanage">标签管理</a></li>
                         <li class="active"><a href="#">下载脱敏数据</a></li>
                     </ul>
                 </div>
@@ -154,7 +172,7 @@
                                             <div data-options="region:'center',title:'查询结果'">
                                                 <div class="easyui-panel" data-options="fit:true,border:false">
                                                     <table id="tagtable" class="easyui-datagrid" title="" style="width:auto;height:100%"
-                                                           data-options="url:'/es/searchTag',method:'POST'">
+                                                           data-options="url:'/searchTag',method:'POST'" >
                                                         <thead>
                                                         <tr>
                                                             <th field="ck" checkbox="true"></th>
@@ -167,11 +185,6 @@
                                             </div>
                                         </div>
                              </div>
-
-
-
-
-
 
                         </div>
                 </div>

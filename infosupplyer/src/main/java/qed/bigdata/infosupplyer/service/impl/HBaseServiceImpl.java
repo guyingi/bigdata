@@ -121,6 +121,7 @@ public class HBaseServiceImpl implements HBaseService {
 
         Table table = conn.getTable(TableName.valueOf(tablename));
         Put put = new Put(Bytes.toBytes(rowkey));
+        value = value==null?"":value;
         put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(qualify),Bytes.toBytes(value));
         table.put(put);
         logger.log(Level.INFO,"方法：updateColumn 调用结束");
@@ -170,13 +171,21 @@ public class HBaseServiceImpl implements HBaseService {
             Put put = new Put(Bytes.toBytes(rowkey));
             for(String key : metaJson.keySet()){
                 if(IntegerFieldList.contains(key)){
-                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(metaJson.getInteger(key)));
+                    Integer integer = metaJson.getInteger(key);
+                    if(integer==null) continue;
+                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(integer));
                 }else if(LongFieldList.contains(key)){
-                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(metaJson.getLong(key)));
+                    Long aLong = metaJson.getLong(key);
+                    if(aLong==null) continue;
+                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(aLong));
                 }else if(DoubleFieldList.contains(key)){
-                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(metaJson.getDouble(key)));
+                    Double aDouble = metaJson.getDouble(key);
+                    if(aDouble==null) continue;
+                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(aDouble));
                 }else{
-                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(metaJson.getString(key)));
+                    String string = metaJson.getString(key);
+                    if(string==null) continue;
+                    put.addColumn(Bytes.toBytes(cf),Bytes.toBytes(key),Bytes.toBytes(string));
                 }
             }
             mutator.mutate(put);

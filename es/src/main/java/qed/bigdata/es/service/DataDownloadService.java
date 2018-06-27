@@ -47,4 +47,6 @@ public interface DataDownloadService {
      * @throws Exception
      */
     String downloadDicomByIds(List<String> ids, String tempDir) throws Exception;
+
+
 }

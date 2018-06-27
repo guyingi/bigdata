@@ -140,4 +140,31 @@ public class HdfsTool {
         }
         return isSuccess;
     }
+
+    public static Long getSizeOfDicom(List<String> paths) throws IOException {
+        Configuration hdfsconf = new Configuration();
+        hdfsconf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
+        FileSystem fs = null;
+        try {
+            fs = FileSystem.get(hdfsconf);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0L;
+        }
+
+        Long sumSize = 0L;
+        try {
+            for (String path : paths) {
+                long length = fs.getContentSummary(new Path(path)).getLength();
+                sumSize += length;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(fs!=null){
+                fs.close();
+            }
+        }
+        return sumSize;
+    }
 }

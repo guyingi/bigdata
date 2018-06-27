@@ -182,6 +182,27 @@ public class HdfsServiceImpl implements HdfsService {
         }
     }
 
+    @Override
+    public void copyDirToLocal(String hdfspath, String local, Configuration hdfsconf) {
+        String name = hdfspath.substring(hdfspath.lastIndexOf(SysConsts.LEFT_SLASH)+1,hdfspath.length());
+        String localDir = local + File.separator+name;
+        Path remotePath = new Path(hdfspath);
+        Path lcoalPath = new Path(localDir);
+        FileSystem fs = null;
+        try {
+            fs = FileSystem.get(hdfsconf);
+            fs.copyToLocalFile(remotePath,lcoalPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                fs.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private boolean downloadElectricSignal(String hdfspath,String localPath,Configuration hdfsconf) throws IOException {
         String name = hdfspath.substring(hdfspath.lastIndexOf(SysConsts.LEFT_SLASH)+1,hdfspath.length());
         localPath += localPath+name;
@@ -190,5 +211,7 @@ public class HdfsServiceImpl implements HdfsService {
         fs.close();
         return true;
     }
+
+
 
 }

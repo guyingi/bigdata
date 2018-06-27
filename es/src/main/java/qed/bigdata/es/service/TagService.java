@@ -2,6 +2,7 @@ package qed.bigdata.es.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import qed.bigdata.es.consts.DataTypeEnum;
 
 /**
  * @author WeiGuangWu
@@ -18,7 +19,15 @@ public interface TagService {
      * @param tag
      * @return
      */
-    Long signTag(JSONArray param, String tag);
+    JSONObject signTag(JSONArray param, String tag);
+
+    /**
+     * 移除tag
+     * @param tag
+     * @param typeEnum
+     * @return
+     */
+    boolean removeTag(String tag, DataTypeEnum typeEnum);
 
     /**
      * 做实际的脱敏操作

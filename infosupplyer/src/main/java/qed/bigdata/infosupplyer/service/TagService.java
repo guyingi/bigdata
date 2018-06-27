@@ -3,6 +3,8 @@ package qed.bigdata.infosupplyer.service;
 import com.alibaba.fastjson.JSONObject;
 import qed.bigdata.infosupplyer.consts.DataTypeEnum;
 
+import java.util.Set;
+
 /**
  * @author WeiGuangWu
  * @version V1.0
@@ -26,6 +28,13 @@ public interface TagService {
      * @return
      */
     Integer signForDicom(JSONObject param);
+
+    /**
+     * 检查dicom数据tag冲突，这个操作通常在打tag之前，
+     * @param param
+     * @return  返回的是冲突的tag
+     */
+    Set<String> checkTagConflictForDicom(JSONObject param);
 
     /**
      * 查询所有dicom序列的标签，以及每个标签下序列的数量

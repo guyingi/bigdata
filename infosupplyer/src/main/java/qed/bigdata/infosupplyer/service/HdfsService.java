@@ -37,4 +37,6 @@ public interface HdfsService {
      * @param path
      */
     void delFile(Path path);
+
+    void copyDirToLocal(String remote,String local,Configuration hdfsconf);
 }

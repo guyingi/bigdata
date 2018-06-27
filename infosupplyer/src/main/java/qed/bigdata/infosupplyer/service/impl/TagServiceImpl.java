@@ -2,6 +2,7 @@ package qed.bigdata.infosupplyer.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -108,6 +109,47 @@ public class TagServiceImpl implements TagService {
         dicomTagDao.insert(dicomTag);
         logger.log(Level.INFO,"方法:signForDicom 调用结束");
         return esids.size();
+    }
+
+    @Override
+    public Set<String> checkTagConflictForDicom(JSONObject param) {
+        Set<String> oldTagSet = new HashSet<>();
+        //1.得到tag,searchcondition
+        String tag = param.getString(SysConsts.TAG_PARAM);
+        JSONArray criteria = param.getJSONArray(SysConsts.CRITERIA);
+
+        //2.下面两段是构造新查询条件，以及返回值给分页查询接口，获得所有序列的SeriesUID,rowkey.
+        JSONArray backfields = new JSONArray();
+        backfields.add(EsConsts.ID);
+        backfields.add(EsConsts.ROWKEY);
+        backfields.add(EsConsts.TAG);
+
+        JSONObject json = new JSONObject();
+        json.put(SysConsts.CRITERIA,criteria);
+        json.put(SysConsts.BACKFIELDS,backfields);
+        DataTypeEnum type=  DataTypeEnum.DICOM;
+        JSONObject result = elasticSearchService.searchByPaging(json,type);
+
+        //遍历序列，每个序列做修改打上标签
+        List<String>  esids = new LinkedList<String>();
+        List<String>  rowkeys = new LinkedList<String>();
+        String code = result.getString(SysConsts.CODE);
+        if(SysConsts.CODE_000.equals(code)){
+            JSONArray data = result.getJSONArray(SysConsts.DATA);
+            long total = data.size();
+            for(int i = 0; i < total; i++){
+                JSONObject one = data.getJSONObject(i);
+                String esid = one.getString(EsConsts.ID);
+                esids.add(esid);
+                String rowkey = one.getString(EsConsts.ROWKEY);
+                rowkeys.add(rowkey);
+                String oldTag = one.getString(EsConsts.TAG);
+                if(!StringUtils.isBlank(oldTag)){
+                    oldTagSet.add(oldTag);
+                }
+            }
+        }
+        return oldTagSet;
     }
 
     @Override
@@ -226,4 +268,15 @@ public class TagServiceImpl implements TagService {
         return success;
     }
 
+
+    public static void main(String[] args) {
+        ElasticSearchService elasticSearchService = new ElasticSearchServiceImpl();
+        InfosupplyerConfiguration conf = new InfosupplyerConfiguration();
+        String ids[] = new String[]{
+                "tGOuFWQBBNjORWhHryqi"};
+        for(String id : ids) {
+            elasticSearchService.updateField(conf.getIndexDicom(),
+                    conf.getTypeDicom(), id, EsConsts.TAG, "LUN");
+        }
+    }
 }
