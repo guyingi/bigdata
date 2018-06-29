@@ -303,8 +303,9 @@ public class SearchServiceImpl implements SearchService {
     public List<String> listInstitutionName() {
         logger.log(Level.INFO,"调用方法:listInstitutionName");
 
-        String interfaceStr = "/info/listValueRangeInDicom";
+        String interfaceStr = "/info/listValueRange";
         JSONObject param = new JSONObject();
+        param.put(SysConsts.DATATYPE,SysConsts.TYPE_DICOM);
         param.put("field",ESConsts.InstitutionName_ES);
         JSONObject jsonObject = Tool.doCallAndGetResult(param, interfaceStr, DataTypeEnum.OTHER);
         List<String> resultList = parseValueRange(jsonObject,ESConsts.InstitutionName_ES);
@@ -320,6 +321,7 @@ public class SearchServiceImpl implements SearchService {
 
         String interfaceStr = "/info/listValueRangeInDicom";
         JSONObject param = new JSONObject();
+        param.put(SysConsts.DATATYPE,SysConsts.TYPE_DICOM);
         param.put("field",ESConsts.ManufacturerModelName_ES);
         JSONObject jsonObject = Tool.doCallAndGetResult(param, interfaceStr, DataTypeEnum.OTHER);
         List<String> resultList = parseValueRange(jsonObject,ESConsts.ManufacturerModelName_ES);
@@ -336,6 +338,7 @@ public class SearchServiceImpl implements SearchService {
 
         String interfaceStr = "/info/listValueRangeInDicom";
         JSONObject param = new JSONObject();
+        param.put(SysConsts.DATATYPE,SysConsts.TYPE_DICOM);
         param.put("field",ESConsts.SeriesDescription_ES);
         JSONObject jsonObject = Tool.doCallAndGetResult(param, interfaceStr, DataTypeEnum.OTHER);
 

@@ -53,18 +53,22 @@ public class DataDownloadServiceImpl implements DataDownloadService {
         //本地临时压缩文件名称，6位随机数
         String zipTempName = Tool.getRandonNumber(6)+"";
         //zipFilePath是zip文件全路径
-        String zipFilePath = tempRealDir+Tool.getDelimiter()+zipTempName+".zip";
+        String zipFilePath = tempRealDir+File.separator+zipTempName+".zip";
         //调用下载方法，做具体下载工作
         doCallAndWriteToDisk(id,interfaceStr,zipFilePath);
         //做解压操作，zipFilePath是zip文件全路径，tempRealDir是存放解压后的文件全路径，
         // true意为将解压后的文件存放在以压缩文件名命名的目录下面
         ZipUtil.unzip(zipFilePath,tempRealDir,true);
         //存放jpg图片的目录
-        String unzipDir = tempRealDir+Tool.getDelimiter()+zipTempName;
+        String unzipDir = tempRealDir+File.separator+zipTempName;
         File file = new File(unzipDir);
         for(File e : file.listFiles()){
             //生成缩略图相对路径，存入结果list
             result.add(tempContextPath+SysConsts.LEFT_SLASH+zipTempName+SysConsts.LEFT_SLASH+e.getName());
+        }
+        //删除zip文件
+        if(new File(zipFilePath).exists()){
+            new File(zipFilePath).delete();
         }
         logger.log(Level.INFO,"调用 downloadDicomThumbnail 结束，结果:"+result.size());
         return result;

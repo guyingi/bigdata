@@ -157,7 +157,7 @@ public class SearchController {
 
 
     /**
-     * 一定要查询数据库，因为这个人可能只有电信号或者量表，没有dicom
+     * 一定要查询数据库，因为这个人可能只有电信号或者量表，没有dicom，这个接口暂时没有使用
      * @param parameter
      * @return
      */
@@ -169,10 +169,12 @@ public class SearchController {
 
         String patientname = (String)parameter.get(SysConsts.PATIENTNAME);
         List<Patient> patients = patientDao.getPatientByName(patientname);
-        System.out.println(patients.size());
         JSONObject result = new JSONObject();
         result.put(SysConsts.CODE,SysConsts.CODE_000);
-        result.put(SysConsts.TOTAL,patients.size());
+        if(patients==null)
+            result.put(SysConsts.TOTAL,0L);
+        else
+            result.put(SysConsts.TOTAL,patients.size());
         result.put(SysConsts.DATA,patients);
 
         logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
@@ -185,23 +187,30 @@ public class SearchController {
      * @param parameter
      * @return
      */
-    @PostMapping("/listValueRangeInDicom")
+    @PostMapping("/listValueRange")
     public JSONObject listValueRangeInDicom(@RequestBody Map<String, Object> parameter){
-        logger.log(Level.INFO,"接口:listValueRangeInDicom 被调用");
+        logger.log(Level.INFO,"接口:listValueRange 被调用");
         JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
-        logger.log(Level.INFO,"接口listValueRangeInDicom接收的参数:"+paramJson.toJSONString());
+        logger.log(Level.INFO,"listValueRange:"+paramJson.toJSONString());
 
         JSONObject result = new JSONObject();
+        String datatype = (String)parameter.get(SysConsts.DATATYPE);
         String field = (String)parameter.get(SysConsts.FIELD_PARAM);
 
-        if(!StringUtils.isBlank(field)){
-            JSONObject tempResult = elasticSearchService.searchAggregation(infoConf.getIndexDicom(),infoConf.getTypeDicom(),null,field);
-            if(SysConsts.CODE_000.equals(tempResult.getString(SysConsts.CODE))){
-                result.put(SysConsts.CODE,SysConsts.CODE_000);
-                result.put(SysConsts.TOTAL,tempResult.getLong(SysConsts.TOTAL));
-                result.put(SysConsts.DATA,tempResult.getJSONArray(SysConsts.DATA));
+        if(SysConsts.TYPE_DICOM.equals(datatype)){
+            if(!StringUtils.isBlank(field)){
+                JSONObject tempResult = elasticSearchService.searchAggregation(infoConf.getIndexDicom(),infoConf.getTypeDicom(),null,field);
+                if(SysConsts.CODE_000.equals(tempResult.getString(SysConsts.CODE))){
+                    result.put(SysConsts.CODE,SysConsts.CODE_000);
+                    result.put(SysConsts.TOTAL,tempResult.getLong(SysConsts.TOTAL));
+                    result.put(SysConsts.DATA,tempResult.getJSONArray(SysConsts.DATA));
+                }else{
+                    result.put(SysConsts.CODE,SysConsts.CODE_999);
+                    result.put(SysConsts.ERROR,"查询失败");
+                }
             }
         }
+
         logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
 
         return result;

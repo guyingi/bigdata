@@ -46,7 +46,7 @@ public class DownloadController {
     @Autowired
     DownloadService downloadService;
 
-    //下载dicom文件缩略图
+    //下载dicom文件缩略图，这里的id时elasticsearch中的id
     @RequestMapping("/downloadDicomNail")
     public String downloadDicomNail(HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.log(Level.INFO,"接口:downloadDicomNail 被调用");

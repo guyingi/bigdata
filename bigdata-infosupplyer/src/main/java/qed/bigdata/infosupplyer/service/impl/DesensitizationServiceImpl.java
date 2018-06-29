@@ -382,7 +382,7 @@ public class DesensitizationServiceImpl implements DesensitizationService {
         }
         result.put(SysConsts.CODE,SysConsts.CODE_000);
         result.put(SysConsts.TOTAL,countOfSuccess);
-        result.put(SysConsts.TAG,tagData);
+        result.put(SysConsts.DATA,tagData);
 
         logger.log(Level.INFO,"返回结果:"+result.toJSONString());
         logger.log(Level.INFO,"方法:downloadDesensitizeDicomByTag 流程结束:");

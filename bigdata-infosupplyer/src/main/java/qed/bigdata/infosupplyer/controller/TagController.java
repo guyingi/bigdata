@@ -175,7 +175,7 @@ public class TagController{
     }
 
     /**
-     * 查询标签以及该标签下面序列数量
+     * 查询标签以及该标签下面序列数量.这个是从数据库中查询
      * @param
      * @return
      */
