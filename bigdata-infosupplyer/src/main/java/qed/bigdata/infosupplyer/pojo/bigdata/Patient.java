@@ -1,9 +1,9 @@
-package qed.bigdata.infosupplyer.pojo.db;
+package qed.bigdata.infosupplyer.pojo.bigdata;
 
 /**
  * @author WeiGuangWu
  * @version V1.0
- * @Package yasen.bigdata.infosupplyer.pojo.db
+ * @Package yasen.bigdata.infosupplyer.pojo.bigdata
  * @Description: ${todo}
  * @date 2018/5/30 17:32
  */

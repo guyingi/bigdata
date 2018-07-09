@@ -73,9 +73,9 @@ function desensitize() {
     if(tag.length == 0){
         alert("提示，当前tag值为空");
     }else{
-        $.messager.confirm('确认', '对tag为'+tag+"的序列做脱敏处理", function(r){
+        $.messager.confirm('任务提交确认', '对tag为'+tag+"的序列做脱敏处理", function(r){
             if(r){
-                $("#hint").html("正在脱敏处理....稍等");
+                $("#hint").html("正在提交任务....");
                 var obj = new Object()
                 obj.tag = tag;
                 $.ajax({
@@ -89,13 +89,16 @@ function desensitize() {
                         console.log(data);
                         if(data.result == 0){
                             $("#hint").html("");
-                            $.messager.confirm('消息', '脱敏完成', function(r){});
+                            $.messager.confirm('消息', '任务提交完成', function(r){});
                         }else if(data.result == 1){
+                            $("#hint").html("");
+                            alert("tag："+tag+"该脱敏任务已经存在");
+                        }else if(data.result == 3){
                             $("#hint").html("");
                             alert("tag："+tag+"已经做过脱敏");
                         }else{
                             $("#hint").html("");
-                            alert("脱敏操作失败");
+                            alert("任务提交失败");
                         }
                     },
                     error: function () {
@@ -247,7 +250,7 @@ function listSeriesOfTag(index,record) {
                                                         <a style="width:30px"></a>
                                                     </td>
                                                     <td>
-                                                        <a class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:80px;height:30px;" onclick="desensitize()">开始脱敏</a>
+                                                        <a class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:80px;height:30px;" onclick="desensitize()">提交任务</a>
                                                     </td>
                                                     <td>
                                                         <a class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:80px;height:30px;" onclick="removetag()">取消标签</a>

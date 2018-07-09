@@ -1,6 +1,6 @@
 package qed.bigdata.infosupplyer.dao;
 
-import qed.bigdata.infosupplyer.pojo.db.DicomTag;
+import qed.bigdata.infosupplyer.pojo.bigdata.DicomTag;
 
 import java.util.List;
 

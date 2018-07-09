@@ -18,7 +18,7 @@ import qed.bigdata.infosupplyer.consts.EsConsts;
 import qed.bigdata.infosupplyer.consts.SysConsts;
 import qed.bigdata.infosupplyer.dao.*;
 import qed.bigdata.infosupplyer.help.StreamGobbler;
-import qed.bigdata.infosupplyer.pojo.db.DicomTag;
+import qed.bigdata.infosupplyer.pojo.bigdata.DicomTag;
 import qed.bigdata.infosupplyer.pojo.marktool.BreastRoiEntity;
 import qed.bigdata.infosupplyer.pojo.marktool.Roi2dEntity;
 import qed.bigdata.infosupplyer.pojo.marktool.Roi3dEntity;
@@ -30,7 +30,6 @@ import qed.bigdata.infosupplyer.service.HBaseService;
 import qed.bigdata.infosupplyer.service.HdfsService;
 import qed.bigdata.infosupplyer.util.ZipUtil;
 
-import javax.sound.sampled.Line;
 import java.io.*;
 import java.util.*;
 

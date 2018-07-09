@@ -196,6 +196,7 @@ public class ZipUtil {
             bos.flush();
             bos.close();
         }
+        zip.close();
     }
 
 //    public static void main(String[] args)

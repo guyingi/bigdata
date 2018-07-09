@@ -250,6 +250,8 @@ public class Tool {
                 result.put("code",reader.readObject(String.class));
             }else if(key.equals("pagecount")){
                 result.put("pagecount",reader.readObject(Long.class));
+            }else if(key.equals("status")){
+                result.put("status",reader.readObject(Integer.class));
             }else if(key.equals("total")){
                 result.put("total",reader.readObject(Long.class));
             }else if(key.equals("data")){
@@ -310,7 +312,7 @@ public class Tool {
     }
 
     public static void delFile(String file){
-        if(!StringUtils.isBlank(file))
+        if(!StringUtils.isBlank(file) && new File(file).exists())
             new File(file).delete();
     }
 

@@ -14,14 +14,14 @@ import java.sql.SQLException;
 public class DBFactory {
     // JDBC 驱动名及数据库 URL
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    static final String MARKTOOL_DB_URL = "jdbc:mysql://192.168.1.231:3306/mark_tools_20180322?autoReconnect=true";
+    static final String MARKTOOL_DB_URL = "jdbc:mysql://192.168.1.228:3306/mark_tools?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true";
     static final String BIGDATA_DB_URL = "jdbc:mysql://192.168.1.228:3306/bigdata?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true";
 
     // 数据库的用户名与密码，需要根据自己的设置
     static final String BigdataUser = "mysql";
     static final String BigdataPass = "123456";
-    static final String MarkToolUser = "root";
-    static final String MarkToolPass = "12345678";
+    static final String MarkToolUser = "mysql";
+    static final String MarkToolPass = "123456";
     static Connection connMarkTool = null;
     static Connection connBigData = null;
     static {

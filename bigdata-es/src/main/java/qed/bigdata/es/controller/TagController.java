@@ -142,15 +142,17 @@ public class TagController {
 
         JSONObject result = new JSONObject();
         if(tagService.isTagDisensitized(tag)){
-            result.put("result",1);         //已做脱敏，无需再做
+            result.put("result",3);         //已做脱敏，无需再做
             return result;
         }
 
-        long count = tagService.doDesensitize(tag);
-        if(count>0){
-            result.put("result",0);         //脱敏操作成功
+        Integer status = tagService.doDesensitize(tag);
+        if(status == 0){
+            result.put("result",status);         //脱敏任务提交成功
+        }else if(status == 1){
+            result.put("result",status);       //任务已经存在，不允许重复提交
         }else{
-            result.put("result",2);       //失败
+            result.put("result",status);       //任务提交失败，此时status=2
         }
         logger.log(Level.INFO,"返与前端结果:"+result.toJSONString());
 

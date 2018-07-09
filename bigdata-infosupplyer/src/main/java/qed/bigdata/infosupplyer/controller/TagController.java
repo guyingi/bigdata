@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import qed.bigdata.infosupplyer.consts.DataTypeEnum;
 import qed.bigdata.infosupplyer.consts.SysConsts;
-import qed.bigdata.infosupplyer.pojo.db.DicomTag;
+import qed.bigdata.infosupplyer.dao.CreateRawTaskInfoDao;
+import qed.bigdata.infosupplyer.pojo.bigdata.DicomTag;
 import qed.bigdata.infosupplyer.util.InfoSupplyerTool;
 import qed.bigdata.infosupplyer.dao.DicomTagDao;
 import qed.bigdata.infosupplyer.service.DesensitizationService;
 import qed.bigdata.infosupplyer.service.ElasticSearchService;
 import qed.bigdata.infosupplyer.service.TagService;
-import qed.bigdata.infosupplyer.service.impl.DesensitizationServiceImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -47,6 +47,9 @@ public class TagController{
 
     @Autowired
     DicomTagDao dicomTagDao;
+
+    @Autowired
+    CreateRawTaskInfoDao createRawTaskInfoDao;
 
     /**
      * 给dicom打标记接口，返回码说明:[000:成功，total：数量]，[999:失败，total:数量],[001:因tag冲突失败，content:冲突的tag]
@@ -91,7 +94,11 @@ public class TagController{
     }
 
 
-
+    /**
+     * 说明：返回json数据中status值为此次任务提交状态，0：提交成功，1：该任务已经存在，2;任务提交失败（写入数据库失败）
+     * @param parameter
+     * @return
+     */
     @PostMapping("/desensitizedicom")
     public JSONObject desensitizedicom(@RequestBody Map<String, Object> parameter){
         logger.log(Level.INFO,"接口:desensitizedicom 被调用");
@@ -99,10 +106,18 @@ public class TagController{
         logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
 
         String tag = (String)parameter.get(SysConsts.TAG);
-        Long count = desensitizationService.desensitizedicom(tag);
+
         JSONObject result = new JSONObject();
         result.put(SysConsts.CODE,SysConsts.CODE_000);
-        result.put("total",count);
+        //查看任务是否已经存在
+        if(createRawTaskInfoDao.isExists(tag)){
+            result.put("status",1);  //该任务已经存在
+        }else{
+            createRawTaskInfoDao.insert(tag);
+            result.put("status",0); //任务提交成功
+        }
+
+//        Long count = desensitizationService.desensitizedicom(tag);
 
         logger.log(Level.INFO,"接口返回结果"+result.toJSONString());
 

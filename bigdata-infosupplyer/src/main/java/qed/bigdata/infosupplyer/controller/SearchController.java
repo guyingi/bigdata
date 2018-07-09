@@ -21,7 +21,7 @@ import qed.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
 import qed.bigdata.infosupplyer.consts.DataTypeEnum;
 import qed.bigdata.infosupplyer.consts.SysConsts;
 import qed.bigdata.infosupplyer.factory.ConfigFactory;
-import qed.bigdata.infosupplyer.pojo.db.Patient;
+import qed.bigdata.infosupplyer.pojo.bigdata.Patient;
 import qed.bigdata.infosupplyer.util.InfoSupplyerTool;
 import qed.bigdata.infosupplyer.dao.PatientDao;
 import qed.bigdata.infosupplyer.service.ElasticSearchService;

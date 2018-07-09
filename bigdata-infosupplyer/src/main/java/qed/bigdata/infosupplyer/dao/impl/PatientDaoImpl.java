@@ -1,7 +1,7 @@
 package qed.bigdata.infosupplyer.dao.impl;
 
 import org.springframework.stereotype.Service;
-import qed.bigdata.infosupplyer.pojo.db.Patient;
+import qed.bigdata.infosupplyer.pojo.bigdata.Patient;
 import qed.bigdata.infosupplyer.dao.PatientDao;
 import qed.bigdata.infosupplyer.factory.DBFactory;
 

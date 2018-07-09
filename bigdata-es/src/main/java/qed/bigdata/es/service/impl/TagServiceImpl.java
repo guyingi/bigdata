@@ -87,10 +87,10 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Long doDesensitize(String tag) {
+    public Integer doDesensitize(String tag) {
         logger.log(Level.INFO,"调用方法:doDesensitize,参数{tag:"+tag);
 
-        Long desensitizedCount = 0L;
+        Integer status = 0;  //此次任务提交状态码，0:成功，1：此任务已经存在，2：任务提交失败
         String interfaceStr = "/info/desensitizedicom";
         JSONObject param = new JSONObject();
         param.put("tag",tag);
@@ -100,13 +100,13 @@ public class TagServiceImpl implements TagService {
             result = Tool.doCallAndGetResult(param, interfaceStr,dataTypeEnum);
         } catch (Exception e) {
             e.printStackTrace();
-            desensitizedCount = 0L;
+            status = 2;
         }
         if(SysConsts.CODE_000.equals(result.getString(SysConsts.CODE))){
-            desensitizedCount = result.getLong(SysConsts.TOTAL);
+            status = result.getInteger(SysConsts.STATUS);
         }
-        logger.log(Level.INFO,"调用 doDesensitize 结束,返回结果:"+desensitizedCount);
-        return desensitizedCount;
+        logger.log(Level.INFO,"调用 doDesensitize 结束,返回结果:"+status);
+        return status;
     }
 
     @Override

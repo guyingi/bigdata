@@ -12,7 +12,7 @@ import qed.bigdata.infosupplyer.conf.InfosupplyerConfiguration;
 import qed.bigdata.infosupplyer.consts.DataTypeEnum;
 import qed.bigdata.infosupplyer.consts.EsConsts;
 import qed.bigdata.infosupplyer.consts.SysConsts;
-import qed.bigdata.infosupplyer.pojo.db.DicomTag;
+import qed.bigdata.infosupplyer.pojo.bigdata.DicomTag;
 import qed.bigdata.infosupplyer.dao.DicomTagDao;
 import qed.bigdata.infosupplyer.service.ElasticSearchService;
 import qed.bigdata.infosupplyer.service.HBaseService;

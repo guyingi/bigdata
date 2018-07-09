@@ -1,7 +1,7 @@
 package qed.bigdata.infosupplyer.dao.impl;
 
 import org.springframework.stereotype.Service;
-import qed.bigdata.infosupplyer.pojo.db.DicomTag;
+import qed.bigdata.infosupplyer.pojo.bigdata.DicomTag;
 import qed.bigdata.infosupplyer.dao.DicomTagDao;
 import qed.bigdata.infosupplyer.factory.DBFactory;
 

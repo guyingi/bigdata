@@ -98,6 +98,7 @@ public class SysConsts {
     public static String DATA = "data";
     public static String CODE = "code";
     public static String TOTAL = "total";
+    public static String STATUS = "status";
     public static String ROWS = "rows";
     public static String TAG = "tag";
     public static String RESULT = "result";

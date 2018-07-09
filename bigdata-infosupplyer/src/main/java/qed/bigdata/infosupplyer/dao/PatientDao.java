@@ -1,6 +1,6 @@
 package qed.bigdata.infosupplyer.dao;
 
-import qed.bigdata.infosupplyer.pojo.db.Patient;
+import qed.bigdata.infosupplyer.pojo.bigdata.Patient;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package qed.bigdata.infosupplyer.pojo.db;
+package qed.bigdata.infosupplyer.pojo.bigdata;
 
 /**
  * @author WeiGuangWu

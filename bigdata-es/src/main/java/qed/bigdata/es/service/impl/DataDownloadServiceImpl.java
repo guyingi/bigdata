@@ -13,6 +13,7 @@ import qed.bigdata.es.service.DataDownloadService;
 import qed.bigdata.es.service.SearchService;
 import qed.bigdata.es.conf.MilkConfiguration;
 import qed.bigdata.es.consts.DataTypeEnum;
+import qed.bigdata.es.statistic.ThumbnailStatistic;
 import qed.bigdata.es.tool.HdfsTool;
 import qed.bigdata.es.tool.Tool;
 import qed.bigdata.es.tool.ZipUtil;
@@ -70,6 +71,14 @@ public class DataDownloadServiceImpl implements DataDownloadService {
         if(new File(zipFilePath).exists()){
             new File(zipFilePath).delete();
         }
+//        Tool.delFile(zipFilePath);
+
+        //添加临时脱略图目录到统计list中，当达到一个阈值就删除这个list中的路径
+        if(ThumbnailStatistic.isFull()){
+            ThumbnailStatistic.clearCache();
+        }
+        ThumbnailStatistic.add(tempRealDir+SysConsts.RIGHT_SLASH+zipTempName);
+
         logger.log(Level.INFO,"调用 downloadDicomThumbnail 结束，结果:"+result.size());
         return result;
     }
