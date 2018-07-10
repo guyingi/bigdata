@@ -188,7 +188,7 @@ public class SearchController {
      * @return
      */
     @PostMapping("/listValueRange")
-    public JSONObject listValueRangeInDicom(@RequestBody Map<String, Object> parameter){
+    public JSONObject listValueRange(@RequestBody Map<String, Object> parameter){
         logger.log(Level.INFO,"接口:listValueRange 被调用");
         JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
         logger.log(Level.INFO,"listValueRange:"+paramJson.toJSONString());

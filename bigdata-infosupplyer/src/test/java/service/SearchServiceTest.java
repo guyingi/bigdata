@@ -182,8 +182,14 @@ public class SearchServiceTest {
 
     public static void test(){
         ElasticSearchServiceImpl searchService = new ElasticSearchServiceImpl();
-        searchService.updateField("dicomindex","dicomtype","dJy-FWQB8hiI7_ZQO49k","tag",null);
+        String name = "Xu^Su Qin";
+        searchService.updateField("electricsignalindex","electricsignaltype","5GOOrmMBBNjORWhHlwP5","PatientName",name);
     }
 
+
+    public static void updateField(){
+
+
+    }
 
 }

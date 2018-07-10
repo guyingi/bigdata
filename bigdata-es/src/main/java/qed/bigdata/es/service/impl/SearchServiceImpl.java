@@ -319,7 +319,7 @@ public class SearchServiceImpl implements SearchService {
     public List<String> listManufacturerModelName(){
         logger.log(Level.INFO,"调用方法:listManufacturerModelName");
 
-        String interfaceStr = "/info/listValueRangeInDicom";
+        String interfaceStr = "/info/listValueRange";
         JSONObject param = new JSONObject();
         param.put(SysConsts.DATATYPE,SysConsts.TYPE_DICOM);
         param.put("field",ESConsts.ManufacturerModelName_ES);
@@ -336,7 +336,7 @@ public class SearchServiceImpl implements SearchService {
     public List<String> listSeriesDescription(){
         logger.log(Level.INFO,"调用方法:listSeriesDescription");
 
-        String interfaceStr = "/info/listValueRangeInDicom";
+        String interfaceStr = "/info/listValueRange";
         JSONObject param = new JSONObject();
         param.put(SysConsts.DATATYPE,SysConsts.TYPE_DICOM);
         param.put("field",ESConsts.SeriesDescription_ES);
@@ -522,6 +522,8 @@ public class SearchServiceImpl implements SearchService {
         headrow.createCell(6).setCellValue(ESConsts.ID_ES);
 
         JSONArray data = parameter.getJSONArray("data");
+        if(data.size() == 0)
+            return false;
         int size = data.size();
 
         JSONObject jsonObject = data.getJSONObject(0);
