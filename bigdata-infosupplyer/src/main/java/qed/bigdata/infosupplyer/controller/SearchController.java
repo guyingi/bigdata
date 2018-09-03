@@ -68,6 +68,9 @@ public class SearchController {
         }else if(SysConsts.TYPE_ELECTRIC.equals(param.getString(SysConsts.DATATYPE))){
             DataTypeEnum type = DataTypeEnum.ELECTRIC;
             result = elasticSearchService.searchByPaging(param,type);
+        }else if(SysConsts.TYPE_KFB.equals(param.getString(SysConsts.DATATYPE))){
+            DataTypeEnum type = DataTypeEnum.KFB;
+            result = elasticSearchService.searchByPaging(param,type);
         }
 
         logger.log(Level.INFO,"接口返回结果"+result.toJSONString());

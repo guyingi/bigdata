@@ -96,6 +96,8 @@ public class PageSearchParamBean {
      * @param param
      */
     private void parseCriteria(JSONArray param){
+        if(param==null)
+            return;
         int size = param.size();
         for(int i=0; i<size; i++){
             JSONObject item = param.getJSONObject(i);

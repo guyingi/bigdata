@@ -51,6 +51,10 @@ public class SysConsts {
     public static String PAGEID_PAGEPARAMNAME = "pageid";
     public static String PAGESIZE_PAGEPARAMNAME = "pagesize";
 
+    public static String DCM = "DCM";
+    public static String EEG = "EEG";
+    public static String KFB = "KFB";
+
     /***************页面datagrid字段************************/
 //    public static String DESCRIBE = "describe";
 //    public static String ORGAN = "organ";

@@ -58,14 +58,14 @@
         //ManufacturerModelName联想搜索
         $.ajax({
             type: "GET",
-            url: "/associativeSearchManufacturerModelName",
+            url: "/associativeSearchModality",
             data: null,
             dataType: 'json',
             traditional:true,
             contentType: 'application/json;charset=utf-8',
             success: function (data) {
                 if(data!=null){
-                    $("#ManufacturerModelName").combobox({
+                    $("#Modality").combobox({
                         data :data,//获取要显示的json数据
                         valueField: 'lable',
                         textField: 'text',
@@ -282,6 +282,45 @@
             contentType: 'application/json;charset=utf-8',
             success: function (data) {
                 console.log(data);
+                var o = $("#ff").serializeObject();
+                if(o['datatype']=="KFB"){
+                    $('#resulttable').datagrid({
+                        columns: [[
+                            { field: 'ck',checkbox: 'true' },
+                            { field: 'id', width: '0%',hidden:'true' },
+                            { field: 'InstitutionName',title: '医院', width: '14%' },
+                            { field: 'PatientName',title: '名字', width: '14%' },
+                            { field: 'entrydate',title: '录入日期', width: '14%' },
+                            { field: 'hdfspath',title: '位置', width: '58%' }
+                        ]]
+                    });
+                }else if(o['datatype']=="EEG") {
+                    $('#resulttable').datagrid({
+                        columns: [[
+                            {field: 'ck', checkbox: 'true'},
+                            {field: 'id', width: '0%',hidden:'true'},
+                            {field: 'InstitutionName', title: '医院', width: '14%'},
+                            {field: 'PatientName', title: '名字', width: '14%'},
+                            {field: 'entrydate', title: '录入日期', width: '14%'},
+                            {field: 'hdfspath', title: '位置', width: '58%'}
+                        ]]
+                    });
+                }else if(o['datatype']=="DCM"){
+                    $('#resulttable').datagrid({
+                        columns: [[
+                            { field: 'ck',checkbox: 'true' },
+                            { field: 'id', width: '0%',hidden:'true' },
+                            { field: 'InstitutionName',title: '医院', width: '14%' },
+                            { field: 'Modality',title: '模式', width: '6%' },
+                            { field: 'SeriesDescription',title: '序列描述',align:"left",width: '14%' },
+                            { field: 'PatientName',title: '名字', width: '14%' },
+                            { field: 'SeriesDate',title: '检查日期', width: '10%' },
+                            { field: 'NumberOfSlices',title: '张数', width: '12%' },
+                            { field: 'tag',title: 'Tag', width: '15%' },
+                            // { field: 'operate',title: '操作', align:"center",formatter:"formatter",width: '15%' }
+                        ]]
+                    });
+                }
                 if(data!=null){
                     if(data.total==0){
                         $("#hint").html("");
@@ -391,8 +430,8 @@
                                                             <!-- 查询条件一 -->
                                                             <table cellpadding="2px" style="margin:0px;">
                                                             <tr>
-                                                                <td>模型名称:</td>
-                                                                <td><input id="ManufacturerModelName" class="easyui-textbox" type="text" name="ManufacturerModelName" data-options="required:false" /></td>
+                                                                <td>Modality:</td>
+                                                                <td><input id="Modality" class="easyui-textbox" type="text" name="Modality" data-options="required:false" /></td>
                                                             </tr>
                                                                 <!--       <tr>
                                                                           <td>器官:</td>
@@ -474,6 +513,12 @@
                                                                     </table>
                                                                 </td>
                                                             </tr>
+                                                            <tr>
+                                                                <td>数据类型:</td>
+                                                                <td>
+                                                                    <select class="easyui-combobox" name="datatype" style="width:100%"><option value="DCM">DCM</option><option value="EEG">EEG</option><option value="KFB">KFB</option></select>
+                                                                </td>
+                                                            </tr>
 
 
                                                         </table>
@@ -552,6 +597,7 @@
                                                        idField="id"
                                                        rownumbers="true"
                                                        pagination="true"
+                                                       firstLoad="false"
                                                        iconCls="icon-table"
                                                 >
                                                     <thead>
@@ -559,7 +605,7 @@
                                                         <th field="ck" checkbox="true"></th>
                                                         <th field="id" width="0%">Item ID</th>
                                                         <th field="InstitutionName" width="14%">医院</th>
-                                                        <th field="ManufacturerModelName" width="16%" align="left">模型名称</th>
+                                                        <th field="Modality" width="16%" align="left">模式</th>
                                                         <th field="SeriesDescription" width="16%" align="left">序列描述</th>
                                                         <th field="PatientName" width="14%" align="left">名字</th>
                                                         <th field="SeriesDate" width="10%" align="left">检查日期</th>

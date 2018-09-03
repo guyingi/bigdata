@@ -20,7 +20,7 @@ public interface SearchService {
 	/**
 	* @Author:weiguangwu
 	* @Description:
-	* @params: searchcondition是查询条件，由页面采集
+	* @params: criteria是查询条件，由页面采集
 	 * pageid：需要返回的页码,传数字或者不传，不要传null
 	 * pagesize：页面大小，如果大于零才分页，否则部分也，页码如果有问题自动默认为0
 	* @return:
@@ -32,13 +32,25 @@ public interface SearchService {
 	/**
 	 * @Author:weiguangwu
 	 * @Description:
-	 * @params: searchcondition是查询条件，由页面采集
+	 * @params: criteria是查询条件，由页面采集
 	 * pageid：需要返回的页码,传数字或者不传，不要传null
 	 * pagesize：页面大小，如果大于零才分页，否则部分也，页码如果有问题自动默认为0
 	 * @return:
 	 * @Date: 2018/4/24 15:11
 	 */
 	JSONObject searchElectricByPaging(JSONArray criteria, JSONArray backfields, JSONArray sortfields, Integer pageid, Integer pagesize);
+
+    /**该方法是从infosupplyer微服务获取，分页查询**/
+	/**
+	 * @Author:weiguangwu
+	 * @Description:
+	 * @params: criteria是查询条件，由页面采集
+	 * pageid：需要返回的页码,传数字或者不传，不要传null
+	 * pagesize：页面大小，如果大于零才分页，否则部分也，页码如果有问题自动默认为0
+	 * @return:
+	 * @Date: 2018/4/24 15:11
+	 */
+	public JSONObject searchKfbcByPaging(JSONArray criteria, JSONArray backfields, JSONArray sortfields, Integer pageid, Integer pagesize);
 
 	/**
 	* @Author:weiguangwu
@@ -110,7 +122,7 @@ public interface SearchService {
 	 * 从es的dicom表中查询所有ManufacturerModelName名称
 	 * @return
 	 */
-	List<String> listManufacturerModelName();
+	List<String> listModality();
 
 
 	/**

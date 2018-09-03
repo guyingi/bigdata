@@ -66,11 +66,13 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         TransportClient transportClient = EsClientFactory.getTransportClient();
         PageSearchParamBean pageSearchParamBean = new PageSearchParamBean(param);
 
-        //步骤一、参数检查
-        if(!pageSearchParamBean.isCriteriaAvailable()){
-            logger.log(Level.INFO,"查询条件参数为空");
-            return createErrorMsg(SysConsts.CODE_010,"searchByPaging","查询条件参数为空");
-        }else if(pageSearchParamBean.isParseError()){
+        //步骤一、参数检查,这里允许查询条件为空，如果查询条件为空，那么默认使用match_all，查询全部
+//        if(!pageSearchParamBean.isCriteriaAvailable()){
+//            logger.log(Level.INFO,"查询条件参数为空");
+//            return createErrorMsg(SysConsts.CODE_010,"searchByPaging","查询条件参数为空");
+//        }else
+
+        if(pageSearchParamBean.isParseError()){
             logger.log(Level.INFO,"参数解析错误");
             return createErrorMsg(SysConsts.CODE_011,"searchByPaging","参数解析错误");
         }
@@ -93,6 +95,16 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             //封装请求
             SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(transportClient, pageSearchParamBean,
                     conf.getIndexElectric(),conf.getTypeElectric(), queryBuilder);
+            //拿取结果
+            result = createResult(transportClient,searchRequestBuilder,
+                    pageSearchParamBean.getBackfields(),pageSearchParamBean.isPaging(),pageSearchParamBean.getPagesize());
+        }else if(type == DataTypeEnum.KFB){
+            logger.log(Level.INFO,"进入electric分支");
+            //创建查询条件
+            QueryBuilder queryBuilder = createQueryBuilder(pageSearchParamBean);
+            //封装请求
+            SearchRequestBuilder searchRequestBuilder = createSearchRequestBuilder(transportClient, pageSearchParamBean,
+                    conf.getIndexKfb(),conf.getTypeKfb(), queryBuilder);
             //拿取结果
             result = createResult(transportClient,searchRequestBuilder,
                     pageSearchParamBean.getBackfields(),pageSearchParamBean.isPaging(),pageSearchParamBean.getPagesize());

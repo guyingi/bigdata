@@ -53,31 +53,50 @@ public class DicomSearchController {
         JSONObject paramJson = JSONObject.parseObject(JSON.toJSONString(parameter));
         logger.log(Level.INFO,"接口接收的参数:"+paramJson.toJSONString());
 
+        String datatype = parameter.get("datatype");
+        parameter.remove("datatype");
+
         JSONObject result = new JSONObject();
         JSONArray param = formatParameter(parameter);
         System.out.println(param.toJSONString());
         HttpSession session = request.getSession();
+
+        session.setAttribute("datatype", datatype);
         session.setAttribute("searchParam", param);
 
+        JSONObject tempResult = null;
         JSONArray backfields = new JSONArray();
-        backfields.add(ESConsts.InstitutionName_ES);
-        backfields.add(ESConsts.PatientName_ES);
-        backfields.add(ESConsts.SeriesDate_ES);
-        backfields.add(ESConsts.ManufacturerModelName_ES);
-        backfields.add(ESConsts.SeriesDescription_ES);
-        backfields.add(ESConsts.NumberOfSlices_ES);
-        backfields.add(ESConsts.TAG_ES);
-        backfields.add(ESConsts.ID_ES);
+        if(datatype.equals(SysConsts.DCM)){
+            backfields.add(ESConsts.InstitutionName_ES);
+            backfields.add(ESConsts.PatientName_ES);
+            backfields.add(ESConsts.SeriesDate_ES);
+            backfields.add(ESConsts.Modality_ES);
+            backfields.add(ESConsts.SeriesDescription_ES);
+            backfields.add(ESConsts.NumberOfSlices_ES);
+//            backfields.add(ESConsts.TAG_ES);
+            backfields.add(ESConsts.ID_ES);
 //
-        JSONArray sortfields = new JSONArray();
-        sortfields.add(ESConsts.InstitutionName_ES);
-        sortfields.add(ESConsts.SeriesDescription_ES);
-        sortfields.add(ESConsts.PatientName_ES);
-        sortfields.add(ESConsts.SeriesDate_ES);
-        sortfields.add(ESConsts.TAG_ES);
-        sortfields.add(ESConsts.NumberOfSlices_ES);
-
-        JSONObject tempResult = searchService.searchDicomByPaging(param, backfields,sortfields,1, SysConsts.DEFAULT_PAGE_SIZE);
+            JSONArray sortfields = new JSONArray();
+            sortfields.add(ESConsts.InstitutionName_ES);
+            sortfields.add(ESConsts.SeriesDescription_ES);
+            sortfields.add(ESConsts.PatientName_ES);
+            sortfields.add(ESConsts.SeriesDate_ES);
+//            sortfields.add(ESConsts.TAG_ES);
+            sortfields.add(ESConsts.NumberOfSlices_ES);
+            tempResult = searchService.searchDicomByPaging(param, backfields,sortfields,1, SysConsts.DEFAULT_PAGE_SIZE);
+        }else if(datatype.equals(SysConsts.EEG)){
+            backfields.add(ESConsts.InstitutionName_ES);
+            backfields.add(ESConsts.PatientName_ES);
+            backfields.add(ESConsts.ENTRYDATE_ES);
+            backfields.add(ESConsts.HDFSPATH);
+            tempResult = searchService.searchElectricByPaging(null, backfields,null,1, SysConsts.DEFAULT_PAGE_SIZE);
+        }else if(datatype.equals(SysConsts.KFB)){
+            backfields.add(ESConsts.InstitutionName_ES);
+            backfields.add(ESConsts.PatientName_ES);
+            backfields.add(ESConsts.ENTRYDATE_ES);
+            backfields.add(ESConsts.HDFSPATH);
+            tempResult = searchService.searchKfbcByPaging(null, backfields,null,1, SysConsts.DEFAULT_PAGE_SIZE);
+        }
         Long total = tempResult.getLong("total");
         if(total==null || total==0L)
             result.put("total",0L);
@@ -91,6 +110,7 @@ public class DicomSearchController {
         return result;
     }
 
+    //这个是table中点击下一页自动加载访问接口，传过来的参数page是将要请求的页码
     @RequestMapping(value = "ajaxPage", method = RequestMethod.POST)
     @ResponseBody
     public JSONObject ajaxPage(HttpServletRequest request, HttpServletResponse response,
@@ -102,29 +122,44 @@ public class DicomSearchController {
         JSONObject result = new JSONObject();
         Integer pageid = Integer.parseInt(page);
         HttpSession session = request.getSession();
+        String datatype = (String)session.getAttribute("datatype");
         JSONArray param = (JSONArray)session.getAttribute("searchParam");
 
         logger.log(Level.INFO,"接口接收的参数:pageid:"+pageid+",searchParam"+param.toJSONString());
 
+        JSONObject tempResult = null;
         JSONArray backfields = new JSONArray();
-        backfields.add(ESConsts.InstitutionName_ES);
-        backfields.add(ESConsts.PatientName_ES);
-        backfields.add(ESConsts.SeriesDate_ES);
-        backfields.add(ESConsts.ManufacturerModelName_ES);
-        backfields.add(ESConsts.SeriesDescription_ES);
-        backfields.add(ESConsts.NumberOfSlices_ES);
-        backfields.add(ESConsts.TAG_ES);
-        backfields.add(ESConsts.ID_ES);
+        if(datatype.equals(SysConsts.DCM)){
+            backfields.add(ESConsts.InstitutionName_ES);
+            backfields.add(ESConsts.PatientName_ES);
+            backfields.add(ESConsts.SeriesDate_ES);
+            backfields.add(ESConsts.Modality_ES);
+            backfields.add(ESConsts.SeriesDescription_ES);
+            backfields.add(ESConsts.NumberOfSlices_ES);
+            backfields.add(ESConsts.TAG_ES);
+            backfields.add(ESConsts.ID_ES);
 //
-        JSONArray sortfields = new JSONArray();
-        sortfields.add(ESConsts.InstitutionName_ES);
-        sortfields.add(ESConsts.SeriesDescription_ES);
-        sortfields.add(ESConsts.PatientName_ES);
-        sortfields.add(ESConsts.SeriesDate_ES);
-        sortfields.add(ESConsts.TAG_ES);
-        sortfields.add(ESConsts.NumberOfSlices_ES);
-
-        JSONObject tempResult = searchService.searchDicomByPaging(param, backfields,sortfields,pageid, SysConsts.DEFAULT_PAGE_SIZE);
+            JSONArray sortfields = new JSONArray();
+            sortfields.add(ESConsts.InstitutionName_ES);
+            sortfields.add(ESConsts.SeriesDescription_ES);
+            sortfields.add(ESConsts.PatientName_ES);
+            sortfields.add(ESConsts.SeriesDate_ES);
+            sortfields.add(ESConsts.TAG_ES);
+            sortfields.add(ESConsts.NumberOfSlices_ES);
+            tempResult = searchService.searchDicomByPaging(param, backfields,sortfields,pageid, SysConsts.DEFAULT_PAGE_SIZE);
+        }else if(datatype.equals(SysConsts.EEG)){
+            backfields.add(ESConsts.InstitutionName_ES);
+            backfields.add(ESConsts.PatientName_ES);
+            backfields.add(ESConsts.ENTRYDATE_ES);
+            backfields.add(ESConsts.HDFSPATH);
+            tempResult = searchService.searchElectricByPaging(null, backfields,null,pageid, SysConsts.DEFAULT_PAGE_SIZE);
+        }else if(datatype.equals(SysConsts.KFB)){
+            backfields.add(ESConsts.InstitutionName_ES);
+            backfields.add(ESConsts.PatientName_ES);
+            backfields.add(ESConsts.ENTRYDATE_ES);
+            backfields.add(ESConsts.HDFSPATH);
+            tempResult = searchService.searchKfbcByPaging(null, backfields,null,pageid, SysConsts.DEFAULT_PAGE_SIZE);
+        }
         System.out.println(tempResult.toJSONString());
         result.put("total",tempResult.getLong("total"));
         result.put("rows",tempResult.getJSONArray("data"));
@@ -292,23 +327,23 @@ public class DicomSearchController {
 
     //assSearchHospital 是个ajax请求方法，医院做成联想搜索
     @ResponseBody
-    @RequestMapping(value = "associativeSearchManufacturerModelName", method = RequestMethod.GET)
-    public List<Map<String,String>> associativeSearchManufacturerModelName() {
-        logger.log(Level.INFO,"controller:associativeSearchManufacturerModelName 被调用");
+    @RequestMapping(value = "associativeSearchModality", method = RequestMethod.GET)
+    public List<Map<String,String>> associativeSearchModality() {
+        logger.log(Level.INFO,"controller:associativeSearchModality 被调用");
 
         List<Map<String,String>> list = new ArrayList<Map<String,String>>();
         Map<String,String> map;
 
-        List<String> manufacturerModelNameList = searchService.listManufacturerModelName();
+        List<String> modalityList = searchService.listModality();
 
-        for(String e : manufacturerModelNameList){
+        for(String e : modalityList){
             map = new HashMap<String,String>();
             map.put("lable",e);
             map.put("text",e);
             list.add(map);
         }
         JSONArray resultJson = JSON.parseArray(JSON.toJSONString(list));
-        logger.log(Level.INFO,"controller:associativeSearchManufacturerModelName反与前数据:"+resultJson.toJSONString());
+        logger.log(Level.INFO,"controller:associativeSearchModality:"+resultJson.toJSONString());
         return list;
     }
 

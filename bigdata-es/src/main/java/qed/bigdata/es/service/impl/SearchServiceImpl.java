@@ -101,6 +101,26 @@ public class SearchServiceImpl implements SearchService {
 //		System.out.println(jsonObject.toJSONString());
 //		String code = jsonObject.getString("code");
 //		System.out.println("返回码："+code);
+        /***构建kfb数据查询测试*/
+        JSONObject json = new JSONObject();
+        JSONArray backfields = new JSONArray();
+        backfields.add("PatientUID");
+        backfields.add("InstitutionName");
+        backfields.add("PatientName");
+        backfields.add("entrydate");
+        backfields.add("hdfspath");
+        json.put(SysConsts.BACKFIELDS,backfields);
+
+        json.put(SysConsts.DATATYPE,SysConsts.TYPE_KFB);
+        String interfaceStr = "/info/searchpaging";
+        DataTypeEnum dataTypeEnum = DataTypeEnum.OTHER;
+        JSONObject searchPagingResult = null;
+        try {
+            searchPagingResult = Tool.doCallAndGetResult(json,interfaceStr,dataTypeEnum);
+            System.out.println(searchPagingResult.toJSONString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -151,16 +171,14 @@ public class SearchServiceImpl implements SearchService {
         String criteriaLog = criteria!=null?criteria.toJSONString():"";
         String backfieldsLog = backfields!=null?backfields.toJSONString():"";
         String sortfieldsLog = sortfields!=null?sortfields.toJSONString():"";
-        logger.log(Level.INFO,"调用方法:searchDicomByPaging,参数{criteria:"+criteriaLog
+        logger.log(Level.INFO,"调用方法:searchElectricByPaging,参数{criteria:"+criteriaLog
                 +"backfields:"+backfieldsLog
                 +"sortfields:"+sortfieldsLog
                 +"pageid:"+pageid
                 +"pagesize:"+pagesize);
 
         JSONObject json = new JSONObject();
-        if (criteria == null || criteria.size() == 0){
-            return new JSONObject();
-        } else {
+        if (criteria != null && criteria.size() != 0){
             json.put(SysConsts.CRITERIA,criteria);
         }
         if(backfields != null && backfields.size() > 0) {
@@ -185,6 +203,46 @@ public class SearchServiceImpl implements SearchService {
             e.printStackTrace();
         }
         logger.log(Level.INFO,"调用 searchElectricByPaging 结束,返回结果:"+searchPagingResult.toJSONString());
+        return searchPagingResult;
+    }
+
+    @Override
+    public JSONObject searchKfbcByPaging(JSONArray criteria, JSONArray backfields, JSONArray sortfields, Integer pageid, Integer pagesize) {
+        String criteriaLog = criteria!=null?criteria.toJSONString():"";
+        String backfieldsLog = backfields!=null?backfields.toJSONString():"";
+        String sortfieldsLog = sortfields!=null?sortfields.toJSONString():"";
+        logger.log(Level.INFO,"调用方法:searchKfbcByPaging,参数{criteria:"+criteriaLog
+                +"backfields:"+backfieldsLog
+                +"sortfields:"+sortfieldsLog
+                +"pageid:"+pageid
+                +"pagesize:"+pagesize);
+
+        JSONObject json = new JSONObject();
+        if (criteria != null && criteria.size() != 0){
+            json.put(SysConsts.CRITERIA,criteria);
+        }
+        if(backfields != null && backfields.size() > 0) {
+            json.put(SysConsts.BACKFIELDS, backfields);
+        }
+        if(sortfields != null && sortfields.size() > 0) {
+            json.put(SysConsts.SORTFIELDS,sortfields);
+        }
+        if(pageid != null) {
+            json.put(SysConsts.PAGE_ID, pageid);
+        }
+        if(pagesize != null) {
+            json.put(SysConsts.PAGE_SIZE, pagesize);
+        }
+        json.put(SysConsts.DATATYPE,SysConsts.TYPE_KFB);
+        String interfaceStr = "/info/searchpaging";
+        DataTypeEnum dataTypeEnum = DataTypeEnum.OTHER;
+        JSONObject searchPagingResult = null;
+        try {
+            searchPagingResult = Tool.doCallAndGetResult(json,interfaceStr,dataTypeEnum);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        logger.log(Level.INFO,"调用 searchKfbcByPaging 结束,返回结果:"+searchPagingResult.toJSONString());
         return searchPagingResult;
     }
 
@@ -316,18 +374,18 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public List<String> listManufacturerModelName(){
-        logger.log(Level.INFO,"调用方法:listManufacturerModelName");
+    public List<String> listModality(){
+        logger.log(Level.INFO,"调用方法:listModality");
 
         String interfaceStr = "/info/listValueRange";
         JSONObject param = new JSONObject();
         param.put(SysConsts.DATATYPE,SysConsts.TYPE_DICOM);
-        param.put("field",ESConsts.ManufacturerModelName_ES);
+        param.put("field",ESConsts.Modality_ES);
         JSONObject jsonObject = Tool.doCallAndGetResult(param, interfaceStr, DataTypeEnum.OTHER);
-        List<String> resultList = parseValueRange(jsonObject,ESConsts.ManufacturerModelName_ES);
+        List<String> resultList = parseValueRange(jsonObject,ESConsts.Modality_ES);
 
         JSONArray resultListJson = JSON.parseArray(JSON.toJSONString(resultList));
-        logger.log(Level.INFO,"调用方法:listManufacturerModelName，返回结果："+resultListJson.toJSONString());
+        logger.log(Level.INFO,"调用方法:listModality，返回结果："+resultListJson.toJSONString());
 
         return resultList;
     }

@@ -33,9 +33,11 @@ public class InfosupplyerConfiguration {
     private String indexDicom = null;
     private String indexDicomDisensitization = null;
     private String indexElectric = null;
+    private String indexKfb = null;
     private String typeDicom = null;
     private String typeDicomDisensitization = null;
     private String typeElectric = null;
+    private String typeKfb = null;
 
 
     private String zookeeperQuorum = null;
@@ -85,9 +87,11 @@ public class InfosupplyerConfiguration {
         indexDicom = props.getProperty(SysConsts.ES_DICOM_INDEX);
         indexDicomDisensitization = props.getProperty(SysConsts.ES_DESENSITIZATION_INDEX);
         indexElectric = props.getProperty(SysConsts.ES_ELECTRIC_INDEX);
+        indexKfb = props.getProperty(SysConsts.ES_KFB_INDEX);
         typeDicom = props.getProperty(SysConsts.ES_DICOM_TYPE);
         typeDicomDisensitization = props.getProperty(SysConsts.ES_DESENSITIZATION_TYPE);
         typeElectric = props.getProperty(SysConsts.ES_ELECTRIC_TYPE);
+        typeKfb = props.getProperty(SysConsts.ES_KFB_TYPE);
 
         zookeeperQuorum = props.getProperty("hbase.zookeeper.quorum");
         zookeeperClientPort = props.getProperty("hbase.zookeeper.property.clientPort");
@@ -262,6 +266,14 @@ public class InfosupplyerConfiguration {
 
     public String getTypeElectric() {
         return typeElectric;
+    }
+
+    public String getIndexKfb() {
+        return indexKfb;
+    }
+
+    public String getTypeKfb() {
+        return typeKfb;
     }
 
     @Override

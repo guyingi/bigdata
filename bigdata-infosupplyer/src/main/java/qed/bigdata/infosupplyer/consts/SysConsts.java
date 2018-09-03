@@ -111,9 +111,11 @@ public class SysConsts {
     public static String ES_DICOM_INDEX = "es.dicom.index";
     public static String ES_DESENSITIZATION_INDEX = "es.disensitization.index";
     public static String ES_ELECTRIC_INDEX = "es.electric.index";
+    public static String ES_KFB_INDEX = "es.kfb.index";
     public static String ES_DICOM_TYPE = "es.dicom.type";
     public static String ES_DESENSITIZATION_TYPE = "es.disensitization.type";
     public static String ES_ELECTRIC_TYPE = "es.electric.type";
+    public static String ES_KFB_TYPE = "es.kfb.type";
 
     public static String DICOM_THUMBNAIL_TABLENAME = "dicom.thumbnail.tablename";
     public static String DICOM_THUMBNAIL_CF = "dicom.thumbnail.cf";
